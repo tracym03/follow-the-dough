@@ -1,25 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { unstable_cache } from 'next/cache';
 
 const LDA_BASE = 'https://lda.senate.gov/api/v1';
 
-export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
-  const keywords = searchParams.get('keywords') || '';
-
-  if (!keywords) return NextResponse.json({ results: [] });
-
-  try {
-    // Search LDA filings by keyword — completely free, no key needed
+const getLobbyingData = unstable_cache(
+  async (keywords: string) => {
     const url = new URL(`${LDA_BASE}/filings/`);
     url.searchParams.set('search', keywords);
     url.searchParams.set('filing_year', '2025');
     url.searchParams.set('page_size', '8');
 
-    const r = await fetch(url.toString(), {
-      headers: { Accept: 'application/json' },
-      next: { revalidate: 3600 },
-    });
-
+    const r = await fetch(url.toString(), { headers: { Accept: 'application/json' } });
     if (!r.ok) throw new Error(`LDA ${r.status}`);
     const data = await r.json();
     const filings: any[] = data.results || [];
@@ -34,10 +25,22 @@ export async function GET(req: NextRequest) {
         .filter(Boolean)
         .join('; '),
       period: f.period_display || '',
-      url: f.url || '',
     }));
 
-    return NextResponse.json({ found: lobbyists.length > 0, keywords, lobbyists });
+    return { found: lobbyists.length > 0, keywords, lobbyists };
+  },
+  ['lobbying'],
+  { revalidate: 86400 } // cache 24 hours
+);
+
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const keywords = searchParams.get('keywords') || '';
+  if (!keywords) return NextResponse.json({ found: false, lobbyists: [] });
+
+  try {
+    const data = await getLobbyingData(keywords.substring(0, 80));
+    return NextResponse.json(data);
   } catch (e: any) {
     return NextResponse.json({ found: false, keywords, lobbyists: [], error: e.message });
   }

@@ -5,6 +5,7 @@ import CandidateCard from './CandidateCard';
 
 export default function CandidatesTab({ zip, state, stateName }: { zip: string; state: string; stateName: string }) {
   const [data, setData] = useState<any>(null);
+  // data.district comes from Census geocoder lookup
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -54,16 +55,36 @@ export default function CandidatesTab({ zip, state, stateName }: { zip: string; 
       <div className="max-w-2xl mx-auto px-4 py-4">
         <div className="bg-lb border border-amber p-3 mb-4 text-[10px] leading-relaxed text-brown">
           <strong className="font-display text-[13px] tracking-[3px] block mb-1">About This Data</strong>
-          Federal law requires all individual donations over $200 to be reported with the donor&apos;s name, employer, and city. PAC donations are also fully disclosed. This is that data, live from FEC filings.
+          Showing your U.S. House representative for your congressional district{data.district ? ` (District ${data.district})` : ''} plus your state&apos;s U.S. Senators. Federal law requires all donations over $200 to be publicly reported with the donor&apos;s name, employer, and city.
         </div>
-        <div className="flex items-center gap-3 mb-4">
-          <h2 className="font-display text-xl tracking-[3px] text-brown">Federal Candidates</h2>
-          <span className="bg-amber text-ink text-[8px] tracking-widest px-2 py-0.5 rounded-full">{data.candidates.length}</span>
-          <div className="flex-1 h-px bg-gradient-to-r from-amber to-transparent" />
-        </div>
-        {data.candidates.map((d: any, i: number) => (
-          <CandidateCard key={i} data={d} />
-        ))}
+
+        {/* House candidates */}
+        {data.candidates.filter((d: any) => d.c?.office === 'H').length > 0 && (
+          <>
+            <div className="flex items-center gap-3 mb-3">
+              <h2 className="font-display text-xl tracking-[3px] text-brown">
+                Your House Rep{data.district ? ` · District ${data.district}` : ''}
+              </h2>
+              <div className="flex-1 h-px bg-gradient-to-r from-amber to-transparent" />
+            </div>
+            {data.candidates.filter((d: any) => d.c?.office === 'H').map((d: any, i: number) => (
+              <CandidateCard key={`h-${i}`} data={d} />
+            ))}
+          </>
+        )}
+
+        {/* Senate candidates */}
+        {data.candidates.filter((d: any) => d.c?.office === 'S').length > 0 && (
+          <>
+            <div className="flex items-center gap-3 mb-3 mt-5">
+              <h2 className="font-display text-xl tracking-[3px] text-brown">Your U.S. Senators</h2>
+              <div className="flex-1 h-px bg-gradient-to-r from-amber to-transparent" />
+            </div>
+            {data.candidates.filter((d: any) => d.c?.office === 'S').map((d: any, i: number) => (
+              <CandidateCard key={`s-${i}`} data={d} />
+            ))}
+          </>
+        )}
         <div className="text-center mt-4">
           <a
             href={`https://www.fec.gov/data/candidates/?state=${state}&election_year=2024`}
