@@ -70,11 +70,26 @@ function LobbySection({ billTitle, billNumber }: { billTitle: string; billNumber
   );
 }
 
+function buildCongressUrl(type: string, number: string, congress: number): string {
+  const typeMap: Record<string, string> = {
+    'HR': 'house-bill',
+    'S': 'senate-bill',
+    'HJRES': 'house-joint-resolution',
+    'SJRES': 'senate-joint-resolution',
+    'HCONRES': 'house-concurrent-resolution',
+    'SCONRES': 'senate-concurrent-resolution',
+    'HRES': 'house-simple-resolution',
+    'SRES': 'senate-simple-resolution',
+  };
+  const typeSlug = typeMap[type?.toUpperCase()] || 'house-bill';
+  return `https://www.congress.gov/bill/${congress}th-congress/${typeSlug}/${number}`;
+}
+
 export default function BillCard({ bill }: { bill: any }) {
   const num = `${bill.type || ''} ${bill.number || ''}`.trim() || 'Bill';
   const congress = bill.congress || 119;
-  const typeSlug = (bill.type || 'hr').toLowerCase().replace('.', '');
-  const url = bill.url || `https://www.congress.gov/bill/${congress}th-congress/${typeSlug}-bill/${bill.number}`;
+  // Always build the public website URL — never use the API URL from the response
+  const url = buildCongressUrl(bill.type || 'HR', bill.number || '', congress);
   const action = bill.latestAction || '';
   const actionDate = bill.actionDate || '';
   const statusCls = billStatusClass(action);
