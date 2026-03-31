@@ -125,11 +125,14 @@ export async function GET(req: NextRequest) {
           }).catch(() => ({ results: [] }));
 
           const empRows = ((empResp.results || []) as any[]).filter((e: any) => {
-            const emp = (e.employer || '').toLowerCase();
+            const emp = (e.employer || '').toLowerCase().trim();
             return emp && emp.length > 2 &&
-              !emp.includes('retired') && !emp.includes('self') &&
-              !emp.includes('homemaker') && !emp.includes('not employed') &&
-              !emp.includes('unemployed') && !emp.includes('n/a') && !emp.includes('none');
+              emp !== 'null' && emp !== 'n/a' && emp !== 'na' &&
+              emp !== 'none' && emp !== 'unknown' && emp !== 'various' &&
+              !emp.includes('retired') && !emp.includes('self-employed') &&
+              !emp.includes('self employed') && !emp.includes('homemaker') &&
+              !emp.includes('not employed') && !emp.includes('unemployed') &&
+              !emp.includes('disabled') && !emp.includes('student');
           }).slice(0, 8);
 
           return { c, t: tr?.results?.[0] || null, ind: ir?.results || [], employers: empRows, pac: pacWithDetails.filter(Boolean), bundlers: actBlueWinRed };
