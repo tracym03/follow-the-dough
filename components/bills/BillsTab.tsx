@@ -5,8 +5,6 @@ import BillCard, { detectBillTopic } from './BillCard';
 import PizzaChart from '@/components/candidates/PizzaChart';
 
 // ── Real lobbying spend by industry, 2024 (Source: OpenSecrets.org) ──────────
-// opensecrets.org/federal-lobbying/overview
-// 2024 was a federal election year — lobbying spend reached a record ~$4.5B total
 const LOBBYING_OVERVIEW = [
   {
     label: 'Healthcare & Pharma', emoji: '🏥', value: 770_000_000, color: '#27ae60',
@@ -100,20 +98,22 @@ const LOBBYING_OVERVIEW = [
 
 // ── Topic filter chips ────────────────────────────────────────────────────────
 const TOPIC_FILTERS = [
-  { label: 'All',              emoji: '📋' },
-  { label: 'Healthcare & Pharma', emoji: '🏥' },
-  { label: 'Defense & Military',  emoji: '🛡️' },
-  { label: 'Finance & Banking',   emoji: '🏦' },
-  { label: 'Energy & Climate',    emoji: '🛢️' },
-  { label: 'Technology',          emoji: '💻' },
+  { label: 'All',                   emoji: '📋' },
+  { label: 'Healthcare & Pharma',   emoji: '🏥' },
+  { label: 'Defense & Military',    emoji: '🛡️' },
+  { label: 'Finance & Banking',     emoji: '🏦' },
+  { label: 'Energy & Climate',      emoji: '🛢️' },
+  { label: 'Technology',            emoji: '💻' },
   { label: 'Housing & Real Estate', emoji: '🏘️' },
-  { label: 'Education',           emoji: '🎓' },
-  { label: 'Agriculture',         emoji: '🌾' },
-  { label: 'Immigration',         emoji: '🌎' },
+  { label: 'Education',             emoji: '🎓' },
+  { label: 'Agriculture',           emoji: '🌾' },
+  { label: 'Immigration',           emoji: '🌎' },
+  { label: 'Foreign Policy',        emoji: '🌐' },
 ];
 
+// ── Lobbying industry overview (always shown above bills) ─────────────────────
 function LobbyingOverview() {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen]     = useState(false);
   const [active, setActive] = useState<number | null>(null);
 
   const total = LOBBYING_OVERVIEW.reduce((s, i) => s + i.value, 0);
@@ -152,7 +152,7 @@ function LobbyingOverview() {
             slices={LOBBYING_OVERVIEW.map(i => ({ label: i.label, emoji: i.emoji, value: i.value, color: i.color }))}
           />
 
-          {/* Bar breakdown */}
+          {/* Bar breakdown with expandable top spenders */}
           <div className="mt-4 space-y-2">
             {LOBBYING_OVERVIEW.map((item, i) => {
               const pct = Math.round((item.value / total) * 100);
@@ -162,7 +162,6 @@ function LobbyingOverview() {
                   className={`cursor-pointer rounded border transition-colors ${isActive ? 'border-amber bg-amber/5' : 'border-lb hover:border-amber/40'}`}
                   onClick={() => setActive(isActive ? null : i)}
                 >
-                  {/* Row header — always visible */}
                   <div className="px-3 py-2">
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2 min-w-0">
@@ -180,7 +179,6 @@ function LobbyingOverview() {
                     </div>
                   </div>
 
-                  {/* Expanded — context + top 5 spenders */}
                   {isActive && (
                     <div className="px-3 pb-3 border-t border-amber/20">
                       <p className="text-[9px] text-brown leading-relaxed mt-2 mb-3">{item.note}</p>
@@ -221,115 +219,275 @@ function LobbyingOverview() {
   );
 }
 
+// ── Topic chip row ────────────────────────────────────────────────────────────
+function TopicChips({ topicFilter, onChange }: { topicFilter: string; onChange: (t: string) => void }) {
+  return (
+    <div className="mb-4">
+      <div className="text-[8px] tracking-[3px] uppercase text-mid mb-2">Filter by topic:</div>
+      <div className="flex gap-1.5 flex-wrap">
+        {TOPIC_FILTERS.map(t => (
+          <button
+            key={t.label}
+            onClick={() => onChange(t.label)}
+            className={`text-[9px] px-2.5 py-1 rounded-full border transition-colors ${
+              topicFilter === t.label
+                ? 'bg-amber text-ink border-amber font-semibold'
+                : 'bg-white border-lb text-mid hover:border-amber/60'
+            }`}
+          >
+            {t.emoji} {t.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── Filtered bill list ────────────────────────────────────────────────────────
+function BillList({
+  bills,
+  topicFilter,
+  onClearFilter,
+  emptyNote,
+}: {
+  bills: any[];
+  topicFilter: string;
+  onClearFilter: () => void;
+  emptyNote: string;
+}) {
+  const filtered = topicFilter === 'All'
+    ? bills
+    : bills.filter(b => detectBillTopic(b.title || '')?.label === topicFilter);
+
+  if (filtered.length === 0) {
+    return (
+      <div className="text-center py-8 text-mid text-[10px] font-mono">
+        No {topicFilter} bills found {emptyNote}.
+        <button onClick={onClearFilter} className="block mx-auto mt-2 text-amber underline">
+          Show all bills
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      {filtered.map((bill: any, i: number) => (
+        <BillCard key={i} bill={bill} />
+      ))}
+    </>
+  );
+}
+
+// ── Main BillsTab component ───────────────────────────────────────────────────
 export default function BillsTab({ zip, state, stateName }: { zip: string; state: string; stateName: string }) {
-  const [data, setData]       = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError]     = useState('');
-  const [topicFilter, setTopicFilter] = useState('All');
+  type TabMode = 'browse' | 'reps';
+  const [activeTab, setActiveTab] = useState<TabMode>('browse');
+
+  // ── Browse All (loads on mount) ──
+  const [browseData, setBrowseData]       = useState<any>(null);
+  const [browseLoading, setBrowseLoading] = useState(true);
+  const [browseError, setBrowseError]     = useState('');
+  const [browseFilter, setBrowseFilter]   = useState('All');
+
+  // ── From My Reps (lazy — loads on first tab click) ──
+  const [repsData, setRepsData]       = useState<any>(null);
+  const [repsLoading, setRepsLoading] = useState(false);
+  const [repsError, setRepsError]     = useState('');
+  const [repsFetched, setRepsFetched] = useState(false);
+  const [repsFilter, setRepsFilter]   = useState('All');
 
   useEffect(() => {
-    async function load() {
-      try {
-        const res  = await fetch(`/api/bills?state=${state}&stateName=${encodeURIComponent(stateName)}`);
-        const json = await res.json();
+    fetch('/api/bills/topics')
+      .then(r => r.json())
+      .then(json => {
         if (json.error) throw new Error(json.error);
-        setData(json);
-      } catch (e: any) {
-        setError(e.message);
-      } finally {
-        setLoading(false);
-      }
+        setBrowseData(json);
+      })
+      .catch((e: any) => setBrowseError(e.message))
+      .finally(() => setBrowseLoading(false));
+  }, []);
+
+  function handleRepsTab() {
+    setActiveTab('reps');
+    if (!repsFetched) {
+      setRepsFetched(true);
+      setRepsLoading(true);
+      fetch(`/api/bills?state=${state}&stateName=${encodeURIComponent(stateName)}`)
+        .then(r => r.json())
+        .then(json => {
+          if (json.error) throw new Error(json.error);
+          setRepsData(json);
+        })
+        .catch((e: any) => setRepsError(e.message))
+        .finally(() => setRepsLoading(false));
     }
-    load();
-  }, [state, stateName]);
+  }
 
-  if (loading) return (
-    <div className="flex flex-col items-center justify-center py-16 text-center">
-      <div className="w-7 h-7 border-[3px] border-amber/20 border-t-amber rounded-full animate-spin mb-4" />
-      <div className="font-display text-2xl text-amber">Loading Bills...</div>
-      <div className="text-[9px] tracking-widest uppercase text-mid mt-2">Fetching Congress.gov data...</div>
-    </div>
-  );
+  const browseBills: any[] = browseData?.bills || [];
+  const repsBills:   any[] = repsData?.bills   || [];
 
-  if (error) return (
-    <div className="bg-red-50 border-2 border-ftdred p-4 my-4 text-red-800 text-sm">
-      ⚠ Could not load bills: {error}
-    </div>
-  );
+  const browseCount = browseFilter === 'All'
+    ? browseBills.length
+    : browseBills.filter(b => detectBillTopic(b.title || '')?.label === browseFilter).length;
 
-  const allBills: any[] = data?.bills || [];
-
-  // Filter bills by selected topic
-  const filteredBills = topicFilter === 'All'
-    ? allBills
-    : allBills.filter(bill => {
-        const topic = detectBillTopic(bill.title || '');
-        return topic?.label === topicFilter;
-      });
+  const repsCount = repsFilter === 'All'
+    ? repsBills.length
+    : repsBills.filter(b => detectBillTopic(b.title || '')?.label === repsFilter).length;
 
   return (
     <div>
+      {/* ── Header bar ── */}
       <div className="bg-brown text-gold text-[9px] tracking-[3px] uppercase px-4 py-2 flex justify-between items-center flex-wrap gap-1">
         <span>ZIP <span className="font-display text-sm tracking-widest text-cream">{zip}</span> · {stateName}</span>
-        <span>{allBills.length} bills · 119th Congress</span>
+        <span>119th U.S. Congress · Federal Bills</span>
+      </div>
+
+      {/* ── Tab switcher ── */}
+      <div className="flex border-b-2 border-lb bg-white sticky top-0 z-10">
+        <button
+          onClick={() => setActiveTab('browse')}
+          className={`flex-1 py-3 text-[11px] font-semibold tracking-wide transition-colors ${
+            activeTab === 'browse'
+              ? 'border-b-2 border-amber text-amber bg-amber/5'
+              : 'text-mid hover:text-brown'
+          }`}
+        >
+          🗺️ Browse All
+        </button>
+        <button
+          onClick={handleRepsTab}
+          className={`flex-1 py-3 text-[11px] font-semibold tracking-wide transition-colors ${
+            activeTab === 'reps'
+              ? 'border-b-2 border-ftdgreen text-ftdgreen bg-ftdgreen/5'
+              : 'text-mid hover:text-brown'
+          }`}
+        >
+          📍 From My Reps
+        </button>
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-4">
 
-        {/* Overall lobbying overview — always visible */}
+        {/* ── Lobbying overview — shown in both tabs ── */}
         <LobbyingOverview />
 
-        {/* Topic filter chips */}
-        <div className="mb-4">
-          <div className="text-[8px] tracking-[3px] uppercase text-mid mb-2">Filter by topic:</div>
-          <div className="flex gap-1.5 flex-wrap">
-            {TOPIC_FILTERS.map(t => (
-              <button
-                key={t.label}
-                onClick={() => setTopicFilter(t.label)}
-                className={`text-[9px] px-2.5 py-1 rounded-full border transition-colors ${
-                  topicFilter === t.label
-                    ? 'bg-amber text-ink border-amber font-semibold'
-                    : 'bg-white border-lb text-mid hover:border-amber/60'
-                }`}
-              >
-                {t.emoji} {t.label}
-              </button>
-            ))}
-          </div>
-        </div>
+        {/* ══════════════════════════════════════════
+            BROWSE ALL TAB
+        ══════════════════════════════════════════ */}
+        {activeTab === 'browse' && (
+          <>
+            <div className="bg-amber/5 border border-amber/30 rounded px-3 py-2.5 mb-4 text-[10px] leading-relaxed text-brown">
+              <strong>Federal bills from across the country.</strong> Recent legislation from members of both
+              parties in CA, TX, NY, FL, IL &amp; OH — 119th Congress. Tap any bill&apos;s
+              💰 section to see which industries fund the sponsor.
+            </div>
 
-        {/* Bills section header */}
-        <div className="flex items-center gap-3 mb-4">
-          <h2 className="font-display text-xl tracking-[3px] text-brown">
-            {topicFilter === 'All' ? `Bills from ${stateName} Members` : `${topicFilter} Bills`}
-          </h2>
-          <span className="bg-ftdgreen text-white text-[8px] tracking-widest px-2 py-0.5 rounded-full">
-            {filteredBills.length}
-          </span>
-          <div className="flex-1 h-px bg-gradient-to-r from-ftdgreen to-transparent" />
-        </div>
+            {/* Loading */}
+            {browseLoading && (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <div className="w-7 h-7 border-[3px] border-amber/20 border-t-amber rounded-full animate-spin mb-4" />
+                <div className="font-display text-2xl text-amber">Loading Bills…</div>
+                <div className="text-[9px] tracking-widest uppercase text-mid mt-2">Fetching Congress.gov data</div>
+              </div>
+            )}
 
-        {filteredBills.length === 0 ? (
-          <div className="text-center py-8 text-mid text-[10px] font-mono">
-            No {topicFilter} bills found from {stateName} members in this cycle.
-            <button onClick={() => setTopicFilter('All')} className="block mx-auto mt-2 text-amber underline">
-              Show all bills
-            </button>
-          </div>
-        ) : (
-          filteredBills.map((bill: any, i: number) => (
-            <BillCard key={i} bill={bill} />
-          ))
+            {/* Error */}
+            {browseError && !browseLoading && (
+              <div className="bg-red-50 border-2 border-ftdred p-4 my-4 text-red-800 text-sm">
+                ⚠ Could not load bills: {browseError}
+              </div>
+            )}
+
+            {/* Bills */}
+            {!browseLoading && !browseError && (
+              <>
+                <TopicChips topicFilter={browseFilter} onChange={setBrowseFilter} />
+
+                <div className="flex items-center gap-3 mb-4">
+                  <h2 className="font-display text-xl tracking-[3px] text-brown">
+                    {browseFilter === 'All' ? 'Federal Bills — All Topics' : `${browseFilter} Bills`}
+                  </h2>
+                  <span className="bg-amber text-ink text-[8px] tracking-widest px-2 py-0.5 rounded-full">
+                    {browseCount}
+                  </span>
+                  <div className="flex-1 h-px bg-gradient-to-r from-amber to-transparent" />
+                </div>
+
+                <BillList
+                  bills={browseBills}
+                  topicFilter={browseFilter}
+                  onClearFilter={() => setBrowseFilter('All')}
+                  emptyNote="in the national sample"
+                />
+
+                <div className="text-center mt-6">
+                  <a href="https://www.congress.gov/browse/bills/119th-congress"
+                    target="_blank" rel="noopener noreferrer"
+                    className="text-[9px] tracking-[3px] uppercase text-amber">
+                    Browse all 119th Congress bills on Congress.gov ↗
+                  </a>
+                </div>
+              </>
+            )}
+          </>
         )}
 
-        <div className="text-center mt-4">
-          <a href={`https://www.congress.gov/members?q=%7B%22congress%22%3A%22119%22%2C%22state%22%3A%22${state}%22%7D`}
-            target="_blank" rel="noopener noreferrer"
-            className="text-[9px] tracking-[3px] uppercase text-ftdgreen">
-            All {stateName} members on Congress.gov ↗
-          </a>
-        </div>
+        {/* ══════════════════════════════════════════
+            FROM MY REPS TAB
+        ══════════════════════════════════════════ */}
+        {activeTab === 'reps' && (
+          <>
+            {/* Loading */}
+            {repsLoading && (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <div className="w-7 h-7 border-[3px] border-ftdgreen/20 border-t-ftdgreen rounded-full animate-spin mb-4" />
+                <div className="font-display text-2xl text-ftdgreen">Loading Your Reps&apos; Bills…</div>
+                <div className="text-[9px] tracking-widest uppercase text-mid mt-2">
+                  Fetching bills from {stateName} members
+                </div>
+              </div>
+            )}
+
+            {repsError && !repsLoading && (
+              <div className="bg-red-50 border-2 border-ftdred p-4 my-4 text-red-800 text-sm">
+                ⚠ Could not load bills: {repsError}
+              </div>
+            )}
+
+            {!repsLoading && !repsError && repsData && (
+              <>
+                <TopicChips topicFilter={repsFilter} onChange={setRepsFilter} />
+
+                <div className="flex items-center gap-3 mb-4">
+                  <h2 className="font-display text-xl tracking-[3px] text-brown">
+                    {repsFilter === 'All' ? `Bills from ${stateName} Members` : `${repsFilter} Bills`}
+                  </h2>
+                  <span className="bg-ftdgreen text-white text-[8px] tracking-widest px-2 py-0.5 rounded-full">
+                    {repsCount}
+                  </span>
+                  <div className="flex-1 h-px bg-gradient-to-r from-ftdgreen to-transparent" />
+                </div>
+
+                <BillList
+                  bills={repsBills}
+                  topicFilter={repsFilter}
+                  onClearFilter={() => setRepsFilter('All')}
+                  emptyNote={`from ${stateName} members in this session`}
+                />
+
+                <div className="text-center mt-6">
+                  <a href={`https://www.congress.gov/members?q=%7B%22congress%22%3A%22119%22%2C%22state%22%3A%22${state}%22%7D`}
+                    target="_blank" rel="noopener noreferrer"
+                    className="text-[9px] tracking-[3px] uppercase text-ftdgreen">
+                    All {stateName} members on Congress.gov ↗
+                  </a>
+                </div>
+              </>
+            )}
+          </>
+        )}
+
       </div>
     </div>
   );

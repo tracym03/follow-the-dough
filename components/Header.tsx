@@ -44,7 +44,7 @@ export default function Header() {
           🗳 Know who&apos;s buying your ballot
         </div>
         <p className="text-[10px] tracking-wide text-gold/30 mt-2 font-mono">
-          Federal donors · State bills · Lobbyists · All public record
+          Candidate funding · Federal bills · Lobbyists · Local politics
         </p>
       </div>
     </header>

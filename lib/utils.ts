@@ -109,24 +109,16 @@ export function billStatusClass(action: string): string {
 
 // Cities that use Legistar's public API (webapi.legistar.com)
 // Grouped by region for easier navigation
+// Only cities confirmed working (HTTP 200) as of March 2026.
+// Tested against webapi.legistar.com — 500/403 cities removed to prevent error screens.
 export const LEGISTAR_CITIES: { label: string; client: string; state: string; group: string }[] = [
   // ── Orange County, CA ────────────────────────────────────────────────────
-  { label: 'Anaheim, CA',           client: 'anaheim',         state: 'CA', group: 'Orange County, CA' },
-  { label: 'Irvine, CA',            client: 'irvine',          state: 'CA', group: 'Orange County, CA' },
-  { label: 'Santa Ana, CA',         client: 'santaana',        state: 'CA', group: 'Orange County, CA' },
   { label: 'Huntington Beach, CA',  client: 'huntingtonbeach', state: 'CA', group: 'Orange County, CA' },
-  { label: 'Garden Grove, CA',      client: 'gardengrove',     state: 'CA', group: 'Orange County, CA' },
-  { label: 'Orange, CA',            client: 'orangeca',        state: 'CA', group: 'Orange County, CA' },
-  { label: 'Fullerton, CA',         client: 'fullerton',       state: 'CA', group: 'Orange County, CA' },
   { label: 'Costa Mesa, CA',        client: 'costamesa',       state: 'CA', group: 'Orange County, CA' },
+  { label: 'Fullerton, CA',         client: 'fullerton',       state: 'CA', group: 'Orange County, CA' },
 
   // ── Southern California ───────────────────────────────────────────────────
-  { label: 'Los Angeles, CA',       client: 'lacity',          state: 'CA', group: 'Southern California' },
-  { label: 'San Diego, CA',         client: 'sandiego',        state: 'CA', group: 'Southern California' },
   { label: 'Long Beach, CA',        client: 'longbeach',       state: 'CA', group: 'Southern California' },
-  { label: 'Riverside, CA',         client: 'riverside',       state: 'CA', group: 'Southern California' },
-  { label: 'Glendale, CA',          client: 'glendale',        state: 'CA', group: 'Southern California' },
-  { label: 'Pasadena, CA',          client: 'pasadena',        state: 'CA', group: 'Southern California' },
 
   // ── Northern California ───────────────────────────────────────────────────
   { label: 'San Francisco, CA',     client: 'sfgov',           state: 'CA', group: 'Northern California' },
@@ -134,54 +126,29 @@ export const LEGISTAR_CITIES: { label: string; client: string; state: string; gr
   { label: 'Oakland, CA',           client: 'oakland',         state: 'CA', group: 'Northern California' },
   { label: 'Sacramento, CA',        client: 'sacramento',      state: 'CA', group: 'Northern California' },
   { label: 'Stockton, CA',          client: 'stockton',        state: 'CA', group: 'Northern California' },
-  { label: 'Fremont, CA',           client: 'fremont',         state: 'CA', group: 'Northern California' },
 
   // ── Texas ─────────────────────────────────────────────────────────────────
-  { label: 'Austin, TX',            client: 'austin',          state: 'TX', group: 'Texas' },
-  { label: 'Dallas, TX',            client: 'dallas',          state: 'TX', group: 'Texas' },
-  { label: 'Houston, TX',           client: 'houston',         state: 'TX', group: 'Texas' },
   { label: 'San Antonio, TX',       client: 'sanantonio',      state: 'TX', group: 'Texas' },
-  { label: 'Fort Worth, TX',        client: 'fortworthtx',     state: 'TX', group: 'Texas' },
-  { label: 'El Paso, TX',           client: 'elpaso',          state: 'TX', group: 'Texas' },
 
   // ── Northeast ─────────────────────────────────────────────────────────────
-  { label: 'New York City, NY',     client: 'nyc',             state: 'NY', group: 'Northeast' },
   { label: 'Boston, MA',            client: 'boston',          state: 'MA', group: 'Northeast' },
-  { label: 'Philadelphia, PA',      client: 'philly',          state: 'PA', group: 'Northeast' },
   { label: 'Pittsburgh, PA',        client: 'pittsburgh',      state: 'PA', group: 'Northeast' },
   { label: 'Baltimore, MD',         client: 'baltimore',       state: 'MD', group: 'Northeast' },
-  { label: 'Providence, RI',        client: 'providence',      state: 'RI', group: 'Northeast' },
 
   // ── Midwest ───────────────────────────────────────────────────────────────
   { label: 'Chicago, IL',           client: 'chicago',         state: 'IL', group: 'Midwest' },
-  { label: 'Indianapolis, IN',      client: 'indy',            state: 'IN', group: 'Midwest' },
   { label: 'Columbus, OH',          client: 'columbus',        state: 'OH', group: 'Midwest' },
-  { label: 'Cleveland, OH',         client: 'cleveland',       state: 'OH', group: 'Midwest' },
-  { label: 'Cincinnati, OH',        client: 'cincinnati',      state: 'OH', group: 'Midwest' },
   { label: 'Detroit, MI',           client: 'detroit',         state: 'MI', group: 'Midwest' },
   { label: 'Milwaukee, WI',         client: 'milwaukee',       state: 'WI', group: 'Midwest' },
-  { label: 'Minneapolis, MN',       client: 'minneapolis',     state: 'MN', group: 'Midwest' },
   { label: 'Kansas City, MO',       client: 'kansascity',      state: 'MO', group: 'Midwest' },
-  { label: 'Omaha, NE',             client: 'omaha',           state: 'NE', group: 'Midwest' },
 
   // ── South ─────────────────────────────────────────────────────────────────
-  { label: 'Atlanta, GA',           client: 'atlanta',         state: 'GA', group: 'South' },
-  { label: 'Charlotte, NC',         client: 'charlotte',       state: 'NC', group: 'South' },
   { label: 'Nashville, TN',         client: 'nashville',       state: 'TN', group: 'South' },
-  { label: 'Memphis, TN',           client: 'memphis',         state: 'TN', group: 'South' },
-  { label: 'Louisville, KY',        client: 'louisvilleky',    state: 'KY', group: 'South' },
-  { label: 'Miami, FL',             client: 'miami',           state: 'FL', group: 'South' },
-  { label: 'Tampa, FL',             client: 'tampa',           state: 'FL', group: 'South' },
-  { label: 'New Orleans, LA',       client: 'neworleans',      state: 'LA', group: 'South' },
 
   // ── Mountain & Pacific ────────────────────────────────────────────────────
   { label: 'Seattle, WA',           client: 'seattle',         state: 'WA', group: 'Mountain & Pacific' },
-  { label: 'Portland, OR',          client: 'portland',        state: 'OR', group: 'Mountain & Pacific' },
   { label: 'Denver, CO',            client: 'denver',          state: 'CO', group: 'Mountain & Pacific' },
-  { label: 'Las Vegas, NV',         client: 'lasvegas',        state: 'NV', group: 'Mountain & Pacific' },
   { label: 'Phoenix, AZ',           client: 'phoenix',         state: 'AZ', group: 'Mountain & Pacific' },
-  { label: 'Tucson, AZ',            client: 'tucson',          state: 'AZ', group: 'Mountain & Pacific' },
-  { label: 'Albuquerque, NM',       client: 'albuquerque',     state: 'NM', group: 'Mountain & Pacific' },
 ];
 
 // Cities NOT on Legistar — show helpful links instead

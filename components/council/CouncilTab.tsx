@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { LEGISTAR_CITIES, NON_LEGISTAR_CITIES } from '@/lib/utils';
+import { getMemberMeta, CITY_COUNCIL_PAGES, PARTY_LABELS, PARTY_COLORS } from '@/lib/councilData';
 
 function formatDate(dateStr: string) {
   if (!dateStr) return '';
@@ -235,14 +236,39 @@ export default function CouncilTab({ zip }: { zip: string }) {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {(data.persons as any[]).slice(0, 20).map((p: any, i: number) => {
                     const initials = [p.PersonFirstName?.[0], p.PersonLastName?.[0]].filter(Boolean).join('');
+                    const meta = getMemberMeta(selectedCity, p.PersonFirstName || '', p.PersonLastName || '');
+                    const profileUrl = meta.url || CITY_COUNCIL_PAGES[selectedCity];
+                    const partyColor = meta.party ? PARTY_COLORS[meta.party] : null;
+                    const partyLabel = meta.party ? PARTY_LABELS[meta.party] : null;
                     return (
                       <div key={i} className="bg-white border border-amber/30 rounded-lg px-4 py-3 flex items-center gap-3 hover:shadow-sm transition-shadow">
                         <div className="w-10 h-10 rounded-full bg-brown text-gold font-display text-xl flex items-center justify-center shrink-0">
                           {initials}
                         </div>
-                        <div className="min-w-0">
-                          <div className="font-semibold text-[13px] text-ink truncate">
-                            {p.PersonFirstName} {p.PersonLastName}
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            {profileUrl ? (
+                              <a
+                                href={profileUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="font-semibold text-[13px] text-amber underline underline-offset-2 decoration-amber/40 hover:decoration-amber truncate"
+                              >
+                                {p.PersonFirstName} {p.PersonLastName}
+                              </a>
+                            ) : (
+                              <span className="font-semibold text-[13px] text-ink truncate">
+                                {p.PersonFirstName} {p.PersonLastName}
+                              </span>
+                            )}
+                            {partyLabel && partyColor && (
+                              <span
+                                className="text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0"
+                                style={{ backgroundColor: partyColor + '22', color: partyColor, border: `1px solid ${partyColor}66` }}
+                              >
+                                {partyLabel}
+                              </span>
+                            )}
                           </div>
                           {p.PersonTitle && <div className="text-[11px] text-mid">{p.PersonTitle}</div>}
                           {p.PersonPhone && <div className="text-[11px] text-mid">{p.PersonPhone}</div>}

@@ -24,6 +24,7 @@ async function congressGet(path: string, params: Record<string, string | number>
 
 const getBillsData = unstable_cache(
   async (state: string, stateName: string) => {
+    // NOTE: state is intentionally used as part of the cache key below
     const membersResp = await congressGet('/member', {
       stateCode: state,
       congress: 119,
@@ -71,8 +72,9 @@ const getBillsData = unstable_cache(
       members: members.map((m: any) => m.name),
     };
   },
-  ['bills'],
-  { revalidate: 21600 } // cache 6 hours
+  // Include state in cache key so each state gets its own cache entry
+  ['bills', 'v2'],
+  { revalidate: 21600 }
 );
 
 export async function GET(req: NextRequest) {
