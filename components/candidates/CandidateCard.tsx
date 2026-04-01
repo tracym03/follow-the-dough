@@ -62,7 +62,7 @@ export default function CandidateCard({ data, electionYear = 2026 }: { data: any
   const [showMore, setShowMore] = useState(false);
   const [expandedPac, setExpandedPac] = useState<number | null>(null);
   const [showPizza, setShowPizza] = useState(false);
-  const { c, t, ind, employers, fundingSources, pac, bundlers } = data;
+  const { c, t, ind, employers, pacIndustrySlices, pac, bundlers } = data;
   const raised = t?.receipts ?? 0;
   const spent = t?.disbursements ?? 0;
   const indivT = t?.individual_contributions ?? 0;
@@ -203,8 +203,8 @@ export default function CandidateCard({ data, electionYear = 2026 }: { data: any
         </div>
       )}
 
-      {/* Pizza toggle button — only show if candidate has raised money */}
-      {raised > 0 && fundingSources?.length >= 2 && (
+      {/* Pizza toggle — which industries & PAC types fund this candidate */}
+      {raised > 0 && (
         <div className="border-t border-lb">
           <button
             onClick={() => setShowPizza(!showPizza)}
@@ -213,18 +213,28 @@ export default function CandidateCard({ data, electionYear = 2026 }: { data: any
             <div className="flex items-center gap-2">
               <span className="text-xl leading-none">🍕</span>
               <div>
-                <div className="text-[11px] font-semibold text-brown">Where does the money come from?</div>
-                <div className="text-[9px] text-mid">Individual donors vs PAC money vs small donors</div>
+                <div className="text-[11px] font-semibold text-brown">Which industries fund this candidate?</div>
+                <div className="text-[9px] text-mid">
+                  {pacIndustrySlices?.length > 0
+                    ? `Pharma, Finance, Defense, Super PACs & more — tap to explore`
+                    : `PAC types & industry breakdown`}
+                </div>
               </div>
             </div>
             <span className="text-[10px] text-amber font-mono">{showPizza ? '▲ hide' : '▼ show'}</span>
           </button>
 
-          {showPizza && (
+          {showPizza && pacIndustrySlices?.length >= 2 && (
             <PizzaChart
-              title="Funding Sources"
-              slices={fundingSources}
+              title="Industry & PAC Funding"
+              slices={pacIndustrySlices}
             />
+          )}
+
+          {showPizza && (!pacIndustrySlices || pacIndustrySlices.length < 2) && (
+            <div className="px-4 pb-4 text-[10px] text-mid italic">
+              Not enough identifiable industry data yet for this candidate. Check back as more donors file with the FEC.
+            </div>
           )}
         </div>
       )}

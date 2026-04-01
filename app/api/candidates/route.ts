@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { unstable_cache } from 'next/cache';
+import { mapToIndustry, addToIndustryBucket, finalizeBuckets, type IndustrySlice } from '@/lib/industryKeywords';
 
 const FEC_KEY = process.env.FEC_API_KEY || '';
 const FEC_BASE = 'https://api.open.fec.gov/v1';
@@ -49,24 +50,56 @@ async function getDistrictFromZip(zip: string): Promise<string | null> {
 }
 
 
-// Build funding source breakdown from candidate totals — always available, no extra API call
-function buildFundingSources(cand: any): { label: string; emoji: string; value: number; color: string }[] {
-  const total = cand.receipts ?? 0;
-  if (total === 0) return [];
+// Build industry + PAC-type pizza from employer names and PAC profiles
+// This gives voters the "Big Pharma / Defense / Wall Street" breakdown they care about
+function buildPacIndustrySlices(pac: any[], employers: any[]): IndustrySlice[] {
+  const buckets = new Map<string, IndustrySlice>();
 
-  const indItemized = cand.individual_itemized_contributions ?? 0;
-  const pac = cand.other_political_committee_contributions ?? 0;
-  const transfers = cand.transfers_from_other_authorized_committee ?? 0;
-  const smallDonors = Math.max(0, total - indItemized - pac - transfers);
+  // ── From PAC data ────────────────────────────────────────────────────────────
+  for (const p of pac) {
+    const amt = p.contribution_receipt_amount || 0;
+    if (amt <= 0) continue;
+    const profile = p.profile;
+    const comm = profile?.committee_type || '';
+    const desig = profile?.designation || '';
+    const org = profile?.organization_type || '';
+    const connOrg = profile?.connected_organization_name || '';
+    const pacName = p.contributor_name || '';
 
-  const sources = [
-    { label: 'Large Individual Donors', emoji: '👤', value: indItemized, color: '#e8c97a' },
-    { label: 'Small Donors (under $200)', emoji: '👥', value: smallDonors, color: '#2d6a4f' },
-    { label: 'PAC & Committee Money', emoji: '🏛', value: pac, color: '#c0392b' },
-    { label: 'Party Transfers', emoji: '🐘🫏', value: transfers, color: '#1a6bb5' },
-  ];
+    // Try to identify the real-world industry from the connected org name
+    const industryFromOrg = connOrg ? mapToIndustry(connOrg) : (mapToIndustry(pacName) ?? null);
 
-  return sources.filter(s => s.value > 500); // only show meaningful slices
+    if (comm === 'O' || desig === 'U') {
+      // Super PAC — try to industry-map it, otherwise bucket as Super PAC
+      if (industryFromOrg) {
+        addToIndustryBucket(buckets, industryFromOrg.label, industryFromOrg.emoji, industryFromOrg.color, amt);
+      } else {
+        addToIndustryBucket(buckets, 'Super PAC Money', '⚡', '#c0392b', amt);
+      }
+    } else if (industryFromOrg) {
+      addToIndustryBucket(buckets, industryFromOrg.label, industryFromOrg.emoji, industryFromOrg.color, amt);
+    } else if (org === 'L' || comm === 'W') {
+      addToIndustryBucket(buckets, 'Labor & Unions', '👷', '#2d6a4f', amt);
+    } else if (comm === 'Y') {
+      addToIndustryBucket(buckets, 'Party Committees', '🏛', '#1a6bb5', amt);
+    } else if (desig === 'L') {
+      addToIndustryBucket(buckets, 'Leadership PACs', '⭐', '#c8934a', amt);
+    } else {
+      addToIndustryBucket(buckets, 'Other PAC Money', '💼', '#854d0e', amt);
+    }
+  }
+
+  // ── From employer data (individual donations by employer) ────────────────────
+  for (const emp of employers) {
+    const total = emp.total || 0;
+    if (total <= 0) continue;
+    const industry = mapToIndustry(emp.employer || '');
+    if (industry) {
+      addToIndustryBucket(buckets, industry.label, industry.emoji, industry.color, total);
+    }
+  }
+
+  return finalizeBuckets(buckets);
 }
 
 // ── Enrich a single candidate with donors, PACs, industries ──────────────────
@@ -92,9 +125,6 @@ async function enrichCandidate(cand: any, cycle: number) {
     if (!cid) return { c: cand, t, ind: [], employers: [], industries: [], pac: [], bundlers: [] };
 
     const period = String(cycle);
-
-    // Build funding source pizza data from totals we already have (no extra API call)
-    const fundingSources = buildFundingSources(cand);
 
     const [ir] = await Promise.all([
       fecGetMulti('/schedules/schedule_a/', {
@@ -164,17 +194,20 @@ async function enrichCandidate(cand: any, cycle: number) {
         !emp.includes('disabled') && !emp.includes('student');
     }).slice(0, 8);
 
+    // Build pizza AFTER we have both pac and employer data
+    const pacIndustrySlices = buildPacIndustrySlices(pacWithDetails.filter(Boolean), empRows);
+
     return {
       c: cand,
       t,
       ind: ir?.results || [],
       employers: empRows,
-      fundingSources,
+      pacIndustrySlices,
       pac: pacWithDetails.filter(Boolean),
       bundlers: actBlueWinRed,
     };
   } catch {
-    return { c: cand, t: null, ind: [], employers: [], fundingSources: [], pac: [], bundlers: [] };
+    return { c: cand, t: null, ind: [], employers: [], pacIndustrySlices: [], pac: [], bundlers: [] };
   }
 }
 
