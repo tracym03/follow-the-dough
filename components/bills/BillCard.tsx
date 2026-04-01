@@ -23,17 +23,21 @@ function extractTopicKeywords(title: string): string {
   return words.slice(0, 3).join(' ');
 }
 
-function LobbySection({ billTitle }: { billTitle: string }) {
+function LobbySection({ billTitle, billType, billNumber }: { billTitle: string; billType?: string; billNumber?: string }) {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
 
   const keywords = extractTopicKeywords(billTitle);
+  // Build the bill ID string the way LDA stores it — "HR 1234" or "S 567"
+  const billId = billType && billNumber ? `${billType.toUpperCase()} ${billNumber}` : '';
 
   function toggle() {
     if (!open && !data && !loading) {
       setLoading(true);
-      fetch(`/api/lobbying?keywords=${encodeURIComponent(keywords)}`)
+      const params = new URLSearchParams({ keywords });
+      if (billId) params.set('billId', billId);
+      fetch(`/api/lobbying?${params.toString()}`)
         .then(r => r.json())
         .then(setData)
         .catch(() => setData({ found: false }))
@@ -87,7 +91,10 @@ function LobbySection({ billTitle }: { billTitle: string }) {
           {!loading && lobbyists.length > 0 && (
             <div className="mt-3">
               <div className="text-[8px] tracking-widest uppercase text-mid mb-2">
-                🏢 Organizations lobbying on <span className="text-amber">{keywords}</span>
+                {data?.searchedByBill
+                  ? <>🏢 Organizations that lobbied on <span className="text-amber">{billId}</span> specifically</>
+                  : <>🏢 Organizations lobbying on <span className="text-amber">{keywords}</span></>
+                }
               </div>
               {lobbyists.map((l: any, i: number) => (
                 <div key={i} className="py-1.5 border-b border-dashed border-lb last:border-0">
@@ -179,7 +186,7 @@ export default function BillCard({ bill }: { bill: any }) {
         )}
       </div>
 
-      <LobbySection billTitle={bill.title || ''} />
+      <LobbySection billTitle={bill.title || ''} billType={bill.type} billNumber={bill.number} />
 
       <a
         href={url}
