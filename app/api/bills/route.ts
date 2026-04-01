@@ -41,10 +41,18 @@ const getBillsData = unstable_cache(
             limit: 4,
             offset: 0,
           });
+          const chamber = (b: any) => {
+            const t = (b.type || 'HR').toUpperCase();
+            return t.startsWith('S') ? 'S' : 'H';
+          };
           return (resp.sponsoredLegislation || []).map((b: any) => ({
             number: b.number || '',
             title: b.title || '',
             sponsor: `${m.name} (${m.partyName?.charAt(0) || '?'})`,
+            sponsorName: m.name || '',           // clean name for FEC lookup
+            sponsorState: state,                  // state already known
+            sponsorParty: m.partyName?.charAt(0) || '',
+            sponsorChamber: chamber(b),           // 'H' or 'S'
             latestAction: b.latestAction?.text || '',
             actionDate: b.latestAction?.actionDate || '',
             type: b.type || 'HR',
