@@ -42,77 +42,83 @@ function StateRacesSection({ state, stateName }: { state: string; stateName: str
                 State-level race · Funded via state campaign finance filings
               </div>
             </div>
-            <span className="text-[8px] px-2 py-0.5 rounded-full bg-green-100 text-ftdgreen shrink-0">Open Race</span>
+            {data.govCandidates?.some((c: any) => c.note?.includes('Incumbent')) ? (
+              <span className="text-[8px] px-2 py-0.5 rounded-full bg-amber/20 text-brown shrink-0">Incumbent Running</span>
+            ) : (
+              <span className="text-[8px] px-2 py-0.5 rounded-full bg-green-100 text-ftdgreen shrink-0">Open Race</span>
+            )}
           </div>
 
-          {/* Direct candidate data from FollowTheMoney */}
+          {/* Candidate list — hardcoded known announced candidates */}
           {data.govCandidates?.length > 0 ? (
             <div className="px-4 pb-3">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-[8px] tracking-[3px] uppercase text-mid">
-                  💰 Candidates & Fundraising — {data.govSource}
-                </span>
+              <div className="text-[8px] tracking-[3px] uppercase text-mid mb-3">
+                🗳️ Known 2026 Candidates
               </div>
-              {data.govCandidates.map((c: any, i: number) => {
-                const maxRaised = data.govCandidates[0]?.raised || 1;
-                const pct = Math.min(100, Math.round((c.raised / maxRaised) * 100));
-                return (
-                  <div key={i} className="mb-3">
-                    <div className="flex justify-between items-start gap-2">
-                      <div>
-                        <div className="text-[12px] font-bold">{c.name}</div>
-                        {c.party && (
-                          <div className={`inline-block text-[8px] tracking-widest uppercase px-2 py-0.5 rounded-full mt-0.5
-                            ${c.party.includes('Dem') ? 'bg-blue-100 text-ftdblue' :
-                              c.party.includes('Rep') ? 'bg-red-100 text-ftdred' :
-                              'bg-lb text-mid'}`}>
-                            {c.party}
-                          </div>
-                        )}
-                      </div>
-                      <div className="text-right shrink-0">
-                        <div className="font-display text-[17px] text-ftdgreen">{c.raisedFmt}</div>
-                        <div className="text-[8px] text-mid tracking-wide">raised</div>
-                      </div>
+              {data.govCandidates.map((c: any, i: number) => (
+                <div key={i} className="py-2 border-b border-dashed border-lb last:border-0">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="text-[12px] font-bold text-ink">{c.name}</div>
+                      {c.title && (
+                        <div className="text-[9px] text-mid mt-0.5">{c.title}</div>
+                      )}
                     </div>
-                    <div className="h-[3px] bg-green-100 rounded mt-1.5">
-                      <div className="h-full bg-ftdgreen rounded" style={{ width: `${pct}%` }} />
+                    <div className="flex flex-col items-end gap-1 shrink-0">
+                      {c.party && (
+                        <span className={`text-[8px] tracking-widest uppercase px-2 py-0.5 rounded-full
+                          ${c.party.includes('Dem') ? 'bg-blue-100 text-ftdblue' :
+                            c.party.includes('Rep') ? 'bg-red-100 text-ftdred' :
+                            'bg-lb text-mid'}`}>
+                          {c.party}
+                        </span>
+                      )}
+                      {c.note && (
+                        <span className="text-[8px] text-amber italic">{c.note}</span>
+                      )}
                     </div>
                   </div>
-                );
-              })}
-              <div className="text-[8px] text-mid mt-1 border-t border-lb pt-2">
-                Source: <a href={`https://www.followthemoney.org/show-me?s=${state}&y=2026`}
-                  target="_blank" rel="noopener noreferrer" className="text-ftdgreen">FollowTheMoney.org</a>
-                {' '}· State campaign finance disclosures
+                </div>
+              ))}
+
+              {/* State finance DB link */}
+              <div className="mt-3 pt-2 border-t border-lb flex flex-col gap-1.5">
+                <div className="text-[8px] text-mid">Follow the money for this race:</div>
+                {data.financeDb && (
+                  <a href={data.financeDb.url} target="_blank" rel="noopener noreferrer"
+                    className="flex items-center gap-1 text-[9px] text-ftdgreen border border-ftdgreen rounded px-2 py-1 w-fit hover:bg-green-50">
+                    ↗ {data.financeDb.name} — {stateName} official campaign finance
+                  </a>
+                )}
+                <a href={`https://www.opensecrets.org/races/summary?cycle=2026&id=${state}G`}
+                  target="_blank" rel="noopener noreferrer"
+                  className="flex items-center gap-1 text-[9px] text-amber border border-amber rounded px-2 py-1 w-fit hover:bg-yellow-50">
+                  ↗ OpenSecrets · {stateName} Governor 2026
+                </a>
               </div>
+              {data.dataNote && (
+                <div className="text-[8px] text-mid italic mt-2">{data.dataNote}</div>
+              )}
             </div>
           ) : (
-            /* No data yet — show helpful context + links */
+            /* No data — show links */
             <div className="px-4 pb-4">
               <div className="bg-green-50 border border-green-200 rounded p-3 text-[10px] leading-relaxed text-brown">
-                <p className="mb-1 font-semibold">Why isn&apos;t this data here automatically?</p>
+                <p className="mb-1 font-semibold">Governor race data coming soon</p>
                 <p className="mb-3 text-mid">
                   Governor races are funded at the <strong>state level</strong> and reported to your
-                  state&apos;s own election authority — not the federal FEC. Each state has its own
-                  database. It&apos;s early in the 2026 cycle so filings may be limited.
+                  state&apos;s own election authority — not the federal FEC. Check these sources:
                 </p>
                 <div className="flex flex-col gap-2">
-                  <a href={`https://www.followthemoney.org/show-me?s=${state}&y=2026&c-exi=1&c-t-eid=5`}
-                    target="_blank" rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-ftdgreen border border-ftdgreen rounded px-2 py-1 w-fit hover:bg-green-50">
-                    ↗ {stateName} Governor donors on FollowTheMoney.org
-                  </a>
                   <a href={`https://www.opensecrets.org/races/summary?cycle=2026&id=${state}G`}
                     target="_blank" rel="noopener noreferrer"
                     className="flex items-center gap-1 text-amber border border-amber rounded px-2 py-1 w-fit hover:bg-yellow-50">
                     ↗ {stateName} Governor race on OpenSecrets
                   </a>
-                  {state === 'CA' && (
-                    <a href="https://cal-access.sos.ca.gov/Campaign/Candidates/"
-                      target="_blank" rel="noopener noreferrer"
-                      className="flex items-center gap-1 text-ftdblue border border-ftdblue rounded px-2 py-1 w-fit hover:bg-blue-50">
-                      ↗ California official donor database (CAL-ACCESS)
+                  {data.financeDb && (
+                    <a href={data.financeDb.url} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-1 text-ftdgreen border border-ftdgreen rounded px-2 py-1 w-fit hover:bg-green-50">
+                      ↗ {data.financeDb.name} — {stateName} official campaign finance
                     </a>
                   )}
                 </div>
