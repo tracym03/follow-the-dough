@@ -193,23 +193,26 @@ export default function CandidatesTab({ zip, state, stateName }: { zip: string; 
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-4">
-        {/* Fallback banner */}
+        {/* Fallback banner — shown whenever we're displaying 2024 data */}
         {data?.usingFallback && (
           <div className="bg-yellow-50 border border-yellow-300 border-l-4 border-l-amber p-3 mb-4 text-[10px] leading-relaxed text-brown">
             <strong className="font-display text-[12px] tracking-wider block mb-1">
-              📅 Showing 2024 Data — 2026 Filings Not Yet Available
+              📅 Showing 2024 Fundraising Data
             </strong>
-            It&apos;s early in the 2026 cycle. These candidates from the 2024 race are shown so you can see who holds this seat and how they were funded. The app will automatically switch to 2026 data as candidates register and file with the FEC.
+            It&apos;s early in the 2026 election cycle and most candidates haven&apos;t raised meaningful money yet.
+            We&apos;re showing you the 2024 race so you can see who holds this seat and exactly who funded them —
+            these representatives are still in office and these donors still have influence.
+            The app will automatically switch to 2026 live data once candidates begin filing.
           </div>
         )}
 
         {/* Info box */}
         <div className="bg-lb border border-amber p-3 mb-4 text-[10px] leading-relaxed text-brown">
           <strong className="font-display text-[13px] tracking-[3px] block mb-1">
-            {data?.usingFallback ? '2024' : '2026'} Federal Candidates
+            {data?.electionYear || 2024} Federal Candidates
           </strong>
           Showing your U.S. House representative for District {data?.district || '?'} and U.S. Senators for {stateName}.
-          Industry breakdowns show which sectors are funding each campaign — same methodology as OpenSecrets, directly from FEC filings.
+          Industry breakdowns show which sectors funded each campaign — same methodology as OpenSecrets, sourced directly from FEC filings.
         </div>
 
         {/* House candidates */}
@@ -222,7 +225,7 @@ export default function CandidatesTab({ zip, state, stateName }: { zip: string; 
               <div className="flex-1 h-px bg-gradient-to-r from-amber to-transparent" />
             </div>
             {houseCands.map((d: any, i: number) => (
-              <CandidateCard key={`h-${i}`} data={d} electionYear={2026} />
+              <CandidateCard key={`h-${i}`} data={d} electionYear={data?.electionYear || 2024} />
             ))}
           </>
         )}
@@ -231,11 +234,11 @@ export default function CandidatesTab({ zip, state, stateName }: { zip: string; 
         {senateCands.length > 0 && (
           <>
             <div className="flex items-center gap-3 mb-3 mt-5">
-              <h2 className="font-display text-xl tracking-[3px] text-brown">Your U.S. Senators · 2026</h2>
+              <h2 className="font-display text-xl tracking-[3px] text-brown">Your U.S. Senators · {data?.electionYear || 2024}</h2>
               <div className="flex-1 h-px bg-gradient-to-r from-amber to-transparent" />
             </div>
             {senateCands.map((d: any, i: number) => (
-              <CandidateCard key={`s-${i}`} data={d} electionYear={2026} />
+              <CandidateCard key={`s-${i}`} data={d} electionYear={data?.electionYear || 2024} />
             ))}
           </>
         )}
@@ -243,18 +246,17 @@ export default function CandidatesTab({ zip, state, stateName }: { zip: string; 
         {/* No federal candidates found */}
         {!hasFederal && !loading && (
           <div className="text-center py-8 bg-lb border border-amber/40 rounded mb-4">
-            <div className="font-display text-2xl text-amber mb-2">No 2026 Federal Filings Yet</div>
+            <div className="font-display text-2xl text-amber mb-2">No FEC Filings Found</div>
             <p className="text-[10px] text-mid font-mono leading-relaxed px-4">
-              It&apos;s early in the 2026 cycle — candidates for District {data?.district} may not have registered
-              with the FEC yet or haven&apos;t begun raising money.
-              Check back as the election gets closer.
+              No candidates found for District {data?.district} in {stateName}.
+              Try a different ZIP code or search directly on FEC.gov below.
             </p>
             <a
-              href={`https://www.fec.gov/data/candidates/?state=${state}&election_year=2026`}
+              href={`https://www.fec.gov/data/candidates/?state=${state}&election_year=2024`}
               target="_blank" rel="noopener noreferrer"
               className="inline-block mt-3 text-[9px] tracking-[3px] uppercase text-amber border-b border-dashed border-amber"
             >
-              ↗ Search all {stateName} 2026 candidates on FEC.gov
+              ↗ Search all {stateName} candidates on FEC.gov
             </a>
           </div>
         )}

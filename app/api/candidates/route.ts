@@ -4,10 +4,11 @@ import { unstable_cache } from 'next/cache';
 const FEC_KEY = process.env.FEC_API_KEY || '';
 const FEC_BASE = 'https://api.open.fec.gov/v1';
 
-// Try 2026 first — if fewer than 2 candidates found, fall back to 2024
-const PREFERRED_YEAR = 2026;
-const FALLBACK_YEAR = 2024;
-const FALLBACK_THRESHOLD = 2; // if fewer than this many 2026 candidates found, use 2024
+// Show 2024 data by default — only upgrade to 2026 if candidates have actually raised money
+const PRIMARY_YEAR = 2024;
+const CURRENT_YEAR = 2026;
+// Minimum dollars raised to consider 2026 data "live"
+const UPGRADE_THRESHOLD = 10000;
 
 // ── FEC helpers ───────────────────────────────────────────────────────────────
 async function fecGet(path: string, params: Record<string, string | number | boolean> = {}) {
@@ -58,7 +59,6 @@ async function getDistrictFromZip(zip: string): Promise<string | null> {
 }
 
 // ── Industry categorization ───────────────────────────────────────────────────
-// Maps FEC industry codes to human-readable names with emoji
 const INDUSTRY_MAP: Record<string, { label: string; emoji: string }> = {
   'K02': { label: 'Real Estate', emoji: '🏘️' },
   'K01': { label: 'Finance & Banking', emoji: '🏦' },
@@ -218,13 +218,11 @@ async function enrichCandidate(c: any, cycle: number) {
 
 // ── Fetch candidates for a given year ────────────────────────────────────────
 async function fetchCandidatesForYear(state: string, district: string | null, year: number) {
-  // Search both with and without district to maximise results
   const houseParamsDistrict: any = {
     state, office: 'H', election_year: year, sort: '-receipts', per_page: '8',
   };
   if (district) houseParamsDistrict.district = district.padStart(2, '0');
 
-  // Also search by state only in case district lookup was off
   const houseParamsState: any = {
     state, office: 'H', election_year: year, sort: '-receipts', per_page: '8',
   };
@@ -239,7 +237,6 @@ async function fetchCandidatesForYear(state: string, district: string | null, ye
     fecGetMulti('/candidates/', senateParams).catch(() => ({ results: [] })),
   ]);
 
-  // Prefer district-specific results; fall back to state-level house results
   const districtResults: any[] = houseRespDistrict.results || [];
   const stateResults: any[] = houseRespState.results || [];
   const houseCands: any[] = districtResults.length > 0
@@ -253,21 +250,36 @@ async function fetchCandidatesForYear(state: string, district: string | null, ye
 // ── Cached data fetcher ───────────────────────────────────────────────────────
 const getCandidateData = unstable_cache(
   async (state: string, district: string | null, zip: string) => {
-    // Try 2026 first
-    let allCands = await fetchCandidatesForYear(state, district, PREFERRED_YEAR);
-    let electionYear = PREFERRED_YEAR;
-    let usingFallback = false;
+    // Always fetch 2024 first — it has real fundraising data
+    const primaryCands = await fetchCandidatesForYear(state, district, PRIMARY_YEAR);
 
-    // Fall back to 2024 if fewer than threshold candidates found for 2026
-    if (allCands.length < FALLBACK_THRESHOLD) {
-      const fallbackCands = await fetchCandidatesForYear(state, district, FALLBACK_YEAR);
-      // Use whichever year has more candidates
-      if (fallbackCands.length > allCands.length) {
-        allCands = fallbackCands;
-        electionYear = FALLBACK_YEAR;
-        usingFallback = true;
-      }
+    // Also check if 2026 has candidates with real money raised
+    const currentCands = await fetchCandidatesForYear(state, district, CURRENT_YEAR);
+
+    // Determine if 2026 is "live" — at least one candidate has raised meaningful money
+    let use2026 = false;
+    if (currentCands.length > 0) {
+      // Quick check: fetch totals for top 3 to see if any have raised money
+      const quickChecks = await Promise.all(
+        currentCands.slice(0, 3).map(async (c: any) => {
+          try {
+            const commResp = await fecGet(`/candidate/${c.candidate_id}/committees/`, {
+              cycle: CURRENT_YEAR, designation: 'P',
+            }).catch(() => fecGet(`/candidate/${c.candidate_id}/committees/`, { cycle: CURRENT_YEAR }));
+            const cid = commResp?.results?.[0]?.committee_id;
+            if (!cid) return 0;
+            const totals = await fecGet(`/committee/${cid}/totals/`, { cycle: CURRENT_YEAR }).catch(() => null);
+            return totals?.results?.[0]?.receipts ?? 0;
+          } catch { return 0; }
+        })
+      );
+      const maxRaised = Math.max(...quickChecks, 0);
+      use2026 = maxRaised >= UPGRADE_THRESHOLD;
     }
+
+    const allCands = use2026 ? currentCands : primaryCands;
+    const electionYear = use2026 ? CURRENT_YEAR : PRIMARY_YEAR;
+    const usingFallback = !use2026; // We're showing 2024 as the "real" data
 
     if (!allCands.length) return { candidates: [], state, zip, district, electionYear, usingFallback };
 
@@ -276,9 +288,8 @@ const getCandidateData = unstable_cache(
 
     return { candidates: details, state, zip, district, electionYear, usingFallback };
   },
-  // Include date in cache key so it refreshes daily and doesn't serve stale empty results
-  [`candidates-hybrid-${new Date().toISOString().slice(0, 10)}`],
-  { revalidate: 3600 } // re-check hourly so new 2026 filings appear quickly
+  [`candidates-v3-${new Date().toISOString().slice(0, 10)}`],
+  { revalidate: 3600 }
 );
 
 // ── Route handler ─────────────────────────────────────────────────────────────

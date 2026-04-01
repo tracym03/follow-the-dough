@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { fmt, tc, partyFull, partyBorderClass, partyPillClass, officeStr } from '@/lib/utils';
+import PizzaChart from './PizzaChart';
 
 function getPacType(profile: any): { label: string; cls: string; explanation: string } {
   if (!profile) return { label: 'Political Committee', cls: 'bg-lb text-mid', explanation: 'A committee that donated to this candidate.' };
@@ -93,7 +94,7 @@ export default function CandidateCard({ data, electionYear = 2026 }: { data: any
       {/* Early cycle notice */}
       {raised === 0 && (
         <div className="mx-4 mb-2 px-3 py-2 bg-yellow-50 border border-yellow-200 rounded text-[9px] text-yellow-800 leading-relaxed">
-          📋 This candidate has registered with the FEC but has not yet filed fundraising reports for the 2026 cycle. Check back as the election approaches.
+          📋 This candidate has registered with the FEC but no fundraising data is available yet for the {electionYear} cycle. Check back as the election approaches.
         </div>
       )}
 
@@ -241,6 +242,19 @@ export default function CandidateCard({ data, electionYear = 2026 }: { data: any
             Industry codes from FEC filings · Same source as OpenSecrets · All public record
           </div>
         </div>
+      )}
+
+      {/* Pizza chart — only show if we have industry data */}
+      {industries?.length >= 2 && (
+        <PizzaChart
+          title="Funding by Industry"
+          slices={industries.map((ind: any) => ({
+            label: ind.label,
+            emoji: ind.emoji,
+            value: ind.total,
+            color: ind.emoji,
+          }))}
+        />
       )}
 
       {/* PAC money */}
