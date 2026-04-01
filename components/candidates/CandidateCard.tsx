@@ -61,7 +61,8 @@ function getRealFunder(p: any): { funder: string; pacAlias: string | null; hasCo
 export default function CandidateCard({ data, electionYear = 2026 }: { data: any; electionYear?: number }) {
   const [showMore, setShowMore] = useState(false);
   const [expandedPac, setExpandedPac] = useState<number | null>(null);
-  const { c, t, ind, employers, industries, pac, bundlers } = data;
+  const [showPizza, setShowPizza] = useState(false);
+  const { c, t, ind, employers, fundingSources, pac, bundlers } = data;
   const raised = t?.receipts ?? 0;
   const spent = t?.disbursements ?? 0;
   const indivT = t?.individual_contributions ?? 0;
@@ -202,59 +203,30 @@ export default function CandidateCard({ data, electionYear = 2026 }: { data: any
         </div>
       )}
 
-      {/* Industry breakdown */}
-      {industries?.length > 0 && (
-        <div className="border-t border-lb px-4 py-3">
-          <div className="mb-2">
-            <span className="text-[8px] tracking-[3px] uppercase text-mid">🏭 Funding by Industry</span>
-            <p className="text-[9px] text-mid mt-0.5 italic">
-              Which industries are bankrolling this campaign — same methodology as OpenSecrets.
-            </p>
-          </div>
-          {industries.map((ind: any, i: number) => {
-            const maxTotal = industries[0]?.total || 1;
-            const pct = Math.min(100, Math.round((ind.total / maxTotal) * 100));
-            return (
-              <div key={i} className="mb-2">
-                <div className="flex justify-between items-center mb-0.5">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-base leading-none">{ind.emoji}</span>
-                    <span className="text-[11px] font-medium">{ind.label}</span>
-                    {ind.count > 0 && (
-                      <span className="text-[8px] text-mid">({ind.count} donor{ind.count !== 1 ? 's' : ''})</span>
-                    )}
-                  </div>
-                  <span className="font-display text-[14px] text-brown shrink-0">{fmt(ind.total)}</span>
-                </div>
-                <div className="h-[4px] bg-lb rounded-full overflow-hidden">
-                  <div
-                    className="h-full rounded-full transition-all"
-                    style={{
-                      width: `${pct}%`,
-                      background: `hsl(${30 + i * 25}, 65%, 45%)`,
-                    }}
-                  />
-                </div>
+      {/* Pizza toggle button — only show if candidate has raised money */}
+      {raised > 0 && fundingSources?.length >= 2 && (
+        <div className="border-t border-lb">
+          <button
+            onClick={() => setShowPizza(!showPizza)}
+            className={`w-full flex items-center justify-between px-4 py-2.5 text-left transition-colors ${showPizza ? 'bg-amber/10' : 'hover:bg-lb/60'}`}
+          >
+            <div className="flex items-center gap-2">
+              <span className="text-xl leading-none">🍕</span>
+              <div>
+                <div className="text-[11px] font-semibold text-brown">Where does the money come from?</div>
+                <div className="text-[9px] text-mid">Individual donors vs PAC money vs small donors</div>
               </div>
-            );
-          })}
-          <div className="text-[8px] text-mid mt-1 border-t border-lb pt-1.5">
-            Industry codes from FEC filings · Same source as OpenSecrets · All public record
-          </div>
-        </div>
-      )}
+            </div>
+            <span className="text-[10px] text-amber font-mono">{showPizza ? '▲ hide' : '▼ show'}</span>
+          </button>
 
-      {/* Pizza chart — only show if we have industry data */}
-      {industries?.length >= 2 && (
-        <PizzaChart
-          title="Funding by Industry"
-          slices={industries.map((ind: any) => ({
-            label: ind.label,
-            emoji: ind.emoji,
-            value: ind.total,
-            color: ind.emoji,
-          }))}
-        />
+          {showPizza && (
+            <PizzaChart
+              title="Funding Sources"
+              slices={fundingSources}
+            />
+          )}
+        </div>
       )}
 
       {/* PAC money */}

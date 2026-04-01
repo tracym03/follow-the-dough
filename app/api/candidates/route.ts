@@ -48,66 +48,25 @@ async function getDistrictFromZip(zip: string): Promise<string | null> {
   } catch { return null; }
 }
 
-// ── Industry categorization ───────────────────────────────────────────────────
-const INDUSTRY_MAP: Record<string, { label: string; emoji: string }> = {
-  'K02': { label: 'Real Estate', emoji: '🏘️' },
-  'K01': { label: 'Finance & Banking', emoji: '🏦' },
-  'K03': { label: 'Insurance', emoji: '🛡️' },
-  'K04': { label: 'Accountants', emoji: '📊' },
-  'B11': { label: 'Oil & Gas', emoji: '🛢️' },
-  'B12': { label: 'Mining', emoji: '⛏️' },
-  'B13': { label: 'Electric Utilities', emoji: '⚡' },
-  'B09': { label: 'Environmental', emoji: '🌿' },
-  'C00': { label: 'Construction', emoji: '🏗️' },
-  'D00': { label: 'Defense', emoji: '🛡️' },
-  'E01': { label: 'Education', emoji: '🎓' },
-  'F10': { label: 'Lawyers & Lobbyists', emoji: '⚖️' },
-  'G00': { label: 'Government & Politics', emoji: '🏛️' },
-  'H04': { label: 'Health Professionals', emoji: '🏥' },
-  'H02': { label: 'Pharmaceuticals', emoji: '💊' },
-  'H03': { label: 'Hospitals', emoji: '🏨' },
-  'H06': { label: 'Health Services', emoji: '🩺' },
-  'J01': { label: 'Agriculture', emoji: '🌾' },
-  'K12': { label: 'Securities & Investment', emoji: '📈' },
-  'K13': { label: 'Venture Capital', emoji: '💸' },
-  'L00': { label: 'Labor Unions', emoji: '👷' },
-  'M00': { label: 'Miscellaneous Business', emoji: '💼' },
-  'N00': { label: 'Lawyers', emoji: '⚖️' },
-  'P00': { label: 'Pro-Israel / AIPAC', emoji: '🌐' },
-  'P01': { label: 'Pro-Israel Orgs', emoji: '🌐' },
-  'Q00': { label: 'Ideological / Single Issue', emoji: '🎯' },
-  'Q03': { label: 'Gun Rights', emoji: '🔫' },
-  'Q04': { label: 'Gun Control', emoji: '🚫' },
-  'Q05': { label: 'Abortion Policy', emoji: '⚕️' },
-  'W00': { label: 'Technology', emoji: '💻' },
-  'W02': { label: 'Telecom', emoji: '📡' },
-  'X00': { label: 'Unknown / Uncoded', emoji: '❓' },
-  'Z90': { label: 'Small Individual Donors', emoji: '👥' },
-};
 
-async function getIndustryBreakdown(committeeId: string, cycle: number) {
-  try {
-    const resp = await fecGet('/schedules/schedule_a/by_industry/', {
-      committee_id: committeeId,
-      cycle,
-      sort: '-total',
-      per_page: 10,
-    });
-    const results: any[] = resp.results || [];
-    return results
-      .filter((r: any) => r.total > 0 && r.industry_code)
-      .slice(0, 8)
-      .map((r: any) => {
-        const mapped = INDUSTRY_MAP[r.industry_code] || { label: r.industry || 'Other', emoji: '💼' };
-        return {
-          code: r.industry_code,
-          label: mapped.label,
-          emoji: mapped.emoji,
-          total: r.total || 0,
-          count: r.count || 0,
-        };
-      });
-  } catch { return []; }
+// Build funding source breakdown from candidate totals — always available, no extra API call
+function buildFundingSources(cand: any): { label: string; emoji: string; value: number; color: string }[] {
+  const total = cand.receipts ?? 0;
+  if (total === 0) return [];
+
+  const indItemized = cand.individual_itemized_contributions ?? 0;
+  const pac = cand.other_political_committee_contributions ?? 0;
+  const transfers = cand.transfers_from_other_authorized_committee ?? 0;
+  const smallDonors = Math.max(0, total - indItemized - pac - transfers);
+
+  const sources = [
+    { label: 'Large Individual Donors', emoji: '👤', value: indItemized, color: '#e8c97a' },
+    { label: 'Small Donors (under $200)', emoji: '👥', value: smallDonors, color: '#2d6a4f' },
+    { label: 'PAC & Committee Money', emoji: '🏛', value: pac, color: '#c0392b' },
+    { label: 'Party Transfers', emoji: '🐘🫏', value: transfers, color: '#1a6bb5' },
+  ];
+
+  return sources.filter(s => s.value > 500); // only show meaningful slices
 }
 
 // ── Enrich a single candidate with donors, PACs, industries ──────────────────
@@ -134,7 +93,10 @@ async function enrichCandidate(cand: any, cycle: number) {
 
     const period = String(cycle);
 
-    const [ir, industries] = await Promise.all([
+    // Build funding source pizza data from totals we already have (no extra API call)
+    const fundingSources = buildFundingSources(cand);
+
+    const [ir] = await Promise.all([
       fecGetMulti('/schedules/schedule_a/', {
         committee_id: cid,
         contributor_type: 'individual',
@@ -142,7 +104,6 @@ async function enrichCandidate(cand: any, cycle: number) {
         per_page: '10',
         two_year_transaction_period: period,
       }).catch(() => ({ results: [] })),
-      getIndustryBreakdown(cid, cycle),
     ]);
 
     const pacResp = await fecGetMulti('/schedules/schedule_a/', {
@@ -208,12 +169,12 @@ async function enrichCandidate(cand: any, cycle: number) {
       t,
       ind: ir?.results || [],
       employers: empRows,
-      industries,
+      fundingSources,
       pac: pacWithDetails.filter(Boolean),
       bundlers: actBlueWinRed,
     };
   } catch {
-    return { c: cand, t: null, ind: [], employers: [], industries: [], pac: [], bundlers: [] };
+    return { c: cand, t: null, ind: [], employers: [], fundingSources: [], pac: [], bundlers: [] };
   }
 }
 
