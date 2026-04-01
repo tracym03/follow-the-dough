@@ -60,7 +60,7 @@ function getRealFunder(p: any): { funder: string; pacAlias: string | null; hasCo
 export default function CandidateCard({ data, electionYear = 2026 }: { data: any; electionYear?: number }) {
   const [showMore, setShowMore] = useState(false);
   const [expandedPac, setExpandedPac] = useState<number | null>(null);
-  const { c, t, ind, employers, pac, bundlers } = data;
+  const { c, t, ind, employers, industries, pac, bundlers } = data;
   const raised = t?.receipts ?? 0;
   const spent = t?.disbursements ?? 0;
   const indivT = t?.individual_contributions ?? 0;
@@ -84,11 +84,18 @@ export default function CandidateCard({ data, electionYear = 2026 }: { data: any
         </div>
         <div className="text-right shrink-0">
           <span className={`inline-block text-[8px] tracking-widest uppercase px-2 py-0.5 rounded-full mb-1 ${pillCls}`}>{partyFull(party)}</span>
-          <div className="font-display text-lg text-brown">{fmt(raised)}</div>
-          <div className="text-[8px] tracking-widest uppercase text-mid">raised</div>
+          <div className="font-display text-lg text-brown">{raised > 0 ? fmt(raised) : '—'}</div>
+          <div className="text-[8px] tracking-widest uppercase text-mid">{raised > 0 ? 'raised' : 'no filings yet'}</div>
           {spent > 0 && <div className="text-[9px] text-mid">{fmt(spent)} spent</div>}
         </div>
       </div>
+
+      {/* Early cycle notice */}
+      {raised === 0 && (
+        <div className="mx-4 mb-2 px-3 py-2 bg-yellow-50 border border-yellow-200 rounded text-[9px] text-yellow-800 leading-relaxed">
+          📋 This candidate has registered with the FEC but has not yet filed fundraising reports for the 2026 cycle. Check back as the election approaches.
+        </div>
+      )}
 
       {/* Individual / PAC split */}
       {raised > 0 && (
@@ -191,6 +198,48 @@ export default function CandidateCard({ data, electionYear = 2026 }: { data: any
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Industry breakdown */}
+      {industries?.length > 0 && (
+        <div className="border-t border-lb px-4 py-3">
+          <div className="mb-2">
+            <span className="text-[8px] tracking-[3px] uppercase text-mid">🏭 Funding by Industry</span>
+            <p className="text-[9px] text-mid mt-0.5 italic">
+              Which industries are bankrolling this campaign — same methodology as OpenSecrets.
+            </p>
+          </div>
+          {industries.map((ind: any, i: number) => {
+            const maxTotal = industries[0]?.total || 1;
+            const pct = Math.min(100, Math.round((ind.total / maxTotal) * 100));
+            return (
+              <div key={i} className="mb-2">
+                <div className="flex justify-between items-center mb-0.5">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-base leading-none">{ind.emoji}</span>
+                    <span className="text-[11px] font-medium">{ind.label}</span>
+                    {ind.count > 0 && (
+                      <span className="text-[8px] text-mid">({ind.count} donor{ind.count !== 1 ? 's' : ''})</span>
+                    )}
+                  </div>
+                  <span className="font-display text-[14px] text-brown shrink-0">{fmt(ind.total)}</span>
+                </div>
+                <div className="h-[4px] bg-lb rounded-full overflow-hidden">
+                  <div
+                    className="h-full rounded-full transition-all"
+                    style={{
+                      width: `${pct}%`,
+                      background: `hsl(${30 + i * 25}, 65%, 45%)`,
+                    }}
+                  />
+                </div>
+              </div>
+            );
+          })}
+          <div className="text-[8px] text-mid mt-1 border-t border-lb pt-1.5">
+            Industry codes from FEC filings · Same source as OpenSecrets · All public record
+          </div>
         </div>
       )}
 

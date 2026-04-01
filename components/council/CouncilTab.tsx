@@ -1,19 +1,26 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { LEGISTAR_CITIES } from '@/lib/utils';
+import { LEGISTAR_CITIES, NON_LEGISTAR_CITIES } from '@/lib/utils';
 
 function formatDate(dateStr: string) {
   if (!dateStr) return '';
-  try {
-    return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  } catch {
-    return dateStr;
-  }
+  try { return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); }
+  catch { return dateStr; }
 }
 
 function isPast(dateStr: string) {
   try { return new Date(dateStr) < new Date(); } catch { return false; }
+}
+
+// Group cities by region
+function groupCities() {
+  const groups: Record<string, typeof LEGISTAR_CITIES> = {};
+  for (const city of LEGISTAR_CITIES) {
+    if (!groups[city.group]) groups[city.group] = [];
+    groups[city.group].push(city);
+  }
+  return groups;
 }
 
 export default function CouncilTab({ zip }: { zip: string }) {
@@ -21,18 +28,27 @@ export default function CouncilTab({ zip }: { zip: string }) {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [cityNotFound, setCityNotFound] = useState(false);
+  const [search, setSearch] = useState('');
+  const cityGroups = groupCities();
 
   async function loadCity(client: string) {
     setLoading(true);
     setError('');
     setData(null);
+    setCityNotFound(false);
     try {
       const res = await fetch(`/api/council?city=${client}`);
       const json = await res.json();
       if (json.error) throw new Error(json.error);
       setData(json);
     } catch (e: any) {
-      setError(e.message);
+      // Check if it's a city not found on Legistar
+      if (e.message.includes('404') || e.message.includes('400')) {
+        setCityNotFound(true);
+      } else {
+        setError(e.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -45,39 +61,136 @@ export default function CouncilTab({ zip }: { zip: string }) {
   }
 
   const cityLabel = LEGISTAR_CITIES.find(c => c.client === selectedCity)?.label || '';
+  const nonLegistarCity = NON_LEGISTAR_CITIES.find(c =>
+    search.toLowerCase().includes(c.label.split(',')[0].toLowerCase())
+  );
+
+  // Filter cities by search
+  const filteredGroups: Record<string, typeof LEGISTAR_CITIES> = {};
+  if (search.trim()) {
+    for (const [group, cities] of Object.entries(cityGroups)) {
+      const filtered = cities.filter(c =>
+        c.label.toLowerCase().includes(search.toLowerCase())
+      );
+      if (filtered.length) filteredGroups[group] = filtered;
+    }
+  } else {
+    Object.assign(filteredGroups, cityGroups);
+  }
 
   return (
     <div>
-      {/* City picker header */}
+      {/* Header */}
       <div className="bg-brown px-6 py-6 text-center">
         <div className="font-display text-3xl tracking-widest text-gold mb-1">🏛 City Council Tracker</div>
         <div className="text-[11px] text-lb/80 mb-4 tracking-wide">
           Council members · Upcoming meetings · Recent legislation
         </div>
+
+        {/* Search box */}
+        <div className="max-w-sm mx-auto mb-3">
+          <input
+            type="text"
+            placeholder="Search for your city..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="w-full bg-lb text-ink border-2 border-gold rounded px-4 py-2.5 font-mono text-sm outline-none focus:border-amber"
+          />
+        </div>
+
+        {/* Grouped dropdown */}
         <div className="max-w-sm mx-auto">
           <select
             value={selectedCity}
             onChange={handleCityChange}
-            className="w-full bg-lb text-ink border-2 border-gold rounded px-4 py-2.5 font-mono text-sm cursor-pointer appearance-none"
-            style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%233b1f0a' stroke-width='2' fill='none'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center' }}
+            className="w-full bg-lb text-ink border-2 border-gold rounded px-4 py-2.5 font-mono text-sm cursor-pointer"
           >
             <option value="">— Select a city —</option>
-            {LEGISTAR_CITIES.map(c => (
-              <option key={c.client} value={c.client}>{c.label}</option>
+            {Object.entries(filteredGroups).map(([group, cities]) => (
+              <optgroup key={group} label={group}>
+                {cities.map(c => (
+                  <option key={c.client} value={c.client}>{c.label}</option>
+                ))}
+              </optgroup>
             ))}
           </select>
         </div>
         <div className="text-[9px] text-white/30 mt-2 tracking-wide">
-          Powered by Legistar · 30 major U.S. cities · No API key required
+          Powered by Legistar · {LEGISTAR_CITIES.length}+ cities · No API key required
         </div>
       </div>
+
+      {/* Small city not on Legistar */}
+      {search && Object.keys(filteredGroups).length === 0 && (
+        <div className="max-w-2xl mx-auto px-4 py-6">
+          <div className="bg-white border border-lb border-l-4 border-l-amber p-4">
+            <div className="font-display text-lg tracking-wide mb-1">
+              {search} — Not on Legistar
+            </div>
+            <p className="text-[10px] text-mid leading-relaxed mb-3">
+              Smaller cities often use their own meeting management systems rather than Legistar.
+              You can still access their council information directly:
+            </p>
+
+            {/* Check if it's a known small city we have links for */}
+            {nonLegistarCity ? (
+              <div className="space-y-2">
+                <a href={nonLegistarCity.website} target="_blank" rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-[10px] text-amber border border-amber rounded px-3 py-2 hover:bg-yellow-50">
+                  🏛 {nonLegistarCity.label} City Council →
+                </a>
+                {nonLegistarCity.financeUrl && (
+                  <a href={nonLegistarCity.financeUrl} target="_blank" rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-[10px] text-ftdgreen border border-ftdgreen rounded px-3 py-2 hover:bg-green-50">
+                    💰 California Campaign Finance Disclosures (FPPC) →
+                  </a>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <p className="text-[9px] text-mid mb-2">Try searching for your city directly:</p>
+                <a
+                  href={`https://www.google.com/search?q=${encodeURIComponent(search + ' city council agenda minutes')}`}
+                  target="_blank" rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-[10px] text-amber border border-amber rounded px-3 py-2 hover:bg-yellow-50">
+                  🔍 Search for {search} City Council →
+                </a>
+                <a
+                  href={`https://www.fppc.ca.gov/transparency/campaign-disclosure-portals.html`}
+                  target="_blank" rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-[10px] text-ftdgreen border border-ftdgreen rounded px-3 py-2 hover:bg-green-50">
+                  💰 California Local Campaign Finance (FPPC) →
+                </a>
+              </div>
+            )}
+
+            <div className="mt-3 pt-3 border-t border-lb text-[9px] text-mid">
+              💡 San Clemente, Dana Point, San Juan Capistrano, Laguna Beach, Newport Beach,
+              Mission Viejo, Lake Forest and Aliso Viejo are listed below — type their name to see links.
+            </div>
+          </div>
+
+          {/* Known OC small cities */}
+          <div className="mt-4">
+            <div className="text-[9px] tracking-[3px] uppercase text-mid mb-2">Orange County Cities (Direct Links)</div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {NON_LEGISTAR_CITIES.map(c => (
+                <a key={c.label} href={c.website} target="_blank" rel="noopener noreferrer"
+                  className="bg-white border border-lb rounded p-3 hover:border-amber transition-colors">
+                  <div className="text-[11px] font-medium text-ink">{c.label}</div>
+                  <div className="text-[9px] text-amber mt-0.5">View City Council →</div>
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Loading */}
       {loading && (
         <div className="flex flex-col items-center justify-center py-16">
           <div className="w-7 h-7 border-[3px] border-amber/20 border-t-amber rounded-full animate-spin mb-4" />
           <div className="font-display text-2xl text-amber">Loading {cityLabel}...</div>
-          <div className="text-[9px] tracking-widest uppercase text-mid mt-2">Fetching council data...</div>
         </div>
       )}
 
@@ -85,9 +198,19 @@ export default function CouncilTab({ zip }: { zip: string }) {
       {error && !loading && (
         <div className="max-w-2xl mx-auto px-4 py-4">
           <div className="bg-red-50 border-2 border-ftdred border-l-4 p-4 text-red-800 text-sm">
-            ⚠ Could not load data for {cityLabel}: {error}
-            <br /><br />
-            <span className="text-xs">Some cities may not be available on Legistar. Try another city.</span>
+            ⚠ Could not load {cityLabel}: {error}
+          </div>
+        </div>
+      )}
+
+      {/* City not found on Legistar */}
+      {cityNotFound && !loading && (
+        <div className="max-w-2xl mx-auto px-4 py-4">
+          <div className="bg-yellow-50 border border-yellow-300 border-l-4 border-l-amber p-4 text-sm">
+            <div className="font-display text-lg mb-1">{cityLabel} — Data Unavailable</div>
+            <p className="text-[10px] text-mid">
+              This city may not have a public Legistar connection. Try another city or visit their official website.
+            </p>
           </div>
         </div>
       )}
@@ -95,7 +218,6 @@ export default function CouncilTab({ zip }: { zip: string }) {
       {/* Dashboard */}
       {data && !loading && (
         <div className="pb-10">
-          {/* City banner */}
           <div className="px-6 py-5 text-center border-b-4 border-gold"
             style={{ background: 'linear-gradient(135deg, #3b1f0a 0%, #5c3010 100%)' }}>
             <div className="font-display text-4xl text-gold tracking-widest">{cityLabel}</div>
@@ -178,16 +300,12 @@ export default function CouncilTab({ zip }: { zip: string }) {
                           <span className="text-[10px] font-bold uppercase tracking-wide bg-brown text-gold rounded px-2 py-0.5">
                             {m.MatterTypeName || 'Matter'}
                           </span>
-                          {m.MatterFile && (
-                            <span className="text-[10px] text-mid font-mono">{m.MatterFile}</span>
-                          )}
+                          {m.MatterFile && <span className="text-[10px] text-mid font-mono">{m.MatterFile}</span>}
                           <span className="text-[10px] text-mid ml-auto">{formatDate(m.MatterLastModifiedUtc)}</span>
                         </div>
                         <div className="text-[13px] leading-snug mb-1.5">{m.MatterTitle || m.MatterName}</div>
                         <div className="flex items-center gap-2 flex-wrap">
-                          {m.MatterStatusName && (
-                            <span className="text-[11px] font-semibold text-mid">{m.MatterStatusName}</span>
-                          )}
+                          {m.MatterStatusName && <span className="text-[11px] font-semibold text-mid">{m.MatterStatusName}</span>}
                           {vote && (
                             <span className={`text-[10px] font-bold rounded px-2 py-0.5 ${passed ? 'bg-green-100 text-green-800' : failed ? 'bg-red-100 text-red-800' : 'bg-lb text-mid'}`}>
                               {passed ? '✓ Passed' : failed ? '✗ Failed' : 'Voted'}
@@ -202,21 +320,22 @@ export default function CouncilTab({ zip }: { zip: string }) {
             )}
 
             <div className="text-center text-[11px] text-mid">
-              Data from{' '}
-              <a href="https://webapi.legistar.com" target="_blank" rel="noopener noreferrer" className="text-amber">
-                Legistar
-              </a>{' '}
-              · Updated in real time · All public record
+              Data from <a href="https://webapi.legistar.com" target="_blank" rel="noopener noreferrer" className="text-amber">Legistar</a>
+              {' '}· Updated in real time · All public record
             </div>
           </div>
         </div>
       )}
 
       {/* Empty state */}
-      {!selectedCity && !loading && (
+      {!selectedCity && !loading && !search && (
         <div className="text-center py-12 text-mid font-mono text-xs tracking-widest uppercase">
-          <div className="font-display text-2xl text-amber mb-2">Select a City</div>
-          Choose a city above to view council data
+          <div className="font-display text-2xl text-amber mb-2">Search or Select a City</div>
+          <p className="text-[10px] normal-case tracking-normal max-w-sm mx-auto mt-2 leading-relaxed">
+            Type your city name above or choose from the dropdown.
+            Don&apos;t see your city? Many smaller cities aren&apos;t on Legistar —
+            search anyway and we&apos;ll show you direct links.
+          </p>
         </div>
       )}
     </div>

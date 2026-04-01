@@ -187,16 +187,29 @@ export default function CandidatesTab({ zip, state, stateName }: { zip: string; 
       {/* Meta bar */}
       <div className="bg-brown text-gold text-[9px] tracking-[3px] uppercase px-4 py-2 flex justify-between items-center flex-wrap gap-1">
         <span>ZIP <span className="font-display text-sm tracking-widest text-cream">{zip}</span> · {stateName}</span>
-        <span className="text-amber font-display text-sm">2026 Election Cycle</span>
+        <span className={`font-display text-sm ${data?.usingFallback ? 'text-amber' : 'text-gold'}`}>
+          {data?.electionYear || 2026} Election Cycle
+        </span>
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-4">
+        {/* Fallback banner */}
+        {data?.usingFallback && (
+          <div className="bg-yellow-50 border border-yellow-300 border-l-4 border-l-amber p-3 mb-4 text-[10px] leading-relaxed text-brown">
+            <strong className="font-display text-[12px] tracking-wider block mb-1">
+              📅 Showing 2024 Data — 2026 Filings Not Yet Available
+            </strong>
+            It&apos;s early in the 2026 cycle. These candidates from the 2024 race are shown so you can see who holds this seat and how they were funded. The app will automatically switch to 2026 data as candidates register and file with the FEC.
+          </div>
+        )}
+
         {/* Info box */}
         <div className="bg-lb border border-amber p-3 mb-4 text-[10px] leading-relaxed text-brown">
-          <strong className="font-display text-[13px] tracking-[3px] block mb-1">2026 Federal Candidates</strong>
+          <strong className="font-display text-[13px] tracking-[3px] block mb-1">
+            {data?.usingFallback ? '2024' : '2026'} Federal Candidates
+          </strong>
           Showing your U.S. House representative for District {data?.district || '?'} and U.S. Senators for {stateName}.
-          FEC filings are live — early in the cycle some candidates may have limited data.
-          State races like Governor are shown below with links to state disclosure sites.
+          Industry breakdowns show which sectors are funding each campaign — same methodology as OpenSecrets, directly from FEC filings.
         </div>
 
         {/* House candidates */}
