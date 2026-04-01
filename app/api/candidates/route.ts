@@ -50,7 +50,7 @@ async function getDistrictFromZip(zip: string): Promise<string | null> {
 }
 
 
-// Build industry + PAC-type pizza from employer names and PAC profiles
+// Build industry + PAC-type dough chart from employer names and PAC profiles
 // This gives voters the "Big Pharma / Defense / Wall Street" breakdown they care about
 function buildPacIndustrySlices(pac: any[], employers: any[]): IndustrySlice[] {
   const buckets = new Map<string, IndustrySlice>();
@@ -194,7 +194,7 @@ async function enrichCandidate(cand: any, cycle: number) {
         !emp.includes('disabled') && !emp.includes('student');
     }).slice(0, 8);
 
-    // Build pizza AFTER we have both pac and employer data
+    // Build dough chart AFTER we have both pac and employer data
     const pacIndustrySlices = buildPacIndustrySlices(pacWithDetails.filter(Boolean), empRows);
 
     return {

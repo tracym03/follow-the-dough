@@ -203,7 +203,7 @@ export default function CandidateCard({ data, electionYear = 2026 }: { data: any
         </div>
       )}
 
-      {/* Pizza toggle — which industries & PAC types fund this candidate */}
+      {/* Dough chart toggle — which industries & PAC types fund this candidate */}
       {raised > 0 && (
         <div className="border-t border-lb">
           <button
@@ -211,7 +211,7 @@ export default function CandidateCard({ data, electionYear = 2026 }: { data: any
             className={`w-full flex items-center justify-between px-4 py-2.5 text-left transition-colors ${showPizza ? 'bg-amber/10' : 'hover:bg-lb/60'}`}
           >
             <div className="flex items-center gap-2">
-              <span className="text-xl leading-none">🍕</span>
+              <span className="text-xl leading-none">🥧</span>
               <div>
                 <div className="text-[11px] font-semibold text-brown">Which industries fund this candidate?</div>
                 <div className="text-[9px] text-mid">

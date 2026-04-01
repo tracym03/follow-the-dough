@@ -28,7 +28,7 @@ const getLobbyingData = unstable_cache(
       period: f.period_display || '',
     }));
 
-    // Build industry pizza from ALL fetched filings (not just top 6)
+    // Build industry dough chart from ALL fetched filings (not just top 6)
     const buckets = new Map<string, any>();
     for (const f of filings) {
       const clientName = f.client?.name || '';

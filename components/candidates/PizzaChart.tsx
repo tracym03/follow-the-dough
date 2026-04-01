@@ -28,21 +28,31 @@ function slicePath(cx: number, cy: number, r: number, startAngle: number, endAng
   ].join(' ');
 }
 
-function crustPath(cx: number, cy: number, r: number, crustW: number, startAngle: number, endAngle: number) {
-  const outerR = r + crustW;
-  const s1 = polarToCartesian(cx, cy, r, startAngle);
-  const s2 = polarToCartesian(cx, cy, outerR, startAngle);
-  const e1 = polarToCartesian(cx, cy, r, endAngle);
-  const e2 = polarToCartesian(cx, cy, outerR, endAngle);
-  const largeArc = endAngle - startAngle > 180 ? 1 : 0;
-  return [
-    `M ${s1.x} ${s1.y}`,
-    `L ${s2.x} ${s2.y}`,
-    `A ${outerR} ${outerR} 0 ${largeArc} 1 ${e2.x} ${e2.y}`,
-    `L ${e1.x} ${e1.y}`,
-    `A ${r} ${r} 0 ${largeArc} 0 ${s1.x} ${s1.y}`,
-    'Z',
-  ].join(' ');
+// Crimped pastry edge — scallop circles around the rim
+function ScallopedCrust({ cx, cy, r, crustW }: { cx: number; cy: number; r: number; crustW: number }) {
+  const numScallops = 18;
+  const scallopsR = r + crustW * 0.55;
+  const bumpR = crustW * 0.48;
+  const scallops = Array.from({ length: numScallops }, (_, i) => {
+    const angle = ((i / numScallops) * 360 - 90) * (Math.PI / 180);
+    return {
+      x: cx + scallopsR * Math.cos(angle),
+      y: cy + scallopsR * Math.sin(angle),
+    };
+  });
+  return (
+    <>
+      {/* Crust base ring */}
+      <circle cx={cx} cy={cy} r={r + crustW} fill="#c8934a" />
+      <circle cx={cx} cy={cy} r={r + crustW} fill="none" stroke="#b8792a" strokeWidth="1" />
+      {/* Scallop bumps — crimped pie edge */}
+      {scallops.map((s, i) => (
+        <circle key={i} cx={s.x} cy={s.y} r={bumpR} fill="#b8792a" opacity="0.7" />
+      ))}
+      {/* Inner pastry ring — the pale inside of the crust */}
+      <circle cx={cx} cy={cy} r={r + 2} fill="#e8c97a" opacity="0.4" />
+    </>
+  );
 }
 
 export default function PizzaChart({ slices, title }: { slices: Slice[]; title?: string }) {
@@ -54,8 +64,8 @@ export default function PizzaChart({ slices, title }: { slices: Slice[]; title?:
   const cx = 80;
   const cy = 80;
   const r = 55;
-  const crustW = 9;
-  const size = 178;
+  const crustW = 10;
+  const size = 180;
 
   let currentAngle = 0;
   const sliceData = slices.map((s, i) => {
@@ -63,8 +73,7 @@ export default function PizzaChart({ slices, title }: { slices: Slice[]; title?:
     const start = currentAngle;
     const end = currentAngle + angle;
     const midAngle = start + angle / 2;
-    const labelR = r * 0.6;
-    const labelPos = polarToCartesian(cx, cy, labelR, midAngle);
+    const labelPos = polarToCartesian(cx, cy, r * 0.6, midAngle);
     currentAngle = end;
     return { ...s, start, end, midAngle, labelPos, index: i };
   });
@@ -73,53 +82,45 @@ export default function PizzaChart({ slices, title }: { slices: Slice[]; title?:
     <div className="px-4 pb-4 pt-1">
       {title && (
         <div className="mb-2">
-          <span className="text-[9px] font-semibold tracking-wide text-brown uppercase">🍕 {title}</span>
+          <span className="text-[9px] font-semibold tracking-wide text-brown uppercase">🥧 {title}</span>
           <p className="text-[8px] text-mid mt-0.5">Tap a slice for details</p>
         </div>
       )}
 
       <div className="flex items-center gap-3">
-        {/* Compact pizza SVG */}
+        {/* Pie chart SVG */}
         <div className="shrink-0">
           <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="drop-shadow-md">
-            {/* Sauce base */}
-            <circle cx={cx} cy={cy} r={r + crustW} fill="#c8934a" />
-            <circle cx={cx} cy={cy} r={r + crustW - 2} fill="#922b21" />
+            {/* Crimped pastry crust */}
+            <ScallopedCrust cx={cx} cy={cy} r={r} crustW={crustW} />
 
+            {/* Pie filling slices */}
             {sliceData.map((s, i) => {
               const isActive = activeSlice === i;
-              const scaleOffset = isActive ? 5 : 0;
+              const offset = isActive ? 5 : 0;
               const midRad = ((s.midAngle - 90) * Math.PI) / 180;
-              const tx = scaleOffset * Math.cos(midRad);
-              const ty = scaleOffset * Math.sin(midRad);
               const col = SLICE_COLORS[i % SLICE_COLORS.length];
               return (
                 <g
                   key={i}
-                  transform={isActive ? `translate(${tx}, ${ty})` : ''}
+                  transform={isActive ? `translate(${offset * Math.cos(midRad)}, ${offset * Math.sin(midRad)})` : ''}
                   style={{ transition: 'transform 0.2s ease', cursor: 'pointer' }}
                   onClick={() => setActiveSlice(isActive ? null : i)}
                 >
                   <path
                     d={slicePath(cx, cy, r, s.start, s.end)}
                     fill={col}
-                    stroke="rgba(255,255,255,0.35)"
+                    stroke="rgba(255,255,255,0.4)"
                     strokeWidth="1.5"
-                    opacity={activeSlice !== null && !isActive ? 0.5 : 1}
+                    opacity={activeSlice !== null && !isActive ? 0.45 : 1}
                   />
-                  <path
-                    d={crustPath(cx, cy, r, crustW, s.start, s.end)}
-                    fill="#c8934a"
-                    stroke="rgba(255,255,255,0.2)"
-                    strokeWidth="1"
-                  />
-                  {/* Emoji on larger slices */}
+                  {/* Emoji label on larger slices */}
                   {s.end - s.start > 25 && (
                     <text
                       x={s.labelPos.x}
                       y={s.labelPos.y + 5}
                       textAnchor="middle"
-                      fontSize="13"
+                      fontSize="12"
                       style={{ userSelect: 'none' }}
                     >
                       {s.emoji}
@@ -129,19 +130,19 @@ export default function PizzaChart({ slices, title }: { slices: Slice[]; title?:
               );
             })}
 
-            {/* Center cheese hole */}
-            <circle cx={cx} cy={cy} r={16} fill="#f5ead6" />
-            <circle cx={cx} cy={cy} r={14} fill="#e8c97a" opacity="0.8" />
-            <text x={cx} y={cy - 3} textAnchor="middle" fontSize="7" fontFamily="system-ui" fontWeight="700" fill="#3b1f0a">
-              FOLLOW
+            {/* Center medallion — pie steam hole */}
+            <circle cx={cx} cy={cy} r={17} fill="#f5ead6" />
+            <circle cx={cx} cy={cy} r={15} fill="#e8c97a" opacity="0.9" />
+            <text x={cx} y={cy + 1} textAnchor="middle" fontSize="11" fontFamily="system-ui" fontWeight="800" fill="#3b1f0a">
+              $
             </text>
-            <text x={cx} y={cy + 6} textAnchor="middle" fontSize="7" fontFamily="system-ui" fontWeight="700" fill="#3b1f0a">
-              DOUGH
+            <text x={cx} y={cy + 10} textAnchor="middle" fontSize="5.5" fontFamily="system-ui" fontWeight="700" fill="#3b1f0a" opacity="0.7">
+              FTD
             </text>
           </svg>
         </div>
 
-        {/* Compact legend */}
+        {/* Legend */}
         <div className="flex-1 min-w-0">
           {sliceData.map((s, i) => {
             const pct = Math.round((s.value / total) * 100);

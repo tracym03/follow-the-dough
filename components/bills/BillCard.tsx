@@ -57,7 +57,7 @@ function LobbySection({ billTitle }: { billTitle: string }) {
         className={`w-full flex items-center justify-between px-4 py-2.5 text-left transition-colors ${open ? 'bg-amber/10' : 'hover:bg-lb/50'}`}
       >
         <div className="flex items-center gap-2">
-          <span className="text-lg leading-none">🍕</span>
+          <span className="text-lg leading-none">🥧</span>
           <div>
             <div className="text-[11px] font-semibold text-brown">Who lobbied on this bill?</div>
             <div className="text-[9px] text-mid">
@@ -78,7 +78,7 @@ function LobbySection({ billTitle }: { billTitle: string }) {
             </div>
           )}
 
-          {/* Pizza — industry breakdown */}
+          {/* Dough chart — industry breakdown */}
           {!loading && slices.length >= 2 && (
             <div className="mb-3">
               <p className="text-[9px] text-mid italic mb-2 leading-relaxed">
