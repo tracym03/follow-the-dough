@@ -87,25 +87,37 @@ function LobbySection({ billTitle, billType, billNumber }: { billTitle: string; 
             </>
           )}
 
-          {/* Who is lobbying — simplified, client-first */}
+          {/* Who is lobbying — grouped by lobbying firm */}
           {!loading && lobbyists.length > 0 && (
             <div className="mt-3">
-              <div className="text-[8px] tracking-widest uppercase text-mid mb-2">
+              <div className="text-[8px] tracking-widest uppercase text-mid mb-1">
                 {data?.searchedByBill
-                  ? <>🏢 Organizations that lobbied on <span className="text-amber">{billId}</span> specifically</>
-                  : <>🏢 Organizations lobbying on <span className="text-amber">{keywords}</span></>
+                  ? <>🏢 Lobbying firms that filed on <span className="text-amber">{billId}</span></>
+                  : <>🏢 Active lobbying firms on this topic</>
                 }
               </div>
+              <p className="text-[8px] text-mid italic mb-2">
+                These are paid lobbying firms registered with the Senate. Each represents multiple clients pushing Congress on this issue.
+              </p>
               {lobbyists.map((l: any, i: number) => (
-                <div key={i} className="py-1.5 border-b border-dashed border-lb last:border-0">
-                  <div className="text-[11px] font-medium text-ink">{l.client}</div>
+                <div key={i} className="py-2 border-b border-dashed border-lb last:border-0">
+                  <div className="flex justify-between items-start gap-2">
+                    <div className="text-[11px] font-semibold text-ink">{l.registrant}</div>
+                    {l.clientCount > 1 && (
+                      <span className="text-[8px] px-1.5 py-0.5 rounded-full bg-amber/20 text-brown shrink-0 whitespace-nowrap">
+                        {l.clientCount} clients
+                      </span>
+                    )}
+                  </div>
                   {l.topics && (
                     <div className="text-[8px] text-mid mt-0.5">
-                      Issues: <span className="text-brown">{l.topics}</span>
+                      Lobbying on: <span className="text-brown">{l.topics}</span>
                     </div>
                   )}
-                  {l.registrant && l.registrant !== l.client && (
-                    <div className="text-[8px] text-mid">Hired lobbyist: {l.registrant}</div>
+                  {l.clients?.length > 0 && (
+                    <div className="text-[8px] text-mid mt-0.5">
+                      Represents: <span className="text-ink">{l.clients.join(', ')}{l.clientCount > 3 ? ` +${l.clientCount - 3} more` : ''}</span>
+                    </div>
                   )}
                 </div>
               ))}

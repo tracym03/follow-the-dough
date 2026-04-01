@@ -71,28 +71,42 @@ function buildResult(filings: any[], searchedByBill: boolean, billId: string, ke
     .sort((a, b) => b.value - a.value)
     .slice(0, 7);
 
-  // ── Lobbyist list: deduplicated by client name ────────────────────────────
-  const seenClients = new Set<string>();
-  const lobbyists = filings
-    .filter(f => {
-      const key = (f.client?.name || '').trim().toUpperCase();
-      if (!key || seenClients.has(key)) return false;
-      seenClients.add(key);
-      return true;
-    })
-    .slice(0, 8)
-    .map((f: any) => {
-      const codes = (f.lobbying_activities || [])
-        .map((a: any) => ISSUE_CODE_MAP[a.general_issue_code]?.label || '')
-        .filter(Boolean);
-      const topics = [...new Set(codes)].slice(0, 3).join(', ');
-      return {
-        client: f.client?.name || 'Unknown',
-        registrant: f.registrant?.name || '',
-        topics,
+  // ── Group by LOBBYING FIRM (registrant) not individual client ────────────
+  // One firm representing 4 clients should appear once, not four times.
+  const firmMap = new Map<string, { registrant: string; clients: string[]; topics: Set<string>; period: string }>();
+
+  for (const f of filings) {
+    const firmName = (f.registrant?.name || 'Unknown Firm').trim();
+    const clientName = (f.client?.name || '').trim();
+    const codes = (f.lobbying_activities || [])
+      .map((a: any) => ISSUE_CODE_MAP[a.general_issue_code]?.label || '')
+      .filter(Boolean) as string[];
+
+    if (!firmMap.has(firmName)) {
+      firmMap.set(firmName, {
+        registrant: firmName,
+        clients: [],
+        topics: new Set<string>(),
         period: f.filing_period_display || String(f.filing_year || ''),
-      };
-    });
+      });
+    }
+    const entry = firmMap.get(firmName)!;
+    if (clientName && !entry.clients.includes(clientName)) {
+      entry.clients.push(clientName);
+    }
+    for (const c of codes) entry.topics.add(c);
+  }
+
+  const lobbyists = [...firmMap.values()]
+    .sort((a, b) => b.clients.length - a.clients.length) // busiest firms first
+    .slice(0, 6)
+    .map(e => ({
+      registrant: e.registrant,
+      clients: e.clients.slice(0, 3),          // top 3 clients they represent
+      clientCount: e.clients.length,
+      topics: [...e.topics].slice(0, 3).join(', '),
+      period: e.period,
+    }));
 
   return { found: lobbyists.length > 0, searchedByBill, billId, keywords, lobbyists, industrySlices };
 }
