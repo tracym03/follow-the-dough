@@ -41,6 +41,42 @@ function getPacType(profile: any): { label: string; cls: string; explanation: st
   };
 }
 
+// Build the plain-English one-liner funding summary
+function getFundingSummary(
+  pacIndustrySlices: any[],
+  raised: number,
+  indivT: number,
+  pacT: number
+): string | null {
+  // If no industry data, fall back to simple individual/PAC split
+  if (!pacIndustrySlices || pacIndustrySlices.length === 0) {
+    if (raised <= 0) return null;
+    const pacPct = Math.round((pacT / raised) * 100);
+    if (pacPct >= 60) return `Heavily PAC-funded — ${pacPct}% from political committees`;
+    const indPct = Math.round((indivT / raised) * 100);
+    if (indPct >= 60) return `Mostly individual donors — ${indPct}% from people, not PACs`;
+    return null;
+  }
+
+  const total = pacIndustrySlices.reduce((s: number, sl: any) => s + (sl.value || 0), 0);
+  if (total === 0) return null;
+
+  // Top 1 industry
+  const top = pacIndustrySlices[0];
+  const second = pacIndustrySlices[1];
+  const topPct = Math.round((top.value / total) * 100);
+  const top2Pct = second ? Math.round(((top.value + second.value) / total) * 100) : topPct;
+
+  if (topPct >= 50) {
+    return `${topPct}% of identifiable funding from ${top.emoji} ${top.label}`;
+  }
+  if (second && top2Pct >= 55) {
+    return `${top2Pct}% of funding from ${top.emoji} ${top.label} & ${second.emoji} ${second.label}`;
+  }
+  // Spread across many industries
+  return `Top funders: ${top.emoji} ${top.label} (${topPct}%)${second ? `, ${second.emoji} ${second.label} (${Math.round((second.value / total) * 100)}%)` : ''}`;
+}
+
 function cleanStr(s: string | null | undefined): string {
   if (!s) return '';
   const trimmed = s.trim();
@@ -75,6 +111,8 @@ export default function CandidateCard({ data, electionYear = 2026 }: { data: any
   const more = (ind || []).slice(5);
   const maxD = top5[0]?.contribution_receipt_amount ?? 1;
 
+  const fundingSummary = getFundingSummary(pacIndustrySlices, raised, indivT, pacT);
+
   return (
     <div className={`bg-white border border-lb border-l-4 ${borderCls} mb-3 hover:-translate-x-px hover:-translate-y-px hover:shadow-[3px_3px_0_#c8934a] transition-all`}>
 
@@ -100,6 +138,13 @@ export default function CandidateCard({ data, electionYear = 2026 }: { data: any
             )}
           </div>
           <div className="text-[9px] tracking-widest uppercase text-mid">{officeStr(c.office, c.state, c.district)}</div>
+          {/* One-liner funding summary */}
+          {fundingSummary && (
+            <div className="mt-1.5 inline-flex items-center gap-1.5 bg-amber/10 border border-amber/30 rounded px-2 py-1">
+              <span className="text-amber text-[10px]">💰</span>
+              <span className="text-[10px] font-medium text-brown leading-tight">{fundingSummary}</span>
+            </div>
+          )}
         </div>
         <div className="text-right shrink-0">
           <span className={`inline-block text-[8px] tracking-widest uppercase px-2 py-0.5 rounded-full mb-1 ${pillCls}`}>{partyFull(party)}</span>
