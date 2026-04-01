@@ -81,8 +81,25 @@ export default function CandidateCard({ data, electionYear = 2026 }: { data: any
       {/* Header */}
       <div className="px-4 pt-3 pb-2 flex justify-between items-start gap-3">
         <div>
-          <div className="font-display text-xl tracking-wide leading-none">{tc(c.name)}</div>
-          <div className="text-[9px] tracking-widest uppercase text-mid mt-1">{officeStr(c.office, c.state, c.district)}</div>
+          <div className="flex items-center gap-2 flex-wrap mb-0.5">
+            <div className="font-display text-xl tracking-wide leading-none">{tc(c.name)}</div>
+            {c.incumbent_challenge === 'I' && (
+              <span className="text-[7px] tracking-widest uppercase px-2 py-0.5 rounded-full bg-amber/20 text-brown border border-amber/40 shrink-0">
+                ★ Currently Serving
+              </span>
+            )}
+            {c.incumbent_challenge === 'C' && (
+              <span className="text-[7px] tracking-widest uppercase px-2 py-0.5 rounded-full bg-blue-50 text-ftdblue border border-blue-200 shrink-0">
+                Challenger
+              </span>
+            )}
+            {c.incumbent_challenge === 'O' && (
+              <span className="text-[7px] tracking-widest uppercase px-2 py-0.5 rounded-full bg-green-50 text-ftdgreen border border-green-200 shrink-0">
+                Open Seat
+              </span>
+            )}
+          </div>
+          <div className="text-[9px] tracking-widest uppercase text-mid">{officeStr(c.office, c.state, c.district)}</div>
         </div>
         <div className="text-right shrink-0">
           <span className={`inline-block text-[8px] tracking-widest uppercase px-2 py-0.5 rounded-full mb-1 ${pillCls}`}>{partyFull(party)}</span>

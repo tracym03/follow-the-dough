@@ -182,6 +182,12 @@ export default function CandidatesTab({ zip, state, stateName }: { zip: string; 
   const senateCands = (data?.candidates || []).filter((d: any) => d.c?.office === 'S');
   const hasFederal = houseCands.length > 0 || senateCands.length > 0;
 
+  // Split into currently serving (incumbent) vs challengers/open seat
+  const houseIncumbents = houseCands.filter((d: any) => d.c?.incumbent_challenge === 'I');
+  const houseChallengers = houseCands.filter((d: any) => d.c?.incumbent_challenge !== 'I');
+  const senateIncumbents = senateCands.filter((d: any) => d.c?.incumbent_challenge === 'I');
+  const senateChallengers = senateCands.filter((d: any) => d.c?.incumbent_challenge !== 'I');
+
   return (
     <div>
       {/* Meta bar */}
@@ -215,31 +221,110 @@ export default function CandidatesTab({ zip, state, stateName }: { zip: string; 
           Industry breakdowns show which sectors funded each campaign — same methodology as OpenSecrets, sourced directly from FEC filings.
         </div>
 
-        {/* House candidates */}
+        {/* ── House ── */}
         {houseCands.length > 0 && (
           <>
-            <div className="flex items-center gap-3 mb-3">
-              <h2 className="font-display text-xl tracking-[3px] text-brown">
-                Your House Rep{data?.district ? ` · District ${data.district}` : ''}
-              </h2>
-              <div className="flex-1 h-px bg-gradient-to-r from-amber to-transparent" />
-            </div>
-            {houseCands.map((d: any, i: number) => (
+            {/* Currently serving */}
+            {houseIncumbents.length > 0 && (
+              <>
+                <div className="flex items-center gap-3 mb-3">
+                  <div>
+                    <h2 className="font-display text-xl tracking-[3px] text-brown">
+                      Currently Serving{data?.district ? ` · District ${data.district}` : ''}
+                    </h2>
+                    <p className="text-[9px] text-mid mt-0.5">Your sitting U.S. House representative</p>
+                  </div>
+                  <div className="flex-1 h-px bg-gradient-to-r from-amber to-transparent" />
+                </div>
+                {houseIncumbents.map((d: any, i: number) => (
+                  <CandidateCard key={`hi-${i}`} data={d} electionYear={data?.electionYear || 2024} />
+                ))}
+              </>
+            )}
+
+            {/* Challengers */}
+            {houseChallengers.length > 0 && (
+              <>
+                <div className="flex items-center gap-3 mb-3 mt-5">
+                  <div>
+                    <h2 className="font-display text-xl tracking-[3px] text-brown">
+                      {data?.electionYear === 2026 ? 'Running in 2026' : '2024 Challengers'}
+                      {data?.district ? ` · District ${data.district}` : ''}
+                    </h2>
+                    <p className="text-[9px] text-mid mt-0.5">
+                      {data?.electionYear === 2026
+                        ? 'Candidates challenging for this seat'
+                        : 'Candidates who ran against the incumbent in 2024'}
+                    </p>
+                  </div>
+                  <div className="flex-1 h-px bg-gradient-to-r from-amber to-transparent" />
+                </div>
+                {houseChallengers.map((d: any, i: number) => (
+                  <CandidateCard key={`hc-${i}`} data={d} electionYear={data?.electionYear || 2024} />
+                ))}
+              </>
+            )}
+
+            {/* If no incumbent/challenger split exists, show all together */}
+            {houseIncumbents.length === 0 && houseChallengers.length === 0 && houseCands.map((d: any, i: number) => (
               <CandidateCard key={`h-${i}`} data={d} electionYear={data?.electionYear || 2024} />
             ))}
           </>
         )}
 
-        {/* Senate candidates */}
+        {/* ── Senate ── */}
         {senateCands.length > 0 && (
           <>
-            <div className="flex items-center gap-3 mb-3 mt-5">
-              <h2 className="font-display text-xl tracking-[3px] text-brown">Your U.S. Senators · {data?.electionYear || 2024}</h2>
-              <div className="flex-1 h-px bg-gradient-to-r from-amber to-transparent" />
-            </div>
-            {senateCands.map((d: any, i: number) => (
-              <CandidateCard key={`s-${i}`} data={d} electionYear={data?.electionYear || 2024} />
-            ))}
+            {/* Currently serving senators */}
+            {senateIncumbents.length > 0 && (
+              <>
+                <div className="flex items-center gap-3 mb-3 mt-6">
+                  <div>
+                    <h2 className="font-display text-xl tracking-[3px] text-brown">Your Sitting U.S. Senators</h2>
+                    <p className="text-[9px] text-mid mt-0.5">Currently serving {stateName} in the U.S. Senate</p>
+                  </div>
+                  <div className="flex-1 h-px bg-gradient-to-r from-amber to-transparent" />
+                </div>
+                {senateIncumbents.map((d: any, i: number) => (
+                  <CandidateCard key={`si-${i}`} data={d} electionYear={data?.electionYear || 2024} />
+                ))}
+              </>
+            )}
+
+            {/* Senate challengers */}
+            {senateChallengers.length > 0 && (
+              <>
+                <div className="flex items-center gap-3 mb-3 mt-5">
+                  <div>
+                    <h2 className="font-display text-xl tracking-[3px] text-brown">
+                      {data?.electionYear === 2026 ? 'Senate Candidates · 2026' : '2024 Senate Challengers'}
+                    </h2>
+                    <p className="text-[9px] text-mid mt-0.5">
+                      {data?.electionYear === 2026
+                        ? 'Candidates running for the {stateName} Senate seat'
+                        : 'Candidates who ran for Senate in 2024'}
+                    </p>
+                  </div>
+                  <div className="flex-1 h-px bg-gradient-to-r from-amber to-transparent" />
+                </div>
+                {senateChallengers.map((d: any, i: number) => (
+                  <CandidateCard key={`sc-${i}`} data={d} electionYear={data?.electionYear || 2024} />
+                ))}
+              </>
+            )}
+
+            {/* Fallback if no split */}
+            {senateIncumbents.length === 0 && senateChallengers.length === 0 && (
+              <>
+                <div className="flex items-center gap-3 mb-3 mt-6">
+                  <h2 className="font-display text-xl tracking-[3px] text-brown">U.S. Senators · {data?.electionYear || 2024}</h2>
+                  <div className="flex-1 h-px bg-gradient-to-r from-amber to-transparent" />
+                </div>
+                {senateCands.map((d: any, i: number) => (
+                  <CandidateCard key={`s-${i}`} data={d} electionYear={data?.electionYear || 2024} />
+                ))}
+              </>
+            )}
           </>
         )}
 
