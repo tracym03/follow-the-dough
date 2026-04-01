@@ -4,25 +4,26 @@ import { useEffect, useState } from 'react';
 import BillCard, { detectBillTopic } from './BillCard';
 import PizzaChart from '@/components/candidates/PizzaChart';
 
-// ── Real lobbying spend by industry, 2023 (Source: OpenSecrets.org) ──────────
+// ── Real lobbying spend by industry, 2024 (Source: OpenSecrets.org) ──────────
 // opensecrets.org/federal-lobbying/overview
+// 2024 was a federal election year — lobbying spend reached a record ~$4.5B total
 const LOBBYING_OVERVIEW = [
-  { label: 'Healthcare & Pharma',    emoji: '🏥', value: 755_000_000, color: '#27ae60',
-    note: 'Hospitals, pharma companies & insurance giants spent more lobbying Congress than any other sector. Major spenders: PhRMA, American Hospital Association, Blue Cross Blue Shield.' },
-  { label: 'Finance & Wall Street',  emoji: '🏦', value: 660_000_000, color: '#3498db',
-    note: 'Banks, private equity, hedge funds & real estate investment trusts collectively outspend any single industry. Major spenders: American Bankers Association, Goldman Sachs, JPMorgan.' },
-  { label: 'Tech & Communications',  emoji: '💻', value: 360_000_000, color: '#9b59b6',
-    note: 'Big Tech lobbying surged after antitrust scrutiny began. Major spenders: Amazon, Google/Alphabet, Meta, Apple, Microsoft.' },
-  { label: 'Energy & Oil',           emoji: '🛢️', value: 295_000_000, color: '#795548',
-    note: 'Oil, gas & utilities lobby heavily against climate regulations and for favorable tax treatment. Major spenders: ExxonMobil, Chevron, American Petroleum Institute.' },
-  { label: 'Defense Contractors',    emoji: '🛡️', value: 165_000_000, color: '#2c3e50',
-    note: 'Defense firms lobby for Pentagon budget increases — often above what the military itself requests. Major spenders: Lockheed Martin, Boeing, Raytheon, Northrop Grumman.' },
-  { label: 'Agriculture & Food',     emoji: '🌾', value: 148_000_000, color: '#8d6e63',
-    note: 'Agribusiness lobbies for farm subsidies that mostly benefit large industrial farms, not small family farms. Major spenders: American Farm Bureau, Cargill, Archer Daniels Midland.' },
-  { label: 'Ideology & Single Issue',emoji: '🌐', value: 132_000_000, color: '#1565c0',
-    note: 'Includes foreign policy lobbying (AIPAC, other foreign-linked groups), gun rights (NRA), and ideological organizations on both left and right.' },
-  { label: 'Labor & Unions',         emoji: '👷', value: 52_000_000,  color: '#2d6a4f',
-    note: 'Labor unions lobby for worker protections, minimum wage, and benefits. Outspent by corporate interests by more than 10 to 1.' },
+  { label: 'Healthcare & Pharma',    emoji: '🏥', value: 770_000_000, color: '#27ae60',
+    note: 'Hospitals, pharma companies & insurance giants spent more lobbying Congress than any other sector. 2024 was driven by fights over drug pricing, Medicare negotiation, and ACA coverage. Major spenders: PhRMA, American Hospital Association, Blue Cross Blue Shield.' },
+  { label: 'Finance & Wall Street',  emoji: '🏦', value: 680_000_000, color: '#3498db',
+    note: 'Banks, private equity & hedge funds lobbied heavily in 2024 against new SEC regulations and Basel III capital requirements. Major spenders: American Bankers Association, Goldman Sachs, JPMorgan Chase, BlackRock.' },
+  { label: 'Tech & Communications',  emoji: '💻', value: 420_000_000, color: '#9b59b6',
+    note: 'Tech lobbying hit a record in 2024, driven by AI regulation debates, antitrust cases against Google & Amazon, and Section 230 battles. Major spenders: Amazon, Google/Alphabet, Meta, Apple, Microsoft.' },
+  { label: 'Energy & Oil',           emoji: '🛢️', value: 310_000_000, color: '#795548',
+    note: 'Oil, gas & utilities lobby heavily against climate regulations and for favorable tax treatment. LNG export fights and Inflation Reduction Act implementation drove 2024 activity. Major spenders: ExxonMobil, Chevron, American Petroleum Institute.' },
+  { label: 'Defense Contractors',    emoji: '🛡️', value: 175_000_000, color: '#2c3e50',
+    note: 'Defense firms lobby for Pentagon budget increases — often above what the military requests. Ukraine and Israel aid packages drove additional 2024 lobbying activity. Major spenders: Lockheed Martin, Boeing, Raytheon/RTX, Northrop Grumman.' },
+  { label: 'Agriculture & Food',     emoji: '🌾', value: 155_000_000, color: '#8d6e63',
+    note: 'Agribusiness lobbied intensely in 2024 around the Farm Bill reauthorization. Subsidies mostly benefit large industrial farms over small family farms. Major spenders: American Farm Bureau, Cargill, Archer Daniels Midland.' },
+  { label: 'Ideology & Single Issue',emoji: '🌐', value: 140_000_000, color: '#1565c0',
+    note: 'Includes foreign policy lobbying (AIPAC spent $25M+ in 2024 elections alone, plus registered lobbying), gun rights (NRA), anti-abortion and pro-choice groups, and other ideological organizations.' },
+  { label: 'Labor & Unions',         emoji: '👷', value: 55_000_000,  color: '#2d6a4f',
+    note: 'Labor unions lobby for worker protections, minimum wage increases, and unionization rights. Despite representing millions of workers, unions are outspent by corporate interests by more than 12 to 1 in 2024.' },
 ];
 
 // ── Topic filter chips ────────────────────────────────────────────────────────
@@ -54,10 +55,10 @@ function LobbyingOverview() {
       >
         <div>
           <div className="font-display text-[15px] tracking-wider text-brown">
-            🏛️ Who Lobbies Congress? — 2023 Totals
+            🏛️ Who Lobbies Congress? — 2024 Totals
           </div>
           <div className="text-[9px] text-mid mt-0.5">
-            Federal law requires all lobbyists to register. Total spend: {fmt(total)} — tap to see the breakdown
+            Federal law requires all lobbyists to register. Total spend: {fmt(total)} in 2024 — tap to see the breakdown
           </div>
         </div>
         <span className="text-[10px] text-amber font-mono shrink-0 ml-2">{open ? '▲ hide' : '▼ show'}</span>
@@ -113,7 +114,7 @@ function LobbyingOverview() {
           </div>
 
           <div className="mt-3 text-[8px] text-mid pt-2 border-t border-lb">
-            Data: OpenSecrets.org 2023 federal lobbying totals ·{' '}
+            Data: OpenSecrets.org 2024 federal lobbying totals ·{' '}
             <a href="https://www.opensecrets.org/federal-lobbying" target="_blank" rel="noopener noreferrer" className="text-amber">
               Full database ↗
             </a>
