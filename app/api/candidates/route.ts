@@ -31,29 +31,20 @@ async function fecGetMulti(path: string, params: Record<string, string | number 
   return r.json();
 }
 
-// ── Census geocoder: ZIP → congressional district ─────────────────────────────
+// ── ZIP → congressional district via FEC's own elections/search endpoint ──────
+// The FEC knows exactly which district every ZIP belongs to — no Census needed.
 async function getDistrictFromZip(zip: string): Promise<string | null> {
   try {
-    const url = new URL('https://geocoding.geo.census.gov/geocoder/geographies/address');
+    const url = new URL(FEC_BASE + '/elections/search/');
+    url.searchParams.set('api_key', FEC_KEY);
     url.searchParams.set('zip', zip);
-    url.searchParams.set('street', '');
-    url.searchParams.set('benchmark', 'Public_AR_Current');
-    url.searchParams.set('vintage', 'Current_Votings');
-    url.searchParams.set('layers', '54');
-    url.searchParams.set('format', 'json');
-    const r = await fetch(url.toString());
+    url.searchParams.set('cycle', String(PRIMARY_YEAR));
+    const r = await fetch(url.toString(), { headers: { Accept: 'application/json' } });
     if (!r.ok) return null;
     const data = await r.json();
-    const geographies = data?.result?.geographies;
-    const districts =
-      geographies?.['119th Congressional Districts'] ||
-      geographies?.['118th Congressional Districts'] ||
-      geographies?.['Congressional Districts'];
-    if (districts?.length) {
-      const n = districts[0]?.DISTRICT;
-      return n ? String(parseInt(n)) : null;
-    }
-    return null;
+    const houseRace = (data.results || []).find((e: any) => e.office === 'H');
+    if (!houseRace?.district) return null;
+    return String(parseInt(houseRace.district)); // e.g. "47" not "047"
   } catch { return null; }
 }
 
