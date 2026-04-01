@@ -6,86 +6,136 @@ import { fmt } from '@/lib/utils';
 
 function StateRacesSection({ state, stateName }: { state: string; stateName: string }) {
   const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch(`/api/stateraces?state=${state}`)
       .then(r => r.json())
       .then(setData)
-      .catch(() => null);
+      .catch(() => null)
+      .finally(() => setLoading(false));
   }, [state]);
 
-  if (!data) return null;
-  if (!data.hasGovRace && !data.hasSenateRace) return null;
+  if (loading) return (
+    <div className="mt-6 py-4 text-center text-[9px] text-mid font-mono tracking-widest uppercase">
+      <div className="w-4 h-4 border-2 border-amber/20 border-t-amber rounded-full animate-spin mx-auto mb-2" />
+      Loading state races...
+    </div>
+  );
+
+  if (!data || (!data.hasGovRace && !data.hasSenateRace)) return null;
 
   return (
     <div className="mt-6">
       <div className="flex items-center gap-3 mb-3">
-        <h2 className="font-display text-xl tracking-[3px] text-brown">State & Other 2026 Races</h2>
+        <h2 className="font-display text-xl tracking-[3px] text-brown">State Races · 2026</h2>
         <div className="flex-1 h-px bg-gradient-to-r from-ftdgreen to-transparent" />
       </div>
 
       {/* Governor race */}
       {data.hasGovRace && (
-        <div className="bg-white border border-lb border-l-4 border-l-ftdgreen mb-3 p-4">
-          <div className="flex justify-between items-start mb-2">
+        <div className="bg-white border border-lb border-l-4 border-l-ftdgreen mb-3">
+          <div className="px-4 pt-3 pb-2 flex justify-between items-start">
             <div>
-              <div className="font-display text-lg tracking-wide">{stateName} Governor · 2026</div>
-              <div className="text-[9px] tracking-widest uppercase text-mid mt-0.5">State-level race · Not in FEC database</div>
+              <div className="font-display text-xl tracking-wide">{stateName} Governor · 2026</div>
+              <div className="text-[9px] tracking-widest uppercase text-mid mt-0.5">
+                State-level race · Funded via state campaign finance filings
+              </div>
             </div>
-            <span className="text-[8px] px-2 py-0.5 rounded-full bg-green-100 text-ftdgreen">Open Race</span>
+            <span className="text-[8px] px-2 py-0.5 rounded-full bg-green-100 text-ftdgreen shrink-0">Open Race</span>
           </div>
 
-          {/* If we have FollowTheMoney data */}
-          {data.races?.length > 0 && data.races[0]?.candidates?.length > 0 ? (
-            <div>
-              <div className="text-[8px] tracking-[3px] uppercase text-mid mb-2">💰 Top Fundraisers (FollowTheMoney.org)</div>
-              {data.races[0].candidates.map((c: any, i: number) => (
-                <div key={i} className="flex justify-between items-center py-1.5 border-b border-lb last:border-0">
-                  <div>
-                    <div className="text-[11px] font-medium">{c.name}</div>
-                    {c.party && <div className="text-[9px] text-mid">{c.party}</div>}
+          {/* Direct candidate data from FollowTheMoney */}
+          {data.govCandidates?.length > 0 ? (
+            <div className="px-4 pb-3">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-[8px] tracking-[3px] uppercase text-mid">
+                  💰 Candidates & Fundraising — {data.govSource}
+                </span>
+              </div>
+              {data.govCandidates.map((c: any, i: number) => {
+                const maxRaised = data.govCandidates[0]?.raised || 1;
+                const pct = Math.min(100, Math.round((c.raised / maxRaised) * 100));
+                return (
+                  <div key={i} className="mb-3">
+                    <div className="flex justify-between items-start gap-2">
+                      <div>
+                        <div className="text-[12px] font-bold">{c.name}</div>
+                        {c.party && (
+                          <div className={`inline-block text-[8px] tracking-widest uppercase px-2 py-0.5 rounded-full mt-0.5
+                            ${c.party.includes('Dem') ? 'bg-blue-100 text-ftdblue' :
+                              c.party.includes('Rep') ? 'bg-red-100 text-ftdred' :
+                              'bg-lb text-mid'}`}>
+                            {c.party}
+                          </div>
+                        )}
+                      </div>
+                      <div className="text-right shrink-0">
+                        <div className="font-display text-[17px] text-ftdgreen">{c.raisedFmt}</div>
+                        <div className="text-[8px] text-mid tracking-wide">raised</div>
+                      </div>
+                    </div>
+                    <div className="h-[3px] bg-green-100 rounded mt-1.5">
+                      <div className="h-full bg-ftdgreen rounded" style={{ width: `${pct}%` }} />
+                    </div>
                   </div>
-                  <div className="font-display text-[15px] text-ftdgreen">{fmt(c.raised)}</div>
-                </div>
-              ))}
+                );
+              })}
+              <div className="text-[8px] text-mid mt-1 border-t border-lb pt-2">
+                Source: <a href={`https://www.followthemoney.org/show-me?s=${state}&y=2026`}
+                  target="_blank" rel="noopener noreferrer" className="text-ftdgreen">FollowTheMoney.org</a>
+                {' '}· State campaign finance disclosures
+              </div>
             </div>
           ) : (
-            /* No API key — show helpful links */
-            <div className="bg-green-50 border border-green-200 rounded p-3 text-[10px] leading-relaxed text-brown">
-              <p className="mb-2">
-                Governor races are funded at the state level and reported to your state&apos;s election authority — not the FEC.
-                Full donation data is publicly available at:
-              </p>
-              <div className="flex flex-col gap-1">
-                <a href={`https://www.followthemoney.org/show-me?s=${state}&y=2026&c-exi=1&c-t-eid=24`}
-                  target="_blank" rel="noopener noreferrer"
-                  className="text-ftdgreen border-b border-dashed border-ftdgreen w-fit">
-                  ↗ {stateName} Governor donors on FollowTheMoney.org
-                </a>
-                <a href={`https://www.opensecrets.org/races/summary?cycle=2026&id=${state}G`}
-                  target="_blank" rel="noopener noreferrer"
-                  className="text-amber border-b border-dashed border-amber w-fit">
-                  ↗ {stateName} Governor race on OpenSecrets
-                </a>
+            /* No data yet — show helpful context + links */
+            <div className="px-4 pb-4">
+              <div className="bg-green-50 border border-green-200 rounded p-3 text-[10px] leading-relaxed text-brown">
+                <p className="mb-1 font-semibold">Why isn&apos;t this data here automatically?</p>
+                <p className="mb-3 text-mid">
+                  Governor races are funded at the <strong>state level</strong> and reported to your
+                  state&apos;s own election authority — not the federal FEC. Each state has its own
+                  database. It&apos;s early in the 2026 cycle so filings may be limited.
+                </p>
+                <div className="flex flex-col gap-2">
+                  <a href={`https://www.followthemoney.org/show-me?s=${state}&y=2026&c-exi=1&c-t-eid=5`}
+                    target="_blank" rel="noopener noreferrer"
+                    className="flex items-center gap-1 text-ftdgreen border border-ftdgreen rounded px-2 py-1 w-fit hover:bg-green-50">
+                    ↗ {stateName} Governor donors on FollowTheMoney.org
+                  </a>
+                  <a href={`https://www.opensecrets.org/races/summary?cycle=2026&id=${state}G`}
+                    target="_blank" rel="noopener noreferrer"
+                    className="flex items-center gap-1 text-amber border border-amber rounded px-2 py-1 w-fit hover:bg-yellow-50">
+                    ↗ {stateName} Governor race on OpenSecrets
+                  </a>
+                  {state === 'CA' && (
+                    <a href="https://cal-access.sos.ca.gov/Campaign/Candidates/"
+                      target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-1 text-ftdblue border border-ftdblue rounded px-2 py-1 w-fit hover:bg-blue-50">
+                      ↗ California official donor database (CAL-ACCESS)
+                    </a>
+                  )}
+                </div>
               </div>
             </div>
           )}
         </div>
       )}
 
-      {/* Senate race note */}
+      {/* Senate race notice */}
       {data.hasSenateRace && (
-        <div className="bg-lb border border-amber/40 p-3 mb-3 text-[10px] text-brown">
-          <strong className="font-display text-[12px] tracking-wider block mb-1">
+        <div className="bg-lb border border-amber/40 p-4 mb-3">
+          <strong className="font-display text-[14px] tracking-wider block mb-1">
             📋 {stateName} has a U.S. Senate seat up in 2026
           </strong>
-          Senate candidates will appear above once they register with the FEC and begin raising money.
-          Early-cycle candidates may not yet appear.
-          <br /><br />
+          <p className="text-[10px] text-mid leading-relaxed mb-2">
+            Senate candidates appear in the Federal section above once they register with the FEC.
+            Early in the cycle many haven&apos;t filed yet — check back as the race develops.
+          </p>
           <a href={`https://www.fec.gov/data/candidates/?state=${state}&office=S&election_year=2026`}
             target="_blank" rel="noopener noreferrer"
-            className="text-amber border-b border-dashed border-amber">
-            ↗ Check for registered Senate candidates on FEC.gov
+            className="text-[9px] tracking-widest uppercase text-amber border-b border-dashed border-amber">
+            ↗ All registered {stateName} Senate candidates on FEC.gov
           </a>
         </div>
       )}

@@ -157,13 +157,13 @@ async function enrichCandidate(c: any) {
 // ── Cached FEC data fetcher ───────────────────────────────────────────────────
 const getCandidateData = unstable_cache(
   async (state: string, district: string | null, zip: string) => {
+    // No has_raised_funds filter — show ALL registered candidates even with $0 raised
     const houseParams: any = {
       state,
       office: 'H',
       election_year: ELECTION_YEAR,
       sort: '-receipts',
-      per_page: '6',
-      has_raised_funds: 'true',
+      per_page: '8',
     };
     if (district) houseParams.district = district.padStart(2, '0');
 
@@ -172,8 +172,7 @@ const getCandidateData = unstable_cache(
       office: 'S',
       election_year: ELECTION_YEAR,
       sort: '-receipts',
-      per_page: '4',
-      has_raised_funds: 'true',
+      per_page: '6',
     };
 
     const [houseResp, senateResp] = await Promise.all([
@@ -181,8 +180,8 @@ const getCandidateData = unstable_cache(
       fecGetMulti('/candidates/', senateParams).catch(() => ({ results: [] })),
     ]);
 
-    const houseCands: any[] = (houseResp.results || []).slice(0, 4);
-    const senateCands: any[] = (senateResp.results || []).slice(0, 2);
+    const houseCands: any[] = (houseResp.results || []).slice(0, 6);
+    const senateCands: any[] = (senateResp.results || []).slice(0, 4);
     const allCands = [...houseCands, ...senateCands];
 
     if (!allCands.length) return { candidates: [], state, zip, district, electionYear: ELECTION_YEAR };
