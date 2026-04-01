@@ -57,7 +57,7 @@ function getRealFunder(p: any): { funder: string; pacAlias: string | null; hasCo
   return { funder: pacName, pacAlias: null, hasCorp: false };
 }
 
-export default function CandidateCard({ data }: { data: any }) {
+export default function CandidateCard({ data, electionYear = 2026 }: { data: any; electionYear?: number }) {
   const [showMore, setShowMore] = useState(false);
   const [expandedPac, setExpandedPac] = useState<number | null>(null);
   const { c, t, ind, employers, pac, bundlers } = data;
@@ -315,7 +315,7 @@ export default function CandidateCard({ data }: { data: any }) {
 
       {/* FEC link */}
       <a
-        href={`https://www.fec.gov/data/candidate/${cid}/?cycle=2024&tab=receipts`}
+        href={`https://www.fec.gov/data/candidate/${cid}/?cycle=${electionYear}&tab=receipts`}
         target="_blank"
         rel="noopener noreferrer"
         className="inline-flex items-center gap-1 text-[9px] tracking-widest uppercase text-amber border-b border-dashed border-amber opacity-70 hover:opacity-100 mx-4 mb-3 mt-1"
