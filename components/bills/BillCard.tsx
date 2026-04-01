@@ -4,8 +4,7 @@ import { useState } from 'react';
 import { billStatusClass } from '@/lib/utils';
 import PizzaChart from '@/components/candidates/PizzaChart';
 
-// Strip legal boilerplate and extract 2-3 meaningful topic words from a bill title
-// LDA filings use topic keywords — "defense", "pharma", "housing" — not bill numbers
+// Strip legal boilerplate and extract meaningful topic words for LDA search
 function extractTopicKeywords(title: string): string {
   const stopWords = new Set([
     'to', 'the', 'a', 'an', 'and', 'or', 'of', 'for', 'in', 'on', 'with',
@@ -17,13 +16,10 @@ function extractTopicKeywords(title: string): string {
     'including', 'purposes', 'make', 'ensure', 'support', 'promote',
     '2024', '2025', '2026', '119th',
   ]);
-
   const words = title
     .replace(/[^a-zA-Z\s]/g, ' ')
     .split(/\s+/)
     .filter(w => w.length > 3 && !stopWords.has(w.toLowerCase()));
-
-  // Take the first 3 meaningful words as the topic search
   return words.slice(0, 3).join(' ');
 }
 
@@ -46,12 +42,11 @@ function LobbySection({ billTitle }: { billTitle: string }) {
     setOpen(v => !v);
   }
 
-  const lobbyists = data?.lobbyists || [];
-  const slices = data?.industrySlices || [];
+  const lobbyists: any[] = data?.lobbyists || [];
+  const slices: any[] = data?.industrySlices || [];
 
   return (
     <div className="border-t border-lb">
-      {/* Toggle button */}
       <button
         onClick={toggle}
         className={`w-full flex items-center justify-between px-4 py-2.5 text-left transition-colors ${open ? 'bg-amber/10' : 'hover:bg-lb/50'}`}
@@ -59,10 +54,8 @@ function LobbySection({ billTitle }: { billTitle: string }) {
         <div className="flex items-center gap-2">
           <span className="text-lg leading-none">🥧</span>
           <div>
-            <div className="text-[11px] font-semibold text-brown">Who lobbied on this bill?</div>
-            <div className="text-[9px] text-mid">
-              Searching LDA registry for: <span className="italic text-amber">{keywords || billTitle.substring(0, 40)}</span>
-            </div>
+            <div className="text-[11px] font-semibold text-brown">Who lobbies on this topic?</div>
+            <div className="text-[9px] text-mid">See which industries have paid lobbyists working this issue</div>
           </div>
         </div>
         <span className="text-[10px] text-amber font-mono shrink-0">{open ? '▲ hide' : '▼ show'}</span>
@@ -78,44 +71,34 @@ function LobbySection({ billTitle }: { billTitle: string }) {
             </div>
           )}
 
-          {/* Dough chart — industry breakdown */}
+          {/* Dough chart — topic breakdown, always has data */}
           {!loading && slices.length >= 2 && (
-            <div className="mb-3">
-              <p className="text-[9px] text-mid italic mb-2 leading-relaxed">
-                Which industries paid federal lobbyists to work on issues related to this bill:
-              </p>
-              <PizzaChart title="Lobbying by Industry" slices={slices} />
-            </div>
+            <>
+              <div className="bg-lb/60 border border-amber/30 rounded px-3 py-2 mb-3 text-[9px] text-brown leading-relaxed">
+                <strong>What this shows:</strong> The more lobbying filings on a topic, the more pressure
+                Congress is getting from that industry. Each slice = number of active registered lobbyists
+                working that issue area right now.
+              </div>
+              <PizzaChart title="Lobbying Activity by Topic" slices={slices} />
+            </>
           )}
 
-          {/* Lobbyist list */}
+          {/* Who is lobbying — simplified, client-first */}
           {!loading && lobbyists.length > 0 && (
-            <div>
+            <div className="mt-3">
               <div className="text-[8px] tracking-widest uppercase text-mid mb-2">
-                📋 Registered Lobbyists — {keywords}
+                🏢 Organizations lobbying on <span className="text-amber">{keywords}</span>
               </div>
               {lobbyists.map((l: any, i: number) => (
-                <div key={i} className="flex justify-between items-start gap-2 py-1.5 border-b border-dashed border-lb last:border-0">
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[11px] font-medium">
-                      {l.client && l.client !== l.registrant ? (
-                        <>
-                          <span className="text-ink">🏢 {l.client}</span>
-                          <span className="text-[8px] text-mid"> via {l.registrant}</span>
-                        </>
-                      ) : (
-                        <span className="text-ink">{l.registrant}</span>
-                      )}
+                <div key={i} className="py-1.5 border-b border-dashed border-lb last:border-0">
+                  <div className="text-[11px] font-medium text-ink">{l.client}</div>
+                  {l.topics && (
+                    <div className="text-[8px] text-mid mt-0.5">
+                      Issues: <span className="text-brown">{l.topics}</span>
                     </div>
-                    {l.issues && (
-                      <div className="text-[8px] text-mid italic mt-0.5 truncate">{l.issues}</div>
-                    )}
-                    {l.period && <div className="text-[8px] text-mid">{l.period}</div>}
-                  </div>
-                  {l.amount && (
-                    <span className="font-display text-[14px] text-ftdpurple whitespace-nowrap shrink-0">
-                      ${Number(l.amount).toLocaleString()}
-                    </span>
+                  )}
+                  {l.registrant && l.registrant !== l.client && (
+                    <div className="text-[8px] text-mid">Hired lobbyist: {l.registrant}</div>
                   )}
                 </div>
               ))}
@@ -123,25 +106,29 @@ function LobbySection({ billTitle }: { billTitle: string }) {
                 Source:{' '}
                 <a href="https://lda.senate.gov" target="_blank" rel="noopener noreferrer" className="text-amber">
                   lda.senate.gov
-                </a>{' '}
-                — all federal lobbyists must register and disclose clients by law
+                </a>
+                {' '}· Federal law requires all lobbyists to register ·{' '}
+                <a
+                  href={`https://lda.senate.gov/filings/public/filing/search/?search=${encodeURIComponent(keywords)}`}
+                  target="_blank" rel="noopener noreferrer"
+                  className="text-amber"
+                >
+                  Full database ↗
+                </a>
               </div>
             </div>
           )}
 
-          {/* No results */}
           {!loading && !lobbyists.length && (
             <p className="text-[9px] text-mid italic py-2">
-              No lobbying filings found for <em>{keywords}</em> in the LDA database.
-              This issue may not have active registered lobbyists, or try searching{' '}
+              No active lobbying filings found for <em>{keywords}</em>.{' '}
               <a
                 href={`https://lda.senate.gov/filings/public/filing/search/?search=${encodeURIComponent(keywords)}`}
-                target="_blank"
-                rel="noopener noreferrer"
+                target="_blank" rel="noopener noreferrer"
                 className="text-amber underline"
               >
-                LDA.senate.gov directly
-              </a>.
+                Search LDA.senate.gov directly ↗
+              </a>
             </p>
           )}
         </div>
@@ -192,7 +179,6 @@ export default function BillCard({ bill }: { bill: any }) {
         )}
       </div>
 
-      {/* Per-bill lobbying section — lazy loads when user taps */}
       <LobbySection billTitle={bill.title || ''} />
 
       <a
