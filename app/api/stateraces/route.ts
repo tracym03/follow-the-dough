@@ -25,18 +25,16 @@ const KNOWN_GOV_CANDIDATES: Record<string, Array<{
   raisedFmt?: string; financeUrl?: string; note?: string;
 }>> = {
   CA: [
-    { name: 'Antonio Villaraigosa', party: 'Democrat', title: 'Former Mayor of Los Angeles',
-      financeUrl: 'https://cal-access.sos.ca.gov/Campaign/Candidates/', note: 'Announced' },
-    { name: 'Eleni Kounalakis', party: 'Democrat', title: 'Lt. Governor of California',
-      financeUrl: 'https://cal-access.sos.ca.gov/Campaign/Candidates/', note: 'Announced' },
-    { name: 'Rob Bonta', party: 'Democrat', title: 'California Attorney General',
-      financeUrl: 'https://cal-access.sos.ca.gov/Campaign/Candidates/', note: 'Exploring' },
-    { name: 'Tony Thurmond', party: 'Democrat', title: 'State Superintendent of Public Instruction',
-      financeUrl: 'https://cal-access.sos.ca.gov/Campaign/Candidates/', note: 'Announced' },
-    { name: 'James Gallagher', party: 'Republican', title: 'California Assembly Republican Leader',
-      financeUrl: 'https://cal-access.sos.ca.gov/Campaign/Candidates/', note: 'Announced' },
-    { name: 'Richard Grenell', party: 'Republican', title: 'Former Acting Director of National Intelligence',
-      financeUrl: 'https://cal-access.sos.ca.gov/Campaign/Candidates/', note: 'Exploring' },
+    { name: 'Antonio Villaraigosa', party: 'Democrat', title: 'Former Mayor of Los Angeles', note: 'Announced' },
+    { name: 'Eleni Kounalakis', party: 'Democrat', title: 'Lt. Governor of California', note: 'Announced' },
+    { name: 'Xavier Becerra', party: 'Democrat', title: 'Former U.S. Secretary of HHS / Former CA Attorney General', note: 'Announced' },
+    { name: 'Katie Porter', party: 'Democrat', title: 'U.S. Representative (CA-47)', note: 'Announced' },
+    { name: 'Tony Thurmond', party: 'Democrat', title: 'State Superintendent of Public Instruction', note: 'Announced' },
+    { name: 'Matt Mahan', party: 'Democrat', title: 'Mayor of San Jose', note: 'Announced' },
+    { name: 'Rob Bonta', party: 'Democrat', title: 'California Attorney General', note: 'Exploring' },
+    { name: 'James Gallagher', party: 'Republican', title: 'California Assembly Republican Leader', note: 'Announced' },
+    { name: 'Steve Hilton', party: 'Republican', title: 'Former UK Policy Adviser / Fox News Host', note: 'Announced' },
+    { name: 'Richard Grenell', party: 'Republican', title: 'Former Acting Director of National Intelligence', note: 'Exploring' },
   ],
   TX: [
     { name: 'Greg Abbott', party: 'Republican', title: 'Incumbent Governor', note: 'Incumbent' },
