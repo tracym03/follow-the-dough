@@ -2,78 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import BillCard from './BillCard';
-import PizzaChart from '@/components/candidates/PizzaChart';
 
-function LobbyingPizza({ stateName }: { stateName: string }) {
-  const [lobbyData, setLobbyData] = useState<any>(null);
-  const [showPizza, setShowPizza] = useState(false);
-  const [loading, setLoading] = useState(false);
-
-  function load() {
-    if (lobbyData || loading) return;
-    setLoading(true);
-    fetch(`/api/lobbying?keywords=${encodeURIComponent(stateName)}`)
-      .then(r => r.json())
-      .then(setLobbyData)
-      .catch(() => null)
-      .finally(() => setLoading(false));
-  }
-
-  function toggle() {
-    if (!showPizza) load();
-    setShowPizza(v => !v);
-  }
-
-  const slices = lobbyData?.industrySlices || [];
-
-  return (
-    <div className="bg-white border border-lb border-l-4 border-l-ftdred mb-4">
-      <button
-        onClick={toggle}
-        className={`w-full flex items-center justify-between px-4 py-3 text-left transition-colors ${showPizza ? 'bg-amber/10' : 'hover:bg-lb/50'}`}
-      >
-        <div className="flex items-center gap-2">
-          <span className="text-xl leading-none">🍕</span>
-          <div>
-            <div className="text-[12px] font-semibold text-brown">Who lobbies Congress on your behalf?</div>
-            <div className="text-[9px] text-mid">Which industries pay registered federal lobbyists to influence {stateName} lawmakers</div>
-          </div>
-        </div>
-        <span className="text-[10px] text-amber font-mono shrink-0">{showPizza ? '▲ hide' : '▼ show pizza'}</span>
-      </button>
-
-      {showPizza && (
-        <>
-          {loading && (
-            <div className="px-4 pb-4 text-center">
-              <div className="w-4 h-4 border-2 border-amber/20 border-t-amber rounded-full animate-spin mx-auto mb-2" />
-              <p className="text-[9px] text-mid">Fetching lobbying disclosures...</p>
-            </div>
-          )}
-          {!loading && slices.length >= 2 && (
-            <>
-              <div className="px-4 pt-1 pb-0">
-                <p className="text-[9px] text-mid italic leading-relaxed">
-                  By law, every federal lobbyist must register with the U.S. Senate and disclose their clients and issues.
-                  This shows which industries are paying to influence Congress — sourced from the official LDA database.
-                </p>
-              </div>
-              <PizzaChart title="Lobbying by Industry" slices={slices} />
-            </>
-          )}
-          {!loading && slices.length < 2 && (
-            <div className="px-4 pb-4 text-[10px] text-mid italic">
-              Not enough lobbying data found for {stateName} right now. Try checking the{' '}
-              <a href="https://lda.senate.gov/filings/public/filing/search/" target="_blank" rel="noopener noreferrer" className="text-amber underline">
-                LDA Senate database
-              </a>{' '}directly.
-            </div>
-          )}
-        </>
-      )}
-    </div>
-  );
-}
 
 export default function BillsTab({ zip, state, stateName }: { zip: string; state: string; stateName: string }) {
   const [data, setData] = useState<any>(null);
@@ -133,8 +62,6 @@ export default function BillsTab({ zip, state, stateName }: { zip: string; state
           Recent bills from {stateName}&apos;s members of Congress. Bill data from Congress.gov. Lobbying disclosures from the official U.S. Senate LDA database — every registered federal lobbyist must disclose their clients and issues by law.
         </div>
 
-        {/* Lobbying industry pizza */}
-        <LobbyingPizza stateName={stateName} />
         {data.members?.length > 0 && (
           <div className="text-[9px] text-mid font-mono mb-3 tracking-wide">
             Members: {data.members.join(' · ')}
