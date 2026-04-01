@@ -4,11 +4,10 @@ import { unstable_cache } from 'next/cache';
 const FEC_KEY = process.env.FEC_API_KEY || '';
 const FEC_BASE = 'https://api.open.fec.gov/v1';
 
-// Show 2024 data by default — only upgrade to 2026 if candidates have actually raised money
+// Show 2024 data by default — only upgrade to 2026 if candidates have raised real money
 const PRIMARY_YEAR = 2024;
 const CURRENT_YEAR = 2026;
-// Minimum dollars raised to consider 2026 data "live"
-const UPGRADE_THRESHOLD = 10000;
+const UPGRADE_THRESHOLD = 10000; // $10k raised = 2026 cycle is live
 
 // ── FEC helpers ───────────────────────────────────────────────────────────────
 async function fecGet(path: string, params: Record<string, string | number | boolean> = {}) {
@@ -16,7 +15,7 @@ async function fecGet(path: string, params: Record<string, string | number | boo
   url.searchParams.set('api_key', FEC_KEY);
   for (const [k, v] of Object.entries(params)) url.searchParams.set(k, String(v));
   const r = await fetch(url.toString(), { headers: { Accept: 'application/json' } });
-  if (!r.ok) throw new Error(`FEC ${r.status}`);
+  if (!r.ok) throw new Error(`FEC ${r.status}: ${url.pathname}`);
   return r.json();
 }
 
@@ -28,7 +27,7 @@ async function fecGetMulti(path: string, params: Record<string, string | number 
     else url.searchParams.set(k, String(v));
   }
   const r = await fetch(url.toString(), { headers: { Accept: 'application/json' } });
-  if (!r.ok) throw new Error(`FEC ${r.status}`);
+  if (!r.ok) throw new Error(`FEC ${r.status}: ${url.pathname}`);
   return r.json();
 }
 
@@ -120,20 +119,31 @@ async function getIndustryBreakdown(committeeId: string, cycle: number) {
   } catch { return []; }
 }
 
-// ── Enrich a single candidate ─────────────────────────────────────────────────
-async function enrichCandidate(c: any, cycle: number) {
+// ── Enrich a single candidate with donors, PACs, industries ──────────────────
+// `cand` is a row from /candidates/totals/ — already has financial summary fields
+async function enrichCandidate(cand: any, cycle: number) {
   try {
-    const commResp = await fecGet(`/candidate/${c.candidate_id}/committees/`, {
+    // cand already has receipts/disbursements from /candidates/totals/
+    // We just need the committee ID to fetch itemized donors + industry breakdown
+    const commResp = await fecGet(`/candidate/${cand.candidate_id}/committees/`, {
       cycle, designation: 'P',
-    }).catch(() => fecGet(`/candidate/${c.candidate_id}/committees/`, { cycle }));
+    }).catch(() => fecGet(`/candidate/${cand.candidate_id}/committees/`, { cycle }));
 
     const cid = commResp?.results?.[0]?.committee_id;
-    if (!cid) return { c, t: null, ind: [], employers: [], industries: [], pac: [], bundlers: [] };
+
+    // Build a totals object from the candidate record itself (no extra API call needed)
+    const t = {
+      receipts: cand.receipts ?? 0,
+      disbursements: cand.disbursements ?? 0,
+      individual_contributions: cand.individual_itemized_contributions ?? 0,
+      other_political_committee_contributions: cand.other_political_committee_contributions ?? 0,
+    };
+
+    if (!cid) return { c: cand, t, ind: [], employers: [], industries: [], pac: [], bundlers: [] };
 
     const period = String(cycle);
 
-    const [tr, ir, industries] = await Promise.all([
-      fecGet(`/committee/${cid}/totals/`, { cycle }).catch(() => null),
+    const [ir, industries] = await Promise.all([
       fecGetMulti('/schedules/schedule_a/', {
         committee_id: cid,
         contributor_type: 'individual',
@@ -153,7 +163,7 @@ async function enrichCandidate(c: any, cycle: number) {
     }).catch(() => ({ results: [] }));
 
     const pacRows: any[] = pacResp.results || [];
-    const candLast = (c.name || '').split(',')[0].toLowerCase().replace(/[^a-z]/g, '');
+    const candLast = (cand.name || '').split(',')[0].toLowerCase().replace(/[^a-z]/g, '');
     const actBlueWinRed: any[] = [];
     const externalPacs = pacRows.filter((p: any) => {
       const n = (p.contributor_name || '').toLowerCase();
@@ -203,8 +213,8 @@ async function enrichCandidate(c: any, cycle: number) {
     }).slice(0, 8);
 
     return {
-      c,
-      t: tr?.results?.[0] || null,
+      c: cand,
+      t,
       ind: ir?.results || [],
       employers: empRows,
       industries,
@@ -212,83 +222,68 @@ async function enrichCandidate(c: any, cycle: number) {
       bundlers: actBlueWinRed,
     };
   } catch {
-    return { c, t: null, ind: [], employers: [], industries: [], pac: [], bundlers: [] };
+    return { c: cand, t: null, ind: [], employers: [], industries: [], pac: [], bundlers: [] };
   }
 }
 
-// ── Fetch candidates for a given year ────────────────────────────────────────
+// ── Fetch candidates using /candidates/totals/ (supports sort by receipts) ───
 async function fetchCandidatesForYear(state: string, district: string | null, year: number) {
-  const houseParamsDistrict: any = {
-    state, office: 'H', election_year: year, sort: '-receipts', per_page: '8',
-  };
-  if (district) houseParamsDistrict.district = district.padStart(2, '0');
+  // House — district-specific first, then statewide fallback
+  const houseBase = { state, office: 'H', election_year: year, sort: '-receipts', per_page: '8', is_election: 'true' };
 
-  const houseParamsState: any = {
-    state, office: 'H', election_year: year, sort: '-receipts', per_page: '8',
-  };
+  const houseWithDistrict = district
+    ? fecGetMulti('/candidates/totals/', { ...houseBase, district: district.padStart(2, '0') }).catch(() => ({ results: [] }))
+    : Promise.resolve({ results: [] });
 
-  const senateParams: any = {
-    state, office: 'S', election_year: year, sort: '-receipts', per_page: '6',
-  };
+  const houseStatewide = fecGetMulti('/candidates/totals/', houseBase).catch(() => ({ results: [] }));
 
-  const [houseRespDistrict, houseRespState, senateResp] = await Promise.all([
-    fecGetMulti('/candidates/', houseParamsDistrict).catch(() => ({ results: [] })),
-    district ? fecGetMulti('/candidates/', houseParamsState).catch(() => ({ results: [] })) : Promise.resolve({ results: [] }),
-    fecGetMulti('/candidates/', senateParams).catch(() => ({ results: [] })),
+  const senateResp = fecGetMulti('/candidates/totals/', {
+    state, office: 'S', election_year: year, sort: '-receipts', per_page: '6', is_election: 'true',
+  }).catch(() => ({ results: [] }));
+
+  const [houseDistrictResp, houseAllResp, senateData] = await Promise.all([
+    houseWithDistrict, houseStatewide, senateResp,
   ]);
 
-  const districtResults: any[] = houseRespDistrict.results || [];
-  const stateResults: any[] = houseRespState.results || [];
+  const districtResults: any[] = houseDistrictResp.results || [];
+  const stateResults: any[] = houseAllResp.results || [];
+
+  // Prefer district results; fall back to top statewide
   const houseCands: any[] = districtResults.length > 0
     ? districtResults.slice(0, 6)
     : stateResults.slice(0, 4);
 
-  const senateCands: any[] = (senateResp.results || []).slice(0, 4);
+  const senateCands: any[] = (senateData.results || []).slice(0, 4);
   return [...houseCands, ...senateCands];
 }
 
 // ── Cached data fetcher ───────────────────────────────────────────────────────
 const getCandidateData = unstable_cache(
   async (state: string, district: string | null, zip: string) => {
-    // Always fetch 2024 first — it has real fundraising data
-    const primaryCands = await fetchCandidatesForYear(state, district, PRIMARY_YEAR);
+    // Fetch both years in parallel — no extra API calls needed
+    // /candidates/totals/ already includes receipts so we can check 2026 for free
+    const [primaryCands, currentCands] = await Promise.all([
+      fetchCandidatesForYear(state, district, PRIMARY_YEAR),
+      fetchCandidatesForYear(state, district, CURRENT_YEAR),
+    ]);
 
-    // Also check if 2026 has candidates with real money raised
-    const currentCands = await fetchCandidatesForYear(state, district, CURRENT_YEAR);
-
-    // Determine if 2026 is "live" — at least one candidate has raised meaningful money
-    let use2026 = false;
-    if (currentCands.length > 0) {
-      // Quick check: fetch totals for top 3 to see if any have raised money
-      const quickChecks = await Promise.all(
-        currentCands.slice(0, 3).map(async (c: any) => {
-          try {
-            const commResp = await fecGet(`/candidate/${c.candidate_id}/committees/`, {
-              cycle: CURRENT_YEAR, designation: 'P',
-            }).catch(() => fecGet(`/candidate/${c.candidate_id}/committees/`, { cycle: CURRENT_YEAR }));
-            const cid = commResp?.results?.[0]?.committee_id;
-            if (!cid) return 0;
-            const totals = await fecGet(`/committee/${cid}/totals/`, { cycle: CURRENT_YEAR }).catch(() => null);
-            return totals?.results?.[0]?.receipts ?? 0;
-          } catch { return 0; }
-        })
-      );
-      const maxRaised = Math.max(...quickChecks, 0);
-      use2026 = maxRaised >= UPGRADE_THRESHOLD;
-    }
+    // Check if 2026 has real fundraising (receipts field comes free from /candidates/totals/)
+    const maxIn2026 = Math.max(...currentCands.map((c: any) => c.receipts ?? 0), 0);
+    const use2026 = maxIn2026 >= UPGRADE_THRESHOLD;
 
     const allCands = use2026 ? currentCands : primaryCands;
     const electionYear = use2026 ? CURRENT_YEAR : PRIMARY_YEAR;
-    const usingFallback = !use2026; // We're showing 2024 as the "real" data
+    const usingFallback = !use2026;
 
     if (!allCands.length) return { candidates: [], state, zip, district, electionYear, usingFallback };
 
-    const details = await Promise.all(allCands.map(c => enrichCandidate(c, electionYear)));
+    const details = await Promise.all(allCands.map((c: any) => enrichCandidate(c, electionYear)));
+    // Already sorted by receipts from the API, but re-sort after enrichment
     details.sort((a: any, b: any) => (b.t?.receipts ?? 0) - (a.t?.receipts ?? 0));
 
     return { candidates: details, state, zip, district, electionYear, usingFallback };
   },
-  [`candidates-v3-${new Date().toISOString().slice(0, 10)}`],
+  [`candidates-v4-${new Date().toISOString().slice(0, 10)}`],
   { revalidate: 3600 }
 );
 

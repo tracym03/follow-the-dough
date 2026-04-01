@@ -20,8 +20,9 @@ module.exports = {
         ftdpurple: '#5b21b6',
       },
       fontFamily: {
+        sans: ['"Inter"', 'system-ui', 'sans-serif'],
         mono: ['"DM Mono"', '"Courier New"', 'monospace'],
-        display: ['"Bebas Neue"', 'Impact', 'sans-serif'],
+        display: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
       },
     },
   },
