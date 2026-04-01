@@ -4,9 +4,10 @@ import { unstable_cache } from 'next/cache';
 const FEC_KEY = process.env.FEC_API_KEY || '';
 const FEC_BASE = 'https://api.open.fec.gov/v1';
 
-// Try 2026 first — if no candidates found, fall back to 2024
+// Try 2026 first — if fewer than 2 candidates found, fall back to 2024
 const PREFERRED_YEAR = 2026;
 const FALLBACK_YEAR = 2024;
+const FALLBACK_THRESHOLD = 2; // if fewer than this many 2026 candidates found, use 2024
 
 // ── FEC helpers ───────────────────────────────────────────────────────────────
 async function fecGet(path: string, params: Record<string, string | number | boolean> = {}) {
@@ -217,21 +218,34 @@ async function enrichCandidate(c: any, cycle: number) {
 
 // ── Fetch candidates for a given year ────────────────────────────────────────
 async function fetchCandidatesForYear(state: string, district: string | null, year: number) {
-  const houseParams: any = {
+  // Search both with and without district to maximise results
+  const houseParamsDistrict: any = {
     state, office: 'H', election_year: year, sort: '-receipts', per_page: '8',
   };
-  if (district) houseParams.district = district.padStart(2, '0');
+  if (district) houseParamsDistrict.district = district.padStart(2, '0');
+
+  // Also search by state only in case district lookup was off
+  const houseParamsState: any = {
+    state, office: 'H', election_year: year, sort: '-receipts', per_page: '8',
+  };
 
   const senateParams: any = {
     state, office: 'S', election_year: year, sort: '-receipts', per_page: '6',
   };
 
-  const [houseResp, senateResp] = await Promise.all([
-    fecGetMulti('/candidates/', houseParams).catch(() => ({ results: [] })),
+  const [houseRespDistrict, houseRespState, senateResp] = await Promise.all([
+    fecGetMulti('/candidates/', houseParamsDistrict).catch(() => ({ results: [] })),
+    district ? fecGetMulti('/candidates/', houseParamsState).catch(() => ({ results: [] })) : Promise.resolve({ results: [] }),
     fecGetMulti('/candidates/', senateParams).catch(() => ({ results: [] })),
   ]);
 
-  const houseCands: any[] = (houseResp.results || []).slice(0, 6);
+  // Prefer district-specific results; fall back to state-level house results
+  const districtResults: any[] = houseRespDistrict.results || [];
+  const stateResults: any[] = houseRespState.results || [];
+  const houseCands: any[] = districtResults.length > 0
+    ? districtResults.slice(0, 6)
+    : stateResults.slice(0, 4);
+
   const senateCands: any[] = (senateResp.results || []).slice(0, 4);
   return [...houseCands, ...senateCands];
 }
@@ -244,11 +258,15 @@ const getCandidateData = unstable_cache(
     let electionYear = PREFERRED_YEAR;
     let usingFallback = false;
 
-    // If no 2026 candidates found, fall back to 2024
-    if (allCands.length === 0) {
-      allCands = await fetchCandidatesForYear(state, district, FALLBACK_YEAR);
-      electionYear = FALLBACK_YEAR;
-      usingFallback = true;
+    // Fall back to 2024 if fewer than threshold candidates found for 2026
+    if (allCands.length < FALLBACK_THRESHOLD) {
+      const fallbackCands = await fetchCandidatesForYear(state, district, FALLBACK_YEAR);
+      // Use whichever year has more candidates
+      if (fallbackCands.length > allCands.length) {
+        allCands = fallbackCands;
+        electionYear = FALLBACK_YEAR;
+        usingFallback = true;
+      }
     }
 
     if (!allCands.length) return { candidates: [], state, zip, district, electionYear, usingFallback };
@@ -258,8 +276,9 @@ const getCandidateData = unstable_cache(
 
     return { candidates: details, state, zip, district, electionYear, usingFallback };
   },
-  ['candidates-hybrid'],
-  { revalidate: 86400 }
+  // Include date in cache key so it refreshes daily and doesn't serve stale empty results
+  [`candidates-hybrid-${new Date().toISOString().slice(0, 10)}`],
+  { revalidate: 3600 } // re-check hourly so new 2026 filings appear quickly
 );
 
 // ── Route handler ─────────────────────────────────────────────────────────────
