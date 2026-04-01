@@ -142,7 +142,16 @@ function SponsorFundingSection({
   const pacT: number   = data?.pacT ?? 0;
   const indivPct = raised > 0 ? Math.round((indivT / raised) * 100) : 0;
   const pacPct   = raised > 0 ? Math.round((pacT   / raised) * 100) : 0;
-  const conflict = data?.found ? getConflictSentence(billTopic, sponsorName, slices) : null;
+  // Always compute a conflict result when we have sponsor data — never hide this section
+  const conflict = data?.found
+    ? (slices.length > 0
+        ? getConflictSentence(billTopic, sponsorName, slices)
+        : {
+            conflict: false,
+            sentence: `FEC data found but PAC donor names couldn't be matched to specific industries automatically. Tap the OpenSecrets link below for the full picture.`,
+            noData: true,
+          })
+    : null;
   const partyColor = sponsorParty === 'D' ? 'text-ftdblue' : sponsorParty === 'R' ? 'text-ftdred' : 'text-mid';
 
   return (
@@ -184,14 +193,17 @@ function SponsorFundingSection({
 
           {!loading && data?.found && (
             <>
-              {/* ── Conflict check — the most important line ── */}
+              {/* ── Conflict check — always shown when we have data ── */}
               {conflict && (
-                <div className={`mt-1 mb-3 px-3 py-2.5 rounded border text-[11px] font-medium leading-snug ${
+                <div className={`mt-1 mb-3 px-3 py-2.5 rounded border text-[11px] leading-snug ${
                   conflict.conflict
-                    ? 'bg-red-50 border-red-300 text-red-800'
-                    : 'bg-green-50 border-green-300 text-green-800'
+                    ? 'bg-red-50 border-red-300 text-red-800 font-medium'
+                    : (conflict as any).noData
+                    ? 'bg-lb border-lb text-mid'
+                    : 'bg-green-50 border-green-300 text-green-800 font-medium'
                 }`}>
-                  {conflict.conflict ? '⚠️ Potential conflict: ' : '✓ '}{conflict.sentence}
+                  {conflict.conflict ? '⚠️ Potential conflict: ' : (conflict as any).noData ? '🔍 ' : '✓ '}
+                  {conflict.sentence}
                 </div>
               )}
 

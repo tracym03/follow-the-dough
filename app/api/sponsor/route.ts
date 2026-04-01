@@ -115,10 +115,18 @@ export async function GET(req: NextRequest) {
     } else {
       // Fallback: bucket by PAC type
       const commType = p.contributor_committee_type || '';
-      if (commType === 'O' || commType === 'U') {
+      const desig    = p.contributor_committee_designation || '';
+      if (commType === 'O' || desig === 'U') {
         addToIndustryBucket(buckets, 'Super PAC Money ⚡', '⚡', '#e74c3c', amt);
       } else if (commType === 'Y') {
         addToIndustryBucket(buckets, 'Party Committees', '🏛️', '#1a6bb5', amt);
+      } else if (commType === 'W' || orgName.match(/union|afl|seiu|teamster|worker/i)) {
+        addToIndustryBucket(buckets, 'Labor & Unions', '👷', '#2d6a4f', amt);
+      } else if (desig === 'L') {
+        addToIndustryBucket(buckets, 'Leadership PACs', '⭐', '#854d0e', amt);
+      } else if (commType === 'Q' || commType === 'N') {
+        // Corporate/trade PAC — keep as generic business if no keyword match
+        addToIndustryBucket(buckets, 'Corporate & Trade PACs', '🏢', '#607d8b', amt);
       }
     }
   }
@@ -134,7 +142,7 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  const industrySlices = finalizeBuckets(buckets, 1000, 6);
+  const industrySlices = finalizeBuckets(buckets, 500, 6);
 
   return NextResponse.json({
     found: true,
