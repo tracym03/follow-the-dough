@@ -24,17 +24,18 @@ const KNOWN_GOV_CANDIDATES: Record<string, Array<{
   name: string; party: string; title?: string;
   raisedFmt?: string; financeUrl?: string; note?: string;
 }>> = {
+  // Source: CalMatters.org — updated April 2026
   CA: [
-    { name: 'Antonio Villaraigosa', party: 'Democrat', title: 'Former Mayor of Los Angeles', note: 'Announced' },
-    { name: 'Eleni Kounalakis', party: 'Democrat', title: 'Lt. Governor of California', note: 'Announced' },
-    { name: 'Xavier Becerra', party: 'Democrat', title: 'Former U.S. Secretary of HHS / Former CA Attorney General', note: 'Announced' },
-    { name: 'Katie Porter', party: 'Democrat', title: 'U.S. Representative (CA-47)', note: 'Announced' },
-    { name: 'Tony Thurmond', party: 'Democrat', title: 'State Superintendent of Public Instruction', note: 'Announced' },
-    { name: 'Matt Mahan', party: 'Democrat', title: 'Mayor of San Jose', note: 'Announced' },
-    { name: 'Rob Bonta', party: 'Democrat', title: 'California Attorney General', note: 'Exploring' },
-    { name: 'James Gallagher', party: 'Republican', title: 'California Assembly Republican Leader', note: 'Announced' },
-    { name: 'Steve Hilton', party: 'Republican', title: 'Former UK Policy Adviser / Fox News Host', note: 'Announced' },
-    { name: 'Richard Grenell', party: 'Republican', title: 'Former Acting Director of National Intelligence', note: 'Exploring' },
+    { name: 'Antonio Villaraigosa', party: 'Democrat',    title: 'Former Mayor of Los Angeles',                    note: 'Announced' },
+    { name: 'Xavier Becerra',       party: 'Democrat',    title: 'Former U.S. Secretary of HHS / Former CA AG',    note: 'Announced' },
+    { name: 'Katie Porter',         party: 'Democrat',    title: 'U.S. Representative (CA-47)',                    note: 'Announced' },
+    { name: 'Tony Thurmond',        party: 'Democrat',    title: 'State Superintendent of Public Instruction',     note: 'Announced' },
+    { name: 'Matt Mahan',           party: 'Democrat',    title: 'Mayor of San Jose',                              note: 'Announced' },
+    { name: 'Tom Steyer',           party: 'Democrat',    title: 'Businessman / Former Presidential Candidate',    note: 'Announced' },
+    { name: 'Eric Swalwell',        party: 'Democrat',    title: 'U.S. Representative (CA-14)',                    note: 'Announced' },
+    { name: 'Betty Yee',            party: 'Democrat',    title: 'Former CA State Controller',                     note: 'Announced' },
+    { name: 'Steve Hilton',         party: 'Republican',  title: 'Former UK Policy Adviser / Fox News Host',       note: 'Announced' },
+    { name: 'Chad Bianco',          party: 'Republican',  title: 'Riverside County Sheriff',                       note: 'Announced' },
   ],
   TX: [
     { name: 'Greg Abbott', party: 'Republican', title: 'Incumbent Governor', note: 'Incumbent' },
