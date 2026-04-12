@@ -76,6 +76,11 @@ export default function StateTab({ zip, state, stateName }: { zip: string; state
   const [govData, setGovData]       = useState<any>(null);
   const [govLoading, setGovLoading] = useState(true);
 
+  // State legislators
+  const [legData, setLegData]       = useState<any>(null);
+  const [legLoading, setLegLoading] = useState(true);
+  const [legError, setLegError]     = useState('');
+
   // State bills
   const userStateSupported = SUPPORTED_STATES.includes(state);
   const defaultBillState   = userStateSupported ? state : 'CA';
@@ -91,7 +96,13 @@ export default function StateTab({ zip, state, stateName }: { zip: string; state
       .then(setGovData)
       .catch(() => null)
       .finally(() => setGovLoading(false));
-  }, [state]);
+
+    fetch(`/api/statelegislators?zip=${zip}`)
+      .then(r => r.json())
+      .then(json => { if (json.error) throw new Error(json.error); setLegData(json); })
+      .catch((e: any) => setLegError(e.message))
+      .finally(() => setLegLoading(false));
+  }, [state, zip]);
 
   useEffect(() => {
     setBillsLoading(true);
@@ -226,35 +237,90 @@ export default function StateTab({ zip, state, stateName }: { zip: string; state
         {/* ── TIER 2: State Legislature ── */}
         <TierLabel num={2} label="State Legislature" />
 
-        <FlowCard
-          title={`${stateName} State Legislature`}
-          sub="Your state senators and assembly members"
-          icon="🏛️"
-          accentColor="#1565c0"
-        >
-          <div className="px-4 py-4 text-[13px] text-brown leading-relaxed">
-            <p className="mb-3">
-              State legislators represent districts within {stateName}. They vote on state budgets,
-              education funding, healthcare, and local laws — issues that often affect daily life more
-              directly than federal legislation.
-            </p>
-            <div className="flex flex-col gap-2">
-              <a href={`https://openstates.org/${state.toLowerCase()}/legislators/`}
-                target="_blank" rel="noopener noreferrer"
-                className="flex items-center gap-1 text-[12px] text-amber border border-amber rounded px-2 py-1 w-fit hover:bg-yellow-50">
-                ↗ Find your {stateName} legislators on OpenStates
-              </a>
-              <a href={`https://ballotpedia.org/${stateName.replace(/ /g, '_')}_State_Legislature`}
-                target="_blank" rel="noopener noreferrer"
-                className="flex items-center gap-1 text-[12px] text-mid border border-lb rounded px-2 py-1 w-fit hover:bg-lb">
-                ↗ {stateName} Legislature on Ballotpedia
-              </a>
-            </div>
-            <p className="mt-3 text-[11px] text-mid italic">
-              Live district lookup for state legislators is coming soon. Use the links above to find your specific representatives.
-            </p>
+        {legLoading ? (
+          <div className="py-6 text-center">
+            <div className="w-6 h-6 border-[3px] border-amber/20 border-t-amber rounded-full animate-spin mx-auto mb-2" />
+            <div className="text-[12px] text-mid tracking-widest uppercase">Finding your state legislators…</div>
           </div>
-        </FlowCard>
+        ) : legError ? (
+          <div className="bg-lb border border-amber/30 rounded px-4 py-3 mb-4 text-[13px] text-mid">
+            Could not load legislators.{' '}
+            <a href={`https://openstates.org/${state.toLowerCase()}/legislators/`}
+              target="_blank" rel="noopener noreferrer" className="text-amber underline">
+              Find them on OpenStates ↗
+            </a>
+          </div>
+        ) : legData?.legislators?.length > 0 ? (
+          <>
+            {/* Group by chamber */}
+            {(['upper', 'lower'] as const).map(chamber => {
+              const members = legData.legislators.filter((l: any) => l.chamber === chamber);
+              if (members.length === 0) return null;
+              const chamberLabel = chamber === 'upper' ? 'State Senate' : 'State Assembly / House';
+              const chamberIcon  = chamber === 'upper' ? '🏛️' : '🏛️';
+              return (
+                <div key={chamber} className="mb-3">
+                  <div className="text-[11px] tracking-[3px] uppercase text-mid mb-2">
+                    {chamberLabel} · Your District
+                  </div>
+                  {members.map((leg: any, i: number) => (
+                    <FlowCard
+                      key={i}
+                      title={leg.title || (chamber === 'upper' ? 'State Senator' : 'State Assembly Member')}
+                      sub={`${leg.name} · ${leg.party}${leg.district ? ` · District ${leg.district}` : ''}`}
+                      icon={chamberIcon}
+                      accentColor="#1565c0"
+                    >
+                      <div className="px-4 py-3 text-[13px] text-brown leading-relaxed">
+                        <div className="flex items-start gap-3 mb-3">
+                          {leg.image && (
+                            <img src={leg.image} alt={leg.name}
+                              className="w-14 h-14 object-cover rounded border border-lb shrink-0" />
+                          )}
+                          <div>
+                            <div className="font-semibold text-[15px] text-ink">{leg.name}</div>
+                            <div className="text-[12px] text-mid">{leg.party}</div>
+                            {leg.district && <div className="text-[12px] text-mid">District {leg.district}</div>}
+                            {leg.email && (
+                              <a href={`mailto:${leg.email}`} className="text-[12px] text-amber underline block mt-0.5">
+                                {leg.email}
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex gap-2 flex-wrap">
+                          {leg.url && (
+                            <a href={leg.url} target="_blank" rel="noopener noreferrer"
+                              className="text-[12px] px-2 py-1 border border-amber text-amber rounded hover:bg-amber/10">
+                              ↗ OpenStates profile
+                            </a>
+                          )}
+                          <a href={`https://ballotpedia.org/${leg.name.replace(/ /g, '_')}`}
+                            target="_blank" rel="noopener noreferrer"
+                            className="text-[12px] px-2 py-1 border border-lb text-mid rounded hover:bg-lb">
+                            ↗ Ballotpedia
+                          </a>
+                        </div>
+                        <p className="text-[11px] text-mid italic mt-3">
+                          State legislators are funded through your state&apos;s campaign finance system.
+                          Federal FEC data does not cover state races.
+                        </p>
+                      </div>
+                    </FlowCard>
+                  ))}
+                </div>
+              );
+            })}
+          </>
+        ) : (
+          <div className="bg-lb border border-amber/30 rounded px-4 py-3 mb-4 text-[13px] text-mid">
+            No legislators found for this ZIP.{' '}
+            <a href={`https://openstates.org/${state.toLowerCase()}/legislators/`}
+              target="_blank" rel="noopener noreferrer" className="text-amber underline">
+              Search on OpenStates ↗
+            </a>
+          </div>
+        )}
 
         <FlowArrow />
 

@@ -172,34 +172,69 @@ export default function FederalTab({ zip, state, stateName }: { zip: string; sta
           <div className="bg-red-50 border border-ftdred p-3 text-red-800 text-[13px] mb-4">⚠ {candError}</div>
         ) : (
           <>
-            {/* House incumbents */}
-            {houseIncumbents.map((d: any, i: number) => (
-              <FlowCard
-                key={`hi-${i}`}
-                title={`Your House Rep${candData?.district ? ` · District ${candData.district}` : ''}`}
-                sub={`${d.c?.name} · ${partyLabel(d.c?.party)} — tap to see funding breakdown`}
-                icon="🏛️"
-                accentColor="#c9a84c"
-              >
-                <CandidateCard data={d} electionYear={candData?.electionYear || 2024} />
-              </FlowCard>
-            ))}
+            {/* ── House ── */}
+            {houseCands.length > 0 && (
+              <>
+                <div className="text-[11px] tracking-[3px] uppercase text-mid mb-2 mt-1">
+                  🏛 U.S. House · District {candData?.district || '?'}
+                </div>
+                {houseIncumbents.map((d: any, i: number) => (
+                  <FlowCard
+                    key={`hi-${i}`}
+                    title={`Your House Rep · District ${candData?.district || '?'}`}
+                    sub={`${d.c?.name} · ${partyLabel(d.c?.party)} — tap to see funding breakdown`}
+                    icon="🏛️"
+                    accentColor="#c9a84c"
+                  >
+                    <CandidateCard data={d} electionYear={candData?.electionYear || 2024} />
+                  </FlowCard>
+                ))}
+                {houseChallengers.map((d: any, i: number) => (
+                  <FlowCard
+                    key={`hc-${i}`}
+                    title={`House Challenger · District ${candData?.district || '?'}`}
+                    sub={`${d.c?.name} · ${partyLabel(d.c?.party)} — tap to see funding breakdown`}
+                    icon="🗳️"
+                    accentColor="#9e9e9e"
+                  >
+                    <CandidateCard data={d} electionYear={candData?.electionYear || 2024} />
+                  </FlowCard>
+                ))}
+              </>
+            )}
 
-            {/* Senate incumbents */}
-            {senateIncumbents.map((d: any, i: number) => (
-              <FlowCard
-                key={`si-${i}`}
-                title={senateIncumbents.length > 1 ? `Your U.S. Senator ${i + 1} of 2` : 'Your U.S. Senator'}
-                sub={`${d.c?.name} · ${partyLabel(d.c?.party)} — tap to see funding breakdown`}
-                icon="🏛️"
-                accentColor="#c9a84c"
-              >
-                <CandidateCard data={d} electionYear={candData?.electionYear || 2024} />
-              </FlowCard>
-            ))}
+            {/* ── Senate ── */}
+            {senateCands.length > 0 && (
+              <>
+                <div className="text-[11px] tracking-[3px] uppercase text-mid mb-2 mt-4">
+                  🏛 U.S. Senate · {stateName}
+                </div>
+                {senateCands.map((d: any, i: number) => {
+                  const isInc = d.c?.incumbent_challenge === 'I';
+                  return (
+                    <FlowCard
+                      key={`s-${i}`}
+                      title={isInc ? `Your U.S. Senator` : `Senate Candidate`}
+                      sub={`${d.c?.name} · ${partyLabel(d.c?.party)} — tap to see funding breakdown`}
+                      icon="🏛️"
+                      accentColor={isInc ? '#c9a84c' : '#9e9e9e'}
+                    >
+                      <CandidateCard data={d} electionYear={candData?.electionYear || 2024} />
+                    </FlowCard>
+                  );
+                })}
+                <div className="text-[11px] text-mid italic px-1 mb-3">
+                  Senators serve staggered 6-year terms — only those who ran in {candData?.electionYear || 2024} appear here.{' '}
+                  <a href={`https://www.senate.gov/states/${stateName.replace(/ /g, '_')}/intro.htm`}
+                    target="_blank" rel="noopener noreferrer" className="text-amber underline">
+                    See all {stateName} senators ↗
+                  </a>
+                </div>
+              </>
+            )}
 
-            {/* No incumbents found */}
-            {houseIncumbents.length === 0 && senateIncumbents.length === 0 && (
+            {/* No candidates at all */}
+            {houseCands.length === 0 && senateCands.length === 0 && (
               <div className="text-center py-6 bg-lb border border-amber/40 rounded mb-4">
                 <div className="font-display text-xl text-amber mb-1">No FEC Filings Found</div>
                 <p className="text-[13px] text-mid px-4">
@@ -208,43 +243,6 @@ export default function FederalTab({ zip, state, stateName }: { zip: string; sta
                     target="_blank" rel="noopener noreferrer" className="text-amber underline">FEC.gov</a>.
                 </p>
               </div>
-            )}
-
-            {/* Challengers */}
-            {(houseChallengers.length > 0 || senateChallengers.length > 0) && (
-              <>
-                <div className="flex items-center gap-3 my-4">
-                  <div className="flex-1 h-px bg-lb" />
-                  <span className="text-[11px] tracking-[2px] uppercase text-mid shrink-0">
-                    Who wants their seats in 2026?
-                  </span>
-                  <div className="flex-1 h-px bg-lb" />
-                </div>
-
-                {houseChallengers.map((d: any, i: number) => (
-                  <FlowCard
-                    key={`hc-${i}`}
-                    title={`House Challenger${candData?.district ? ` · District ${candData.district}` : ''}`}
-                    sub={`${d.c?.name} · ${partyLabel(d.c?.party)}`}
-                    icon="🗳️"
-                    accentColor="#9e9e9e"
-                  >
-                    <CandidateCard data={d} electionYear={candData?.electionYear || 2024} />
-                  </FlowCard>
-                ))}
-
-                {senateChallengers.map((d: any, i: number) => (
-                  <FlowCard
-                    key={`sc-${i}`}
-                    title="Senate Challenger"
-                    sub={`${d.c?.name} · ${partyLabel(d.c?.party)}`}
-                    icon="🗳️"
-                    accentColor="#9e9e9e"
-                  >
-                    <CandidateCard data={d} electionYear={candData?.electionYear || 2024} />
-                  </FlowCard>
-                ))}
-              </>
             )}
           </>
         )}
