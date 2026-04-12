@@ -6,10 +6,11 @@ import Header from '@/components/Header';
 import ZipSearch from '@/components/ZipSearch';
 import CandidatesTab from '@/components/candidates/CandidatesTab';
 import BillsTab from '@/components/bills/BillsTab';
+import StateBillsTab from '@/components/bills/StateBillsTab';
 import CouncilTab from '@/components/council/CouncilTab';
 import { zipToState } from '@/lib/utils';
 
-type Tab = 'candidates' | 'bills' | 'council';
+type Tab = 'candidates' | 'bills' | 'statebills' | 'council';
 
 export default function SearchPage() {
   const params = useParams();
@@ -32,9 +33,10 @@ export default function SearchPage() {
   }
 
   const tabs: { id: Tab; label: string }[] = [
-    { id: 'candidates', label: '🗳 Candidates' },
-    { id: 'bills', label: '📋 Bills & Lobbying' },
-    { id: 'council', label: '🏛 City Council' },
+    { id: 'candidates',  label: '🗳 Candidates' },
+    { id: 'bills',       label: '📋 Federal Bills' },
+    { id: 'statebills',  label: '📜 State Bills' },
+    { id: 'council',     label: '🏛 City Council' },
   ];
 
   return (
@@ -48,7 +50,7 @@ export default function SearchPage() {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex-1 py-3 px-2 text-center font-display text-[14px] tracking-[3px] cursor-pointer border-none transition-colors ${
+            className={`flex-1 py-3 px-1 text-center font-display text-[11px] tracking-[2px] cursor-pointer border-none transition-colors ${
               activeTab === tab.id
                 ? 'text-gold border-b-[3px] border-b-gold -mb-px'
                 : 'text-cream/35 hover:text-cream'
@@ -66,6 +68,9 @@ export default function SearchPage() {
         )}
         {activeTab === 'bills' && (
           <BillsTab zip={zip} state={si.state} stateName={si.name} />
+        )}
+        {activeTab === 'statebills' && (
+          <StateBillsTab state={si.state} />
         )}
         {activeTab === 'council' && (
           <CouncilTab zip={zip} />

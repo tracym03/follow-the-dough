@@ -230,7 +230,7 @@ const getStateRaces = unstable_cache(
       dataNote: 'Candidate list based on public announcements as of early 2026. Campaign finance data links to your state\'s official database.',
     };
   },
-  ['stateraces-2026-v2'],
+  ['stateraces-2026-v3'],
   { revalidate: 3600 * 24 } // 24 hours — static data doesn't need frequent refresh
 );
 

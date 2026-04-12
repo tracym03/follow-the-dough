@@ -271,7 +271,7 @@ function buildCongressUrl(type: string, number: string, congress: number): strin
 export default function BillCard({ bill }: { bill: any }) {
   const num       = `${bill.type || ''} ${bill.number || ''}`.trim() || 'Bill';
   const congress  = bill.congress || 119;
-  const url       = buildCongressUrl(bill.type || 'HR', bill.number || '', congress);
+  const url       = bill.stateUrl || buildCongressUrl(bill.type || 'HR', bill.number || '', congress);
   const action    = bill.latestAction || '';
   const actionDate = bill.actionDate || '';
   const statusCls = billStatusClass(action);
@@ -281,7 +281,9 @@ export default function BillCard({ bill }: { bill: any }) {
     <div className="bg-white border border-lb border-l-4 border-l-ftdgreen mb-3 hover:-translate-x-px hover:-translate-y-px hover:shadow-[3px_3px_0_#2d6a4f] transition-all">
       <div className="px-4 py-3">
         <div className="flex items-start justify-between gap-2 mb-1">
-          <div className="font-display text-[12px] tracking-[3px] text-amber">{num} · {congress}th Congress</div>
+          <div className="font-display text-[12px] tracking-[3px] text-amber">
+            {num} · {bill.isStateBill ? `${bill.stateCode || bill.sponsorState} Legislature` : `${congress}th Congress`}
+          </div>
           {/* Topic badge */}
           {topic && (
             <span className="text-[8px] px-2 py-0.5 rounded-full bg-lb border border-amber/40 text-brown shrink-0 whitespace-nowrap">
@@ -317,7 +319,7 @@ export default function BillCard({ bill }: { bill: any }) {
 
       <a href={url} target="_blank" rel="noopener noreferrer"
         className="inline-flex items-center gap-1 text-[9px] tracking-widest uppercase text-ftdgreen border-b border-dashed border-ftdgreen opacity-70 hover:opacity-100 mx-4 mb-3 mt-2">
-        ↗ Full bill on Congress.gov
+        ↗ {bill.isStateBill ? 'Full bill on OpenStates.org' : 'Full bill on Congress.gov'}
       </a>
     </div>
   );
