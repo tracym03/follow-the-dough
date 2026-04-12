@@ -84,7 +84,7 @@ export default function CouncilTab({ zip }: { zip: string }) {
       {/* Header */}
       <div className="bg-brown px-6 py-6 text-center">
         <div className="font-display text-3xl tracking-widest text-gold mb-1">🏛 City Council Tracker</div>
-        <div className="text-[11px] text-lb/80 mb-4 tracking-wide">
+        <div className="text-[14px] text-lb/80 mb-4 tracking-wide">
           Council members · Upcoming meetings · Recent legislation
         </div>
 
@@ -116,7 +116,7 @@ export default function CouncilTab({ zip }: { zip: string }) {
             ))}
           </select>
         </div>
-        <div className="text-[9px] text-white/30 mt-2 tracking-wide">
+        <div className="text-[12px] text-white/30 mt-2 tracking-wide">
           Powered by Legistar · {LEGISTAR_CITIES.length}+ cities · No API key required
         </div>
       </div>
@@ -128,7 +128,7 @@ export default function CouncilTab({ zip }: { zip: string }) {
             <div className="font-display text-lg tracking-wide mb-1">
               {search} — Not on Legistar
             </div>
-            <p className="text-[10px] text-mid leading-relaxed mb-3">
+            <p className="text-[13px] text-mid leading-relaxed mb-3">
               Smaller cities often use their own meeting management systems rather than Legistar.
               You can still access their council information directly:
             </p>
@@ -137,35 +137,35 @@ export default function CouncilTab({ zip }: { zip: string }) {
             {nonLegistarCity ? (
               <div className="space-y-2">
                 <a href={nonLegistarCity.website} target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-[10px] text-amber border border-amber rounded px-3 py-2 hover:bg-yellow-50">
+                  className="flex items-center gap-2 text-[13px] text-amber border border-amber rounded px-3 py-2 hover:bg-yellow-50">
                   🏛 {nonLegistarCity.label} City Council →
                 </a>
                 {nonLegistarCity.financeUrl && (
                   <a href={nonLegistarCity.financeUrl} target="_blank" rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-[10px] text-ftdgreen border border-ftdgreen rounded px-3 py-2 hover:bg-green-50">
+                    className="flex items-center gap-2 text-[13px] text-ftdgreen border border-ftdgreen rounded px-3 py-2 hover:bg-green-50">
                     💰 California Campaign Finance Disclosures (FPPC) →
                   </a>
                 )}
               </div>
             ) : (
               <div className="space-y-2">
-                <p className="text-[9px] text-mid mb-2">Try searching for your city directly:</p>
+                <p className="text-[12px] text-mid mb-2">Try searching for your city directly:</p>
                 <a
                   href={`https://www.google.com/search?q=${encodeURIComponent(search + ' city council agenda minutes')}`}
                   target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-[10px] text-amber border border-amber rounded px-3 py-2 hover:bg-yellow-50">
+                  className="flex items-center gap-2 text-[13px] text-amber border border-amber rounded px-3 py-2 hover:bg-yellow-50">
                   🔍 Search for {search} City Council →
                 </a>
                 <a
                   href={`https://www.fppc.ca.gov/transparency/campaign-disclosure-portals.html`}
                   target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-[10px] text-ftdgreen border border-ftdgreen rounded px-3 py-2 hover:bg-green-50">
+                  className="flex items-center gap-2 text-[13px] text-ftdgreen border border-ftdgreen rounded px-3 py-2 hover:bg-green-50">
                   💰 California Local Campaign Finance (FPPC) →
                 </a>
               </div>
             )}
 
-            <div className="mt-3 pt-3 border-t border-lb text-[9px] text-mid">
+            <div className="mt-3 pt-3 border-t border-lb text-[12px] text-mid">
               💡 San Clemente, Dana Point, San Juan Capistrano, Laguna Beach, Newport Beach,
               Mission Viejo, Lake Forest and Aliso Viejo are listed below — type their name to see links.
             </div>
@@ -173,13 +173,13 @@ export default function CouncilTab({ zip }: { zip: string }) {
 
           {/* Known OC small cities */}
           <div className="mt-4">
-            <div className="text-[9px] tracking-[3px] uppercase text-mid mb-2">Orange County Cities (Direct Links)</div>
+            <div className="text-[12px] tracking-[3px] uppercase text-mid mb-2">Orange County Cities (Direct Links)</div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {NON_LEGISTAR_CITIES.map(c => (
                 <a key={c.label} href={c.website} target="_blank" rel="noopener noreferrer"
                   className="bg-white border border-lb rounded p-3 hover:border-amber transition-colors">
-                  <div className="text-[11px] font-medium text-ink">{c.label}</div>
-                  <div className="text-[9px] text-amber mt-0.5">View City Council →</div>
+                  <div className="text-[14px] font-medium text-ink">{c.label}</div>
+                  <div className="text-[12px] text-amber mt-0.5">View City Council →</div>
                 </a>
               ))}
             </div>
@@ -209,7 +209,7 @@ export default function CouncilTab({ zip }: { zip: string }) {
         <div className="max-w-2xl mx-auto px-4 py-4">
           <div className="bg-yellow-50 border border-yellow-300 border-l-4 border-l-amber p-4 text-sm">
             <div className="font-display text-lg mb-1">{cityLabel} — Data Unavailable</div>
-            <p className="text-[10px] text-mid">
+            <p className="text-[13px] text-mid">
               This city may not have a public Legistar connection. Try another city or visit their official website.
             </p>
           </div>
@@ -222,7 +222,7 @@ export default function CouncilTab({ zip }: { zip: string }) {
           <div className="px-6 py-5 text-center border-b-4 border-gold"
             style={{ background: 'linear-gradient(135deg, #3b1f0a 0%, #5c3010 100%)' }}>
             <div className="font-display text-4xl text-gold tracking-widest">{cityLabel}</div>
-            <div className="text-[11px] text-cream/50 uppercase tracking-widest mt-1">City Council Data via Legistar</div>
+            <div className="text-[14px] text-cream/50 uppercase tracking-widest mt-1">City Council Data via Legistar</div>
           </div>
 
           <div className="max-w-2xl mx-auto px-4 py-4 space-y-6">
@@ -252,26 +252,26 @@ export default function CouncilTab({ zip }: { zip: string }) {
                                 href={profileUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="font-semibold text-[13px] text-amber underline underline-offset-2 decoration-amber/40 hover:decoration-amber truncate"
+                                className="font-semibold text-[16px] text-amber underline underline-offset-2 decoration-amber/40 hover:decoration-amber truncate"
                               >
                                 {p.PersonFirstName} {p.PersonLastName}
                               </a>
                             ) : (
-                              <span className="font-semibold text-[13px] text-ink truncate">
+                              <span className="font-semibold text-[16px] text-ink truncate">
                                 {p.PersonFirstName} {p.PersonLastName}
                               </span>
                             )}
                             {partyLabel && partyColor && (
                               <span
-                                className="text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0"
+                                className="text-[12px] font-bold px-1.5 py-0.5 rounded-full shrink-0"
                                 style={{ backgroundColor: partyColor + '22', color: partyColor, border: `1px solid ${partyColor}66` }}
                               >
                                 {partyLabel}
                               </span>
                             )}
                           </div>
-                          {p.PersonTitle && <div className="text-[11px] text-mid">{p.PersonTitle}</div>}
-                          {p.PersonPhone && <div className="text-[11px] text-mid">{p.PersonPhone}</div>}
+                          {p.PersonTitle && <div className="text-[14px] text-mid">{p.PersonTitle}</div>}
+                          {p.PersonPhone && <div className="text-[14px] text-mid">{p.PersonPhone}</div>}
                         </div>
                       </div>
                     );
@@ -291,14 +291,14 @@ export default function CouncilTab({ zip }: { zip: string }) {
                     const past = isPast(ev.EventDate);
                     return (
                       <div key={i} className={`bg-white border border-amber/30 rounded-lg px-4 py-3 border-l-4 ${past ? 'border-l-mid opacity-80' : 'border-l-amber'}`}>
-                        <div className={`text-[11px] font-bold uppercase tracking-wide mb-1 ${past ? 'text-mid' : 'text-amber'}`}>
+                        <div className={`text-[14px] font-bold uppercase tracking-wide mb-1 ${past ? 'text-mid' : 'text-amber'}`}>
                           {formatDate(ev.EventDate)}
                         </div>
-                        <div className="text-[13px] font-medium text-ink">{ev.EventBodyName || 'Council Meeting'}</div>
-                        {ev.EventLocation && <div className="text-[11px] text-mid mt-0.5">📍 {ev.EventLocation}</div>}
+                        <div className="text-[16px] font-medium text-ink">{ev.EventBodyName || 'Council Meeting'}</div>
+                        {ev.EventLocation && <div className="text-[14px] text-mid mt-0.5">📍 {ev.EventLocation}</div>}
                         {ev.EventAgendaFile && (
                           <a href={ev.EventAgendaFile} target="_blank" rel="noopener noreferrer"
-                            className="inline-block mt-2 text-[11px] text-ftdblue border border-ftdblue rounded px-2 py-0.5 hover:bg-ftdblue hover:text-white transition-colors">
+                            className="inline-block mt-2 text-[14px] text-ftdblue border border-ftdblue rounded px-2 py-0.5 hover:bg-ftdblue hover:text-white transition-colors">
                             View Agenda ↗
                           </a>
                         )}
@@ -323,17 +323,17 @@ export default function CouncilTab({ zip }: { zip: string }) {
                     return (
                       <div key={i} className="bg-white border border-amber/30 rounded-lg px-4 py-3">
                         <div className="flex flex-wrap gap-2 items-center mb-1.5">
-                          <span className="text-[10px] font-bold uppercase tracking-wide bg-brown text-gold rounded px-2 py-0.5">
+                          <span className="text-[13px] font-bold uppercase tracking-wide bg-brown text-gold rounded px-2 py-0.5">
                             {m.MatterTypeName || 'Matter'}
                           </span>
-                          {m.MatterFile && <span className="text-[10px] text-mid font-mono">{m.MatterFile}</span>}
-                          <span className="text-[10px] text-mid ml-auto">{formatDate(m.MatterLastModifiedUtc)}</span>
+                          {m.MatterFile && <span className="text-[13px] text-mid font-mono">{m.MatterFile}</span>}
+                          <span className="text-[13px] text-mid ml-auto">{formatDate(m.MatterLastModifiedUtc)}</span>
                         </div>
-                        <div className="text-[13px] leading-snug mb-1.5">{m.MatterTitle || m.MatterName}</div>
+                        <div className="text-[16px] leading-snug mb-1.5">{m.MatterTitle || m.MatterName}</div>
                         <div className="flex items-center gap-2 flex-wrap">
-                          {m.MatterStatusName && <span className="text-[11px] font-semibold text-mid">{m.MatterStatusName}</span>}
+                          {m.MatterStatusName && <span className="text-[14px] font-semibold text-mid">{m.MatterStatusName}</span>}
                           {vote && (
-                            <span className={`text-[10px] font-bold rounded px-2 py-0.5 ${passed ? 'bg-green-100 text-green-800' : failed ? 'bg-red-100 text-red-800' : 'bg-lb text-mid'}`}>
+                            <span className={`text-[13px] font-bold rounded px-2 py-0.5 ${passed ? 'bg-green-100 text-green-800' : failed ? 'bg-red-100 text-red-800' : 'bg-lb text-mid'}`}>
                               {passed ? '✓ Passed' : failed ? '✗ Failed' : 'Voted'}
                             </span>
                           )}
@@ -345,7 +345,7 @@ export default function CouncilTab({ zip }: { zip: string }) {
               </section>
             )}
 
-            <div className="text-center text-[11px] text-mid">
+            <div className="text-center text-[14px] text-mid">
               Data from <a href="https://webapi.legistar.com" target="_blank" rel="noopener noreferrer" className="text-amber">Legistar</a>
               {' '}· Updated in real time · All public record
             </div>
@@ -357,7 +357,7 @@ export default function CouncilTab({ zip }: { zip: string }) {
       {!selectedCity && !loading && !search && (
         <div className="text-center py-12 text-mid font-mono text-xs tracking-widest uppercase">
           <div className="font-display text-2xl text-amber mb-2">Search or Select a City</div>
-          <p className="text-[10px] normal-case tracking-normal max-w-sm mx-auto mt-2 leading-relaxed">
+          <p className="text-[13px] normal-case tracking-normal max-w-sm mx-auto mt-2 leading-relaxed">
             Type your city name above or choose from the dropdown.
             Don&apos;t see your city? Many smaller cities aren&apos;t on Legistar —
             search anyway and we&apos;ll show you direct links.

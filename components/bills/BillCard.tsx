@@ -71,6 +71,16 @@ const BILL_TOPIC_PATTERNS: { pattern: RegExp; label: string; emoji: string; indu
     label: 'Foreign Policy', emoji: '🌐',
     industryKeys: ['pro-israel', 'foreign'],
   },
+  {
+    pattern: /\bepa\b|environmental protection agency|clean air act|clean water act|superfund|endangered species|pollution|toxic waste|pesticide|wetland|wildlife refuge|national park|biodiversity|conservation fund|deforestation|environmental impact/i,
+    label: 'Environment', emoji: '🌿',
+    industryKeys: ['oil', 'gas', 'energy', 'agriculture'],
+  },
+  {
+    pattern: /civil liberties|civil rights|first amendment|free speech|freedom of (speech|press|religion|assembly)|voting rights|voter suppression|equal protection|due process|fourth amendment|search and seizure|warrantless|surveillance|privacy rights|reproductive rights|abortion|bodily autonomy|lgbtq|transgender|discrimination ban|hate crime|police accountability|civil asset forfeiture/i,
+    label: 'Civil Liberties', emoji: '🗽',
+    industryKeys: [],
+  },
 ];
 
 export function detectBillTopic(title: string) {
@@ -163,26 +173,26 @@ function SponsorFundingSection({
         <div className="flex items-center gap-2">
           <span className="text-lg leading-none">💰</span>
           <div>
-            <div className="text-[11px] font-semibold text-brown">Who funds the bill&apos;s sponsor?</div>
-            <div className="text-[9px] text-mid">
+            <div className="text-[16px] font-semibold text-brown">Who funds the bill&apos;s sponsor?</div>
+            <div className="text-[17px] text-mid">
               See which industries bankroll <span className={`font-medium ${partyColor}`}>{sponsorName}</span>
             </div>
           </div>
         </div>
-        <span className="text-[10px] text-amber font-mono shrink-0">{open ? '▲ hide' : '▼ show'}</span>
+        <span className="text-[16px] text-amber font-mono shrink-0">{open ? '▲ hide' : '▼ show'}</span>
       </button>
 
       {open && (
         <div className="px-4 pb-4">
           {loading && (
-            <div className="flex items-center gap-2 py-3 text-[9px] text-mid">
+            <div className="flex items-center gap-2 py-3 text-[17px] text-mid">
               <div className="w-3 h-3 border-2 border-amber/20 border-t-amber rounded-full animate-spin shrink-0" />
               Looking up FEC filings for {sponsorName}...
             </div>
           )}
 
           {!loading && data && !data.found && (
-            <p className="py-2 text-[9px] text-mid italic">
+            <p className="py-2 text-[17px] text-mid italic">
               No FEC filings found for {sponsorName}.{' '}
               <a href={`https://www.fec.gov/data/candidates/?q=${encodeURIComponent(sponsorName)}&office=${sponsorChamber}`}
                 target="_blank" rel="noopener noreferrer" className="text-amber underline">
@@ -195,7 +205,7 @@ function SponsorFundingSection({
             <>
               {/* ── Conflict check — always shown when we have data ── */}
               {conflict && (
-                <div className={`mt-1 mb-3 px-3 py-2.5 rounded border text-[11px] leading-snug ${
+                <div className={`mt-1 mb-3 px-3 py-2.5 rounded border text-[16px] leading-snug ${
                   conflict.conflict
                     ? 'bg-red-50 border-red-300 text-red-800 font-medium'
                     : (conflict as any).noData
@@ -210,17 +220,17 @@ function SponsorFundingSection({
               {/* ── Summary pills ── */}
               <div className="flex gap-2 flex-wrap mb-3">
                 {raised > 0 && (
-                  <span className="text-[9px] px-2 py-0.5 rounded-full bg-amber/20 text-brown">
+                  <span className="text-[17px] px-2 py-0.5 rounded-full bg-amber/20 text-brown">
                     💵 {fmt(raised)} raised (2024)
                   </span>
                 )}
                 {indivPct > 0 && (
-                  <span className="text-[9px] px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-800">
+                  <span className="text-[17px] px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-800">
                     👤 {indivPct}% individual
                   </span>
                 )}
                 {pacPct > 0 && (
-                  <span className="text-[9px] px-2 py-0.5 rounded-full bg-purple-100 text-ftdpurple">
+                  <span className="text-[17px] px-2 py-0.5 rounded-full bg-purple-100 text-ftdpurple">
                     🏛 {pacPct}% PAC money
                   </span>
                 )}
@@ -229,13 +239,13 @@ function SponsorFundingSection({
               {/* ── Industry dough chart ── */}
               {slices.length >= 2 ? (
                 <>
-                  <p className="text-[9px] text-brown leading-relaxed mb-2">
+                  <p className="text-[17px] text-brown leading-relaxed mb-2">
                     <strong>Top industry funders</strong> — these industries have a financial interest in how {sponsorName.split(',')[0]} votes:
                   </p>
                   <PizzaChart title={`${sponsorName} — Industry Funders`} slices={slices} />
                 </>
               ) : (
-                <p className="text-[9px] text-mid italic">
+                <p className="text-[17px] text-mid italic">
                   Not enough PAC data to identify industries.{' '}
                   <a href={`https://www.opensecrets.org/members-of-congress/summary?name=${encodeURIComponent(sponsorName)}`}
                     target="_blank" rel="noopener noreferrer" className="text-amber underline">
@@ -244,7 +254,7 @@ function SponsorFundingSection({
                 </p>
               )}
 
-              <div className="text-[8px] text-mid mt-2 pt-2 border-t border-lb flex gap-3 flex-wrap">
+              <div className="text-[16px] text-mid mt-2 pt-2 border-t border-lb flex gap-3 flex-wrap">
                 <a href={`https://www.fec.gov/data/candidate/${data.candidateId}/?cycle=2024&tab=receipts`}
                   target="_blank" rel="noopener noreferrer" className="text-amber">Full FEC record ↗</a>
                 <a href={`https://www.opensecrets.org/members-of-congress/summary?name=${encodeURIComponent(sponsorName)}`}
@@ -281,27 +291,27 @@ export default function BillCard({ bill }: { bill: any }) {
     <div className="bg-white border border-lb border-l-4 border-l-ftdgreen mb-3 hover:-translate-x-px hover:-translate-y-px hover:shadow-[3px_3px_0_#2d6a4f] transition-all">
       <div className="px-4 py-3">
         <div className="flex items-start justify-between gap-2 mb-1">
-          <div className="font-display text-[12px] tracking-[3px] text-amber">
+          <div className="font-display text-[17px] tracking-[3px] text-amber">
             {num} · {bill.isStateBill ? `${bill.stateCode || bill.sponsorState} Legislature` : `${congress}th Congress`}
           </div>
           {/* Topic badge */}
           {topic && (
-            <span className="text-[8px] px-2 py-0.5 rounded-full bg-lb border border-amber/40 text-brown shrink-0 whitespace-nowrap">
+            <span className="text-[16px] px-2 py-0.5 rounded-full bg-lb border border-amber/40 text-brown shrink-0 whitespace-nowrap">
               {topic.emoji} {topic.label}
             </span>
           )}
         </div>
-        <div className="text-[12px] font-medium leading-snug mb-1">
+        <div className="text-[17px] font-medium leading-snug mb-1">
           {bill.title?.substring(0, 130)}{(bill.title?.length || 0) > 130 ? '…' : ''}
         </div>
         {bill.sponsor && (
-          <div className="text-[9px] text-mid mt-1">
+          <div className="text-[17px] text-mid mt-1">
             Sponsored by <strong className="text-ink">{bill.sponsor}</strong>
             {bill.sponsorState && <span className="ml-1 text-mid">· {bill.sponsorState}</span>}
           </div>
         )}
         {action && (
-          <span className={`inline-flex items-center text-[8px] tracking-[1.5px] uppercase px-2 py-0.5 rounded-full mt-2 ${statusCls}`}>
+          <span className={`inline-flex items-center text-[16px] tracking-[1.5px] uppercase px-2 py-0.5 rounded-full mt-2 ${statusCls}`}>
             {actionDate ? `${actionDate} — ` : ''}{action.substring(0, 90)}{action.length > 90 ? '…' : ''}
           </span>
         )}
@@ -318,7 +328,7 @@ export default function BillCard({ bill }: { bill: any }) {
       )}
 
       <a href={url} target="_blank" rel="noopener noreferrer"
-        className="inline-flex items-center gap-1 text-[9px] tracking-widest uppercase text-ftdgreen border-b border-dashed border-ftdgreen opacity-70 hover:opacity-100 mx-4 mb-3 mt-2">
+        className="inline-flex items-center gap-1 text-[17px] tracking-widest uppercase text-ftdgreen border-b border-dashed border-ftdgreen opacity-70 hover:opacity-100 mx-4 mb-3 mt-2">
         ↗ {bill.isStateBill ? 'Full bill on OpenStates.org' : 'Full bill on Congress.gov'}
       </a>
     </div>

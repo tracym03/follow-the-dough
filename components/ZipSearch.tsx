@@ -19,7 +19,7 @@ export default function ZipSearch({ defaultZip = '' }: { defaultZip?: string }) 
 
   return (
     <div className="bg-ink px-6 py-4 flex flex-col items-center gap-2">
-      <div className="text-[10px] tracking-[4px] uppercase text-amber font-mono">Enter your ZIP code</div>
+      <div className="text-[13px] tracking-[4px] uppercase text-amber font-mono">Enter your ZIP code</div>
       <div className="flex w-full max-w-sm">
         <input
           type="text"
@@ -39,7 +39,7 @@ export default function ZipSearch({ defaultZip = '' }: { defaultZip?: string }) 
         </button>
       </div>
       {error && <p className="text-ftdred text-xs font-mono tracking-wider">{error}</p>}
-      <div className="text-[9px] tracking-[2px] uppercase text-amber/20 font-mono">
+      <div className="text-[12px] tracking-[2px] uppercase text-amber/20 font-mono">
         FEC · Congress.gov · LDA · Legistar — all free, all public record
       </div>
     </div>

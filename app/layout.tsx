@@ -11,7 +11,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className="bg-cream font-sans text-ink min-h-screen">
         {children}
-        <footer className="bg-ink py-4 px-4 text-center text-[9px] tracking-widest uppercase text-amber/25 leading-loose">
+        <footer className="bg-ink py-4 px-4 text-center text-[12px] tracking-widest uppercase text-amber/25 leading-loose">
           <div>
             Federal donations:{' '}
             <a href="https://fec.gov" target="_blank" rel="noopener noreferrer" className="text-amber">FEC.gov</a>

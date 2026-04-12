@@ -10,6 +10,8 @@ const STATE_OPTIONS = [
   { code: 'FL', name: 'Florida',    emoji: '🌊', financeUrl: 'https://dos.myflorida.com/elections/candidates-committees/' },
 ];
 
+const SUPPORTED_STATES = STATE_OPTIONS.map(s => s.code);
+
 const TOPIC_FILTERS = [
   { label: 'All',                   emoji: '📋' },
   { label: 'Healthcare & Pharma',   emoji: '🏥' },
@@ -20,10 +22,13 @@ const TOPIC_FILTERS = [
   { label: 'Education',             emoji: '🎓' },
   { label: 'Agriculture',           emoji: '🌾' },
   { label: 'Immigration',           emoji: '🌎' },
+  { label: 'Environment',           emoji: '🌿' },
+  { label: 'Civil Liberties',       emoji: '🗽' },
 ];
 
-export default function StateBillsTab({ state }: { state: string }) {
-  const defaultState = (['CA', 'NY', 'TX', 'FL'] as string[]).includes(state) ? state : 'CA';
+export default function StateBillsTab({ state, stateName }: { state: string; stateName: string }) {
+  const userStateSupported = SUPPORTED_STATES.includes(state);
+  const defaultState = userStateSupported ? state : 'CA';
   const [selectedState, setSelectedState] = useState(defaultState);
   const [filter, setFilter]               = useState('All');
   const [data, setData]                   = useState<any>(null);
@@ -54,22 +59,45 @@ export default function StateBillsTab({ state }: { state: string }) {
   return (
     <div>
       {/* Header bar */}
-      <div className="bg-brown text-gold text-[9px] tracking-[3px] uppercase px-4 py-2 flex justify-between items-center flex-wrap gap-1">
+      <div className="bg-brown text-gold text-[17px] tracking-[3px] uppercase px-4 py-2 flex justify-between items-center flex-wrap gap-1">
         <span>State Legislature Bills</span>
         <span>{data?.session ? `Session: ${data.session}` : 'Most Recent Session'}</span>
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-4">
 
+        {/* Not yet available banner for unsupported states */}
+        {!userStateSupported && (
+          <div className="bg-lb border border-amber/50 border-l-4 border-l-amber px-4 py-3 mb-5 text-[16px] leading-relaxed text-brown">
+            <div className="font-semibold text-[16px] mb-1">📜 State bills for {stateName} aren&apos;t live yet</div>
+            <p className="text-mid mb-2">
+              We currently have live bill tracking for CA, NY, TX, and FL. You can still browse those states below,
+              or view {stateName}&apos;s bills directly on these free public resources:
+            </p>
+            <div className="flex gap-2 flex-wrap">
+              <a href={`https://openstates.org/${state.toLowerCase()}/bills/`}
+                target="_blank" rel="noopener noreferrer"
+                className="text-[17px] px-2 py-1 border border-amber text-amber rounded hover:bg-amber/10">
+                ↗ OpenStates — {stateName} Bills
+              </a>
+              <a href={`https://www.ncsl.org/research/about-state-legislatures/legislative-websites.aspx`}
+                target="_blank" rel="noopener noreferrer"
+                className="text-[17px] px-2 py-1 border border-mid text-mid rounded hover:bg-lb">
+                ↗ {stateName} Legislature Website
+              </a>
+            </div>
+          </div>
+        )}
+
         {/* State selector */}
         <div className="mb-5">
-          <div className="text-[8px] tracking-[3px] uppercase text-mid mb-2">Select state:</div>
+          <div className="text-[16px] tracking-[3px] uppercase text-mid mb-2">Select state:</div>
           <div className="flex gap-2 flex-wrap">
             {STATE_OPTIONS.map(s => (
               <button
                 key={s.code}
                 onClick={() => setSelectedState(s.code)}
-                className={`text-[11px] px-3 py-1.5 rounded border font-semibold transition-colors ${
+                className={`text-[16px] px-3 py-1.5 rounded border font-semibold transition-colors ${
                   selectedState === s.code
                     ? 'bg-brown text-gold border-brown'
                     : 'bg-white text-mid border-lb hover:border-amber/60 hover:text-ink'
@@ -82,7 +110,7 @@ export default function StateBillsTab({ state }: { state: string }) {
         </div>
 
         {/* Sponsor funding note */}
-        <div className="bg-amber/5 border border-amber/30 rounded px-3 py-2 mb-5 text-[9px] leading-relaxed text-brown">
+        <div className="bg-amber/5 border border-amber/30 rounded px-3 py-2 mb-5 text-[17px] leading-relaxed text-brown">
           <strong>About sponsor funding:</strong> State legislators rarely appear in federal FEC records unless
           they&apos;ve also run for Congress. For state-level campaign finance, check{' '}
           <a href={stateInfo.financeUrl} target="_blank" rel="noopener noreferrer" className="text-amber underline">
@@ -92,13 +120,13 @@ export default function StateBillsTab({ state }: { state: string }) {
 
         {/* Topic filter chips */}
         <div className="mb-4">
-          <div className="text-[8px] tracking-[3px] uppercase text-mid mb-2">Filter by topic:</div>
+          <div className="text-[16px] tracking-[3px] uppercase text-mid mb-2">Filter by topic:</div>
           <div className="flex gap-1.5 flex-wrap">
             {TOPIC_FILTERS.map(t => (
               <button
                 key={t.label}
                 onClick={() => setFilter(t.label)}
-                className={`text-[9px] px-2.5 py-1 rounded-full border transition-colors ${
+                className={`text-[17px] px-2.5 py-1 rounded-full border transition-colors ${
                   filter === t.label
                     ? 'bg-amber text-ink border-amber font-semibold'
                     : 'bg-white border-lb text-mid hover:border-amber/60'
@@ -116,7 +144,7 @@ export default function StateBillsTab({ state }: { state: string }) {
             {stateInfo.emoji} {stateInfo.name} — {filter === 'All' ? 'All Bills' : `${filter} Bills`}
           </h2>
           {!loading && (
-            <span className="text-[8px] tracking-widest px-2 py-0.5 rounded-full bg-amber text-ink">
+            <span className="text-[16px] tracking-widest px-2 py-0.5 rounded-full bg-amber text-ink">
               {filteredBills.length}
             </span>
           )}
@@ -128,7 +156,7 @@ export default function StateBillsTab({ state }: { state: string }) {
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <div className="w-7 h-7 border-[3px] border-amber/20 border-t-amber rounded-full animate-spin mb-4" />
             <div className="font-display text-2xl text-amber">Loading {stateInfo.name} Bills…</div>
-            <div className="text-[9px] tracking-widest uppercase text-mid mt-2">Fetching OpenStates data</div>
+            <div className="text-[17px] tracking-widest uppercase text-mid mt-2">Fetching OpenStates data</div>
           </div>
         )}
 
@@ -142,7 +170,7 @@ export default function StateBillsTab({ state }: { state: string }) {
         {/* Bills */}
         {!loading && !error && (
           filteredBills.length === 0 ? (
-            <div className="text-center py-8 text-mid text-[10px] font-mono">
+            <div className="text-center py-8 text-mid text-[16px] font-mono">
               No {filter === 'All' ? '' : `${filter} `}bills found.
               {filter !== 'All' && (
                 <button onClick={() => setFilter('All')} className="block mx-auto mt-2 text-amber underline">
@@ -162,12 +190,12 @@ export default function StateBillsTab({ state }: { state: string }) {
           <div className="text-center mt-6 space-y-2">
             <a href={`https://openstates.org/${selectedState.toLowerCase()}/bills/`}
               target="_blank" rel="noopener noreferrer"
-              className="text-[9px] tracking-[3px] uppercase text-amber block">
+              className="text-[17px] tracking-[3px] uppercase text-amber block">
               Browse all {stateInfo.name} bills on OpenStates ↗
             </a>
             <a href={stateInfo.financeUrl}
               target="_blank" rel="noopener noreferrer"
-              className="text-[9px] tracking-[3px] uppercase text-mid block">
+              className="text-[17px] tracking-[3px] uppercase text-mid block">
               {stateInfo.name} campaign finance database ↗
             </a>
           </div>

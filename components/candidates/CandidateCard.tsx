@@ -217,26 +217,26 @@ export default function CandidateCard({ data, electionYear = 2026 }: { data: any
               </span>
             )}
           </div>
-          <div className="text-[9px] tracking-widest uppercase text-mid">{officeStr(c.office, c.state, c.district)}</div>
+          <div className="text-[12px] tracking-widest uppercase text-mid">{officeStr(c.office, c.state, c.district)}</div>
           {/* One-liner funding summary */}
           {fundingSummary && (
             <div className="mt-1.5 inline-flex items-center gap-1.5 bg-amber/10 border border-amber/30 rounded px-2 py-1">
-              <span className="text-amber text-[10px]">💰</span>
-              <span className="text-[10px] font-medium text-brown leading-tight">{fundingSummary}</span>
+              <span className="text-amber text-[13px]">💰</span>
+              <span className="text-[13px] font-medium text-brown leading-tight">{fundingSummary}</span>
             </div>
           )}
         </div>
         <div className="text-right shrink-0">
-          <span className={`inline-block text-[8px] tracking-widest uppercase px-2 py-0.5 rounded-full mb-1 ${pillCls}`}>{partyFull(party)}</span>
+          <span className={`inline-block text-[11px] tracking-widest uppercase px-2 py-0.5 rounded-full mb-1 ${pillCls}`}>{partyFull(party)}</span>
           <div className="font-display text-lg text-brown">{raised > 0 ? fmt(raised) : '—'}</div>
-          <div className="text-[8px] tracking-widest uppercase text-mid">{raised > 0 ? 'raised' : 'no filings yet'}</div>
-          {spent > 0 && <div className="text-[9px] text-mid">{fmt(spent)} spent</div>}
+          <div className="text-[11px] tracking-widest uppercase text-mid">{raised > 0 ? 'raised' : 'no filings yet'}</div>
+          {spent > 0 && <div className="text-[12px] text-mid">{fmt(spent)} spent</div>}
         </div>
       </div>
 
       {/* Early cycle notice */}
       {raised === 0 && (
-        <div className="mx-4 mb-2 px-3 py-2 bg-yellow-50 border border-yellow-200 rounded text-[9px] text-yellow-800 leading-relaxed">
+        <div className="mx-4 mb-2 px-3 py-2 bg-yellow-50 border border-yellow-200 rounded text-[12px] text-yellow-800 leading-relaxed">
           📋 This candidate has registered with the FEC but no fundraising data is available yet for the {electionYear} cycle. Check back as the election approaches.
         </div>
       )}
@@ -244,10 +244,10 @@ export default function CandidateCard({ data, electionYear = 2026 }: { data: any
       {/* Individual / PAC split */}
       {raised > 0 && (
         <div className="px-4 pb-2 flex gap-2 flex-wrap">
-          <span className="text-[9px] px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-800">
+          <span className="text-[12px] px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-800">
             👤 Individual {Math.round((indivT / raised) * 100) || 0}%
           </span>
-          <span className="text-[9px] px-2 py-0.5 rounded-full bg-purple-100 text-ftdpurple">
+          <span className="text-[12px] px-2 py-0.5 rounded-full bg-purple-100 text-ftdpurple">
             🏛 PAC {Math.round((pacT / raised) * 100) || 0}%
           </span>
         </div>
@@ -256,11 +256,11 @@ export default function CandidateCard({ data, electionYear = 2026 }: { data: any
       {/* Individual donors */}
       <div className="px-4 pb-3">
         <div className="flex justify-between items-center mb-2">
-          <span className="text-[8px] tracking-[3px] uppercase text-mid">✦ Top Individual Donors</span>
-          <span className="text-[8px] px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-800">Donations $200+ are public</span>
+          <span className="text-[11px] tracking-[3px] uppercase text-mid">✦ Top Individual Donors</span>
+          <span className="text-[11px] px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-800">Donations $200+ are public</span>
         </div>
         {top5.length === 0 && (
-          <p className="text-[9px] text-mid italic">No itemized individual donations found for this candidate.</p>
+          <p className="text-[12px] text-mid italic">No itemized individual donations found for this candidate.</p>
         )}
         {top5.map((d: any, i: number) => {
           const amt = d.contribution_receipt_amount;
@@ -275,13 +275,13 @@ export default function CandidateCard({ data, electionYear = 2026 }: { data: any
             <div key={i} className="flex items-center gap-2 mb-2">
               <div className="font-display text-xs text-lb w-4 text-center shrink-0">{i + 1}</div>
               <div className="flex-1 min-w-0">
-                <div className="text-[11px] font-medium truncate">{name}</div>
-                {sub && <div className="text-[9px] text-mid truncate">{sub}</div>}
+                <div className="text-[14px] font-medium truncate">{name}</div>
+                {sub && <div className="text-[12px] text-mid truncate">{sub}</div>}
                 <div className="h-[3px] bg-lb rounded mt-1">
                   <div className={`h-full rounded ${party === 'DEM' ? 'bg-ftdblue' : party === 'REP' ? 'bg-ftdred' : 'bg-amber'}`} style={{ width: `${pct}%` }} />
                 </div>
               </div>
-              <div className="font-display text-[15px] text-brown shrink-0">{fmt(amt)}</div>
+              <div className="font-display text-[18px] text-brown shrink-0">{fmt(amt)}</div>
             </div>
           );
         })}
@@ -296,19 +296,19 @@ export default function CandidateCard({ data, electionYear = 2026 }: { data: any
                 <div key={i} className="flex items-center gap-2 mb-2">
                   <div className="font-display text-xs text-lb w-4 text-center shrink-0">{5 + i + 1}</div>
                   <div className="flex-1 min-w-0">
-                    <div className="text-[11px] font-medium truncate">{name}</div>
-                    {emp && <div className="text-[9px] text-mid truncate">{emp}</div>}
+                    <div className="text-[14px] font-medium truncate">{name}</div>
+                    {emp && <div className="text-[12px] text-mid truncate">{emp}</div>}
                     <div className="h-[3px] bg-lb rounded mt-1">
                       <div className={`h-full rounded ${party === 'DEM' ? 'bg-ftdblue' : party === 'REP' ? 'bg-ftdred' : 'bg-amber'}`} style={{ width: `${pct}%` }} />
                     </div>
                   </div>
-                  <div className="font-display text-[15px] text-brown shrink-0">{fmt(amt)}</div>
+                  <div className="font-display text-[18px] text-brown shrink-0">{fmt(amt)}</div>
                 </div>
               );
             })}
             <button
               onClick={() => setShowMore(!showMore)}
-              className="w-full bg-lb border-t border-[#e5d5b5] py-1.5 font-mono text-[9px] tracking-[3px] uppercase text-mid hover:bg-gold hover:text-ink transition-colors"
+              className="w-full bg-lb border-t border-[#e5d5b5] py-1.5 font-mono text-[12px] tracking-[3px] uppercase text-mid hover:bg-gold hover:text-ink transition-colors"
             >
               {showMore ? '▲ Show fewer' : `▼ Show ${more.length} more donors`}
             </button>
@@ -320,8 +320,8 @@ export default function CandidateCard({ data, electionYear = 2026 }: { data: any
       {employers?.length > 0 && (
         <div className="border-t border-lb px-4 py-3">
           <div className="mb-2">
-            <span className="text-[8px] tracking-[3px] uppercase text-mid">🏢 Top Employers of Individual Donors</span>
-            <p className="text-[9px] text-mid mt-0.5 italic">Employees of these companies donated as individuals — aggregated from all filings.</p>
+            <span className="text-[11px] tracking-[3px] uppercase text-mid">🏢 Top Employers of Individual Donors</span>
+            <p className="text-[12px] text-mid mt-0.5 italic">Employees of these companies donated as individuals — aggregated from all filings.</p>
           </div>
           {employers.slice(0, 6).map((e: any, i: number) => {
             const empName = cleanStr(e.employer);
@@ -331,10 +331,10 @@ export default function CandidateCard({ data, electionYear = 2026 }: { data: any
               <div key={i} className="bg-purple-50 border border-purple-200 border-l-2 border-l-ftdpurple px-2 py-2 mb-1.5 rounded-sm">
                 <div className="flex justify-between items-start mb-1">
                   <div>
-                    <div className="text-[11px] font-bold">{empName}</div>
-                    {e.count && <div className="text-[8px] text-mid">{e.count} employee donor{e.count !== 1 ? 's' : ''}</div>}
+                    <div className="text-[14px] font-bold">{empName}</div>
+                    {e.count && <div className="text-[11px] text-mid">{e.count} employee donor{e.count !== 1 ? 's' : ''}</div>}
                   </div>
-                  <div className="font-display text-[15px] text-ftdpurple">${((e.total || 0) / 1000).toFixed(0)}K</div>
+                  <div className="font-display text-[18px] text-ftdpurple">${((e.total || 0) / 1000).toFixed(0)}K</div>
                 </div>
                 <div className="h-[3px] bg-purple-200 rounded">
                   <div className="h-full bg-ftdpurple rounded" style={{ width: `${pct}%` }} />
@@ -355,15 +355,15 @@ export default function CandidateCard({ data, electionYear = 2026 }: { data: any
             <div className="flex items-center gap-2">
               <span className="text-xl leading-none">🥧</span>
               <div>
-                <div className="text-[11px] font-semibold text-brown">Which industries fund this candidate?</div>
-                <div className="text-[9px] text-mid">
+                <div className="text-[14px] font-semibold text-brown">Which industries fund this candidate?</div>
+                <div className="text-[12px] text-mid">
                   {pacIndustrySlices?.length > 0
                     ? `Pharma, Finance, Defense, Super PACs & more — tap to explore`
                     : `PAC types & industry breakdown`}
                 </div>
               </div>
             </div>
-            <span className="text-[10px] text-amber font-mono">{showPizza ? '▲ hide' : '▼ show'}</span>
+            <span className="text-[13px] text-amber font-mono">{showPizza ? '▲ hide' : '▼ show'}</span>
           </button>
 
           {showPizza && pacIndustrySlices?.length >= 2 && (
@@ -374,7 +374,7 @@ export default function CandidateCard({ data, electionYear = 2026 }: { data: any
           )}
 
           {showPizza && (!pacIndustrySlices || pacIndustrySlices.length < 2) && (
-            <div className="px-4 pb-4 text-[10px] text-mid italic">
+            <div className="px-4 pb-4 text-[13px] text-mid italic">
               Not enough identifiable industry data yet for this candidate. Check back as more donors file with the FEC.
             </div>
           )}
@@ -385,8 +385,8 @@ export default function CandidateCard({ data, electionYear = 2026 }: { data: any
       {pac?.length > 0 && (
         <div className="border-t border-lb px-4 py-3">
           <div className="mb-2">
-            <span className="text-[8px] tracking-[3px] uppercase text-mid">🏛 PAC & Committee Money</span>
-            <p className="text-[9px] text-mid mt-0.5 italic">
+            <span className="text-[11px] tracking-[3px] uppercase text-mid">🏛 PAC & Committee Money</span>
+            <p className="text-[12px] text-mid mt-0.5 italic">
               PACs are political committees that pool money from donors. Click any PAC to see who funds it.
             </p>
           </div>
@@ -411,20 +411,20 @@ export default function CandidateCard({ data, electionYear = 2026 }: { data: any
                     <div className="flex-1 min-w-0">
                       {hasCorp ? (
                         <>
-                          <div className="text-[11px] font-bold text-ink">🏢 {funder}</div>
-                          <div className="text-[9px] text-mid">via PAC: {pacAlias}</div>
+                          <div className="text-[14px] font-bold text-ink">🏢 {funder}</div>
+                          <div className="text-[12px] text-mid">via PAC: {pacAlias}</div>
                         </>
                       ) : (
-                        <div className="text-[11px] font-medium text-ink">{funder}</div>
+                        <div className="text-[14px] font-medium text-ink">{funder}</div>
                       )}
                       <div className="flex gap-1 flex-wrap mt-1">
-                        <span className={`text-[8px] px-2 py-0.5 rounded-full ${ptype.cls}`}>{ptype.label}</span>
-                        {st && <span className="text-[8px] px-2 py-0.5 rounded-full bg-lb text-mid">📍 {st}</span>}
+                        <span className={`text-[11px] px-2 py-0.5 rounded-full ${ptype.cls}`}>{ptype.label}</span>
+                        {st && <span className="text-[11px] px-2 py-0.5 rounded-full bg-lb text-mid">📍 {st}</span>}
                       </div>
                     </div>
                     <div className="text-right shrink-0">
                       <div className="font-display text-[17px] text-ftdpurple">{fmt(amt)}</div>
-                      <div className="text-[8px] text-mid">{isExpanded ? '▲ less' : '▼ who funds this?'}</div>
+                      <div className="text-[11px] text-mid">{isExpanded ? '▲ less' : '▼ who funds this?'}</div>
                     </div>
                   </div>
                   <div className="h-[3px] bg-purple-200 rounded mt-2">
@@ -436,10 +436,10 @@ export default function CandidateCard({ data, electionYear = 2026 }: { data: any
                 {isExpanded && (
                   <div className="px-3 pb-3 border-t border-purple-200 bg-white">
                     {/* Plain English explanation */}
-                    <p className="text-[10px] text-mid italic mt-2 mb-2 leading-relaxed">{ptype.explanation}</p>
+                    <p className="text-[13px] text-mid italic mt-2 mb-2 leading-relaxed">{ptype.explanation}</p>
 
                     {totalRaised && (
-                      <div className="text-[9px] text-mid mb-2">
+                      <div className="text-[12px] text-mid mb-2">
                         This PAC raised <strong className="text-ink">{fmt(totalRaised)}</strong> total this cycle.
                       </div>
                     )}
@@ -447,26 +447,26 @@ export default function CandidateCard({ data, electionYear = 2026 }: { data: any
                     {/* PAC's own donors */}
                     {p.pacDonors?.length > 0 ? (
                       <>
-                        <div className="text-[8px] tracking-widest uppercase text-ftdpurple mb-1.5">💼 Who funds this PAC:</div>
+                        <div className="text-[11px] tracking-widest uppercase text-ftdpurple mb-1.5">💼 Who funds this PAC:</div>
                         {p.pacDonors.map((d: any, j: number) => {
                           const dName = cleanStr(d.name) || 'Unknown';
                           const dEmp = cleanStr(d.employer);
                           return (
                             <div key={j} className="flex justify-between items-start gap-2 py-1.5 border-b border-purple-100 last:border-0">
                               <div>
-                                <div className="text-[10px] font-bold">{d.isOrg ? '🏛 ' : '👤 '}{dName}</div>
+                                <div className="text-[13px] font-bold">{d.isOrg ? '🏛 ' : '👤 '}{dName}</div>
                                 {!d.isOrg && dEmp && dEmp !== dName && (
-                                  <div className="text-[8px] text-mid">{dEmp}</div>
+                                  <div className="text-[11px] text-mid">{dEmp}</div>
                                 )}
-                                {d.isOrg && <div className="text-[8px] text-mid">Organization</div>}
+                                {d.isOrg && <div className="text-[11px] text-mid">Organization</div>}
                               </div>
-                              <span className="font-display text-[13px] text-ftdpurple whitespace-nowrap">{fmt(d.amount)}</span>
+                              <span className="font-display text-[16px] text-ftdpurple whitespace-nowrap">{fmt(d.amount)}</span>
                             </div>
                           );
                         })}
                       </>
                     ) : (
-                      <p className="text-[9px] text-mid italic">
+                      <p className="text-[12px] text-mid italic">
                         {hasCorp
                           ? `This PAC is directly connected to ${funder}. Funded by company employees under federal contribution limits.`
                           : 'Detailed donor breakdown not available for this PAC. Check FEC.gov for full records.'}
@@ -478,7 +478,7 @@ export default function CandidateCard({ data, electionYear = 2026 }: { data: any
                         href={`https://www.fec.gov/data/committee/${commId}/?cycle=2024&tab=receipts`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-block mt-2 text-[8px] tracking-widest uppercase text-amber border-b border-dashed border-amber"
+                        className="inline-block mt-2 text-[11px] tracking-widest uppercase text-amber border-b border-dashed border-amber"
                       >
                         ↗ See all {funder} donors on FEC.gov
                       </a>
@@ -494,7 +494,7 @@ export default function CandidateCard({ data, electionYear = 2026 }: { data: any
       {/* ActBlue / WinRed note */}
       {bundlers?.length > 0 && (
         <div className="px-4 pb-3 border-t border-lb pt-2 bg-yellow-50">
-          <p className="text-[9px] text-mid leading-relaxed">
+          <p className="text-[12px] text-mid leading-relaxed">
             ℹ️ <strong>Bundled small donations:</strong> Also received money via {bundlers.map((b: any) => cleanStr(b.contributor_name)).join(' / ')} — these platforms bundle thousands of small individual donations. This is grassroots money, not a single large donor.
           </p>
         </div>
@@ -504,22 +504,22 @@ export default function CandidateCard({ data, electionYear = 2026 }: { data: any
       {industryContext.length > 0 && (
         <div className="mx-4 mb-3 mt-1 border border-amber/40 rounded bg-amber/5 px-3 py-3">
           <div className="flex items-center gap-1.5 mb-2">
-            <span className="text-[9px] tracking-[2px] uppercase text-brown font-semibold">⚠ What does this funding mean?</span>
-            <span className="text-[8px] text-mid italic">Research-backed context</span>
+            <span className="text-[12px] tracking-[2px] uppercase text-brown font-semibold">⚠ What does this funding mean?</span>
+            <span className="text-[11px] text-mid italic">Research-backed context</span>
           </div>
           {industryContext.map((ctx, i) => (
-            <div key={i} className={`text-[10px] leading-relaxed text-ink ${i > 0 ? 'mt-2 pt-2 border-t border-amber/20' : ''}`}>
+            <div key={i} className={`text-[13px] leading-relaxed text-ink ${i > 0 ? 'mt-2 pt-2 border-t border-amber/20' : ''}`}>
               <span className="font-semibold text-brown">{ctx.label}*</span>
               {' — '}{ctx.fact}
               <div className="mt-1">
                 <a href={ctx.sourceUrl} target="_blank" rel="noopener noreferrer"
-                  className="text-[8px] text-amber underline">
+                  className="text-[11px] text-amber underline">
                   * Source: {ctx.source}
                 </a>
               </div>
             </div>
           ))}
-          <p className="text-[8px] text-mid italic mt-2 pt-2 border-t border-amber/20">
+          <p className="text-[11px] text-mid italic mt-2 pt-2 border-t border-amber/20">
             Correlation does not prove causation. This data is provided for voter education only. Sources are independent research organizations.
           </p>
         </div>
@@ -530,7 +530,7 @@ export default function CandidateCard({ data, electionYear = 2026 }: { data: any
         href={`https://www.fec.gov/data/candidate/${cid}/?cycle=${electionYear}&tab=receipts`}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center gap-1 text-[9px] tracking-widest uppercase text-amber border-b border-dashed border-amber opacity-70 hover:opacity-100 mx-4 mb-3 mt-1"
+        className="inline-flex items-center gap-1 text-[12px] tracking-widest uppercase text-amber border-b border-dashed border-amber opacity-70 hover:opacity-100 mx-4 mb-3 mt-1"
       >
         ↗ View all donations on FEC.gov
       </a>

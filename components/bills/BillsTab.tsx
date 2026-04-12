@@ -109,6 +109,8 @@ const TOPIC_FILTERS = [
   { label: 'Agriculture',           emoji: '🌾' },
   { label: 'Immigration',           emoji: '🌎' },
   { label: 'Foreign Policy',        emoji: '🌐' },
+  { label: 'Environment',           emoji: '🌿' },
+  { label: 'Civil Liberties',       emoji: '🗽' },
 ];
 
 // ── Lobbying industry overview (always shown above bills) ─────────────────────
@@ -126,19 +128,19 @@ function LobbyingOverview() {
         className={`w-full flex items-center justify-between px-4 py-3 text-left transition-colors ${open ? 'bg-amber/10' : 'hover:bg-lb/50'}`}
       >
         <div>
-          <div className="font-display text-[15px] tracking-wider text-brown">
+          <div className="font-display text-[17px] tracking-wider text-brown">
             🏛️ Who Lobbies Congress? — 2024 Totals
           </div>
-          <div className="text-[9px] text-mid mt-0.5">
+          <div className="text-[17px] text-mid mt-0.5">
             Federal law requires all lobbyists to register. Total spend: {fmt(total)} in 2024 — tap to see the breakdown
           </div>
         </div>
-        <span className="text-[10px] text-amber font-mono shrink-0 ml-2">{open ? '▲ hide' : '▼ show'}</span>
+        <span className="text-[16px] text-amber font-mono shrink-0 ml-2">{open ? '▲ hide' : '▼ show'}</span>
       </button>
 
       {open && (
         <div className="px-4 pb-4">
-          <div className="bg-amber/5 border border-amber/30 rounded px-3 py-2 mb-4 text-[10px] leading-relaxed text-brown">
+          <div className="bg-amber/5 border border-amber/30 rounded px-3 py-2 mb-4 text-[16px] leading-relaxed text-brown">
             <strong>What this shows:</strong> Total amount spent lobbying Congress in 2024, broken down by industry.
             This is <em>not</em> campaign donations — this is money paid to registered lobbyists to directly
             influence legislation. Source:{' '}
@@ -166,12 +168,12 @@ function LobbyingOverview() {
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2 min-w-0">
                         <span className="text-base shrink-0">{item.emoji}</span>
-                        <span className="text-[11px] font-semibold text-ink truncate">{item.label}</span>
+                        <span className="text-[16px] font-semibold text-ink truncate">{item.label}</span>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
-                        <span className="text-[10px] text-mid">{pct}%</span>
-                        <span className="font-display text-[14px] text-amber">{fmt(item.value)}</span>
-                        <span className="text-[9px] text-mid">{isActive ? '▲' : '▼'}</span>
+                        <span className="text-[16px] text-mid">{pct}%</span>
+                        <span className="font-display text-[16px] text-amber">{fmt(item.value)}</span>
+                        <span className="text-[17px] text-mid">{isActive ? '▲' : '▼'}</span>
                       </div>
                     </div>
                     <div className="h-1.5 bg-lb rounded mt-1.5">
@@ -181,21 +183,21 @@ function LobbyingOverview() {
 
                   {isActive && (
                     <div className="px-3 pb-3 border-t border-amber/20">
-                      <p className="text-[9px] text-brown leading-relaxed mt-2 mb-3">{item.note}</p>
-                      <div className="text-[8px] tracking-[2px] uppercase text-mid mb-2">Top 5 spenders — 2024</div>
+                      <p className="text-[17px] text-brown leading-relaxed mt-2 mb-3">{item.note}</p>
+                      <div className="text-[16px] tracking-[2px] uppercase text-mid mb-2">Top 5 spenders — 2024</div>
                       {item.topSpenders.map((s, j) => {
                         const maxAmt = item.topSpenders[0].amount;
                         const sPct = Math.round((s.amount / maxAmt) * 100);
                         return (
                           <div key={j} className="mb-3 last:mb-0">
                             <div className="flex justify-between items-baseline gap-2">
-                              <span className="text-[11px] font-semibold text-ink">{j + 1}. {s.name}</span>
-                              <span className="font-display text-[13px] text-amber shrink-0">{fmt(s.amount)}</span>
+                              <span className="text-[16px] font-semibold text-ink">{j + 1}. {s.name}</span>
+                              <span className="font-display text-[16px] text-amber shrink-0">{fmt(s.amount)}</span>
                             </div>
                             <div className="h-1 bg-lb rounded my-1">
                               <div className="h-full rounded" style={{ width: `${sPct}%`, backgroundColor: item.color }} />
                             </div>
-                            <p className="text-[8px] text-mid leading-relaxed">{s.what}</p>
+                            <p className="text-[16px] text-mid leading-relaxed">{s.what}</p>
                           </div>
                         );
                       })}
@@ -206,7 +208,7 @@ function LobbyingOverview() {
             })}
           </div>
 
-          <div className="mt-3 text-[8px] text-mid pt-2 border-t border-lb">
+          <div className="mt-3 text-[16px] text-mid pt-2 border-t border-lb">
             Data: OpenSecrets.org 2024 federal lobbying totals · Last updated: March 2026 ·{' '}
             <a href="https://www.opensecrets.org/federal-lobbying" target="_blank" rel="noopener noreferrer" className="text-amber">
               Full database ↗
@@ -284,7 +286,7 @@ export default function BillsTab({ zip, state, stateName }: { zip: string; state
   return (
     <div>
       {/* Header bar */}
-      <div className="bg-brown text-gold text-[9px] tracking-[3px] uppercase px-4 py-2 flex justify-between items-center flex-wrap gap-1">
+      <div className="bg-brown text-gold text-[17px] tracking-[3px] uppercase px-4 py-2 flex justify-between items-center flex-wrap gap-1">
         <span>ZIP <span className="font-display text-sm tracking-widest text-cream">{zip}</span> · {stateName}</span>
         <span>119th U.S. Congress · Federal Bills</span>
       </div>
@@ -296,7 +298,7 @@ export default function BillsTab({ zip, state, stateName }: { zip: string; state
 
         {/* Unified chip row: All · From My Reps · Healthcare · ... */}
         <div className="mb-4">
-          <div className="text-[8px] tracking-[3px] uppercase text-mid mb-2">Filter by topic:</div>
+          <div className="text-[16px] tracking-[3px] uppercase text-mid mb-2">Filter by topic:</div>
           <div className="flex gap-1.5 flex-wrap">
             {allChips.map(t => {
               const isActive   = filter === t.label;
@@ -305,7 +307,7 @@ export default function BillsTab({ zip, state, stateName }: { zip: string; state
                 <button
                   key={t.label}
                   onClick={() => handleFilterChange(t.label)}
-                  className={`text-[9px] px-2.5 py-1 rounded-full border transition-colors ${
+                  className={`text-[17px] px-2.5 py-1 rounded-full border transition-colors ${
                     isActive
                       ? isRepsChip
                         ? 'bg-ftdgreen text-white border-ftdgreen font-semibold'
@@ -328,7 +330,7 @@ export default function BillsTab({ zip, state, stateName }: { zip: string; state
             :                           `${filter} Bills`}
           </h2>
           {!isLoading && (
-            <span className={`text-[8px] tracking-widest px-2 py-0.5 rounded-full ${isReps ? 'bg-ftdgreen text-white' : 'bg-amber text-ink'}`}>
+            <span className={`text-[16px] tracking-widest px-2 py-0.5 rounded-full ${isReps ? 'bg-ftdgreen text-white' : 'bg-amber text-ink'}`}>
               {filteredBills.length}
             </span>
           )}
@@ -342,7 +344,7 @@ export default function BillsTab({ zip, state, stateName }: { zip: string; state
             <div className={`font-display text-2xl ${isReps ? 'text-ftdgreen' : 'text-amber'}`}>
               {isReps ? `Loading ${stateName} Bills…` : 'Loading Bills…'}
             </div>
-            <div className="text-[9px] tracking-widest uppercase text-mid mt-2">Fetching Congress.gov data</div>
+            <div className="text-[17px] tracking-widest uppercase text-mid mt-2">Fetching Congress.gov data</div>
           </div>
         )}
 
@@ -356,7 +358,7 @@ export default function BillsTab({ zip, state, stateName }: { zip: string; state
         {/* Bills */}
         {!isLoading && !hasError && (
           filteredBills.length === 0 ? (
-            <div className="text-center py-8 text-mid text-[10px] font-mono">
+            <div className="text-center py-8 text-mid text-[16px] font-mono">
               No {filter === 'From My Reps' ? stateName : filter} bills found.
               <button onClick={() => setFilter('All')} className="block mx-auto mt-2 text-amber underline">
                 Show all bills
@@ -375,13 +377,13 @@ export default function BillsTab({ zip, state, stateName }: { zip: string; state
             {isReps ? (
               <a href={`https://www.congress.gov/members?q=%7B%22congress%22%3A%22119%22%2C%22state%22%3A%22${state}%22%7D`}
                 target="_blank" rel="noopener noreferrer"
-                className="text-[9px] tracking-[3px] uppercase text-ftdgreen">
+                className="text-[17px] tracking-[3px] uppercase text-ftdgreen">
                 All {stateName} members on Congress.gov ↗
               </a>
             ) : (
               <a href="https://www.congress.gov/browse/bills/119th-congress"
                 target="_blank" rel="noopener noreferrer"
-                className="text-[9px] tracking-[3px] uppercase text-amber">
+                className="text-[17px] tracking-[3px] uppercase text-amber">
                 Browse all 119th Congress bills on Congress.gov ↗
               </a>
             )}

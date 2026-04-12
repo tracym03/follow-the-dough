@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Follow the Dough — Layout Mockup</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --brown:    #2c1a0e;
+    --brown2:   #3d2410;
+    --amber:    #c97d2a;
+    --gold:     #d4a843;
+    --cream:    #f5ede0;
+    --lb:       #ede8e0;
+    --mid:      #8a7060;
+    --ink:      #1a1008;
+    --green:    #2d6a4f;
+    --blue:     #1a6bb5;
+    --red:      #c0392b;
+    --purple:   #7b3fa0;
+  }
+
+  body {
+    background: var(--cream);
+    font-family: 'Georgia', serif;
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  .site-header {
+    background: var(--brown);
+    padding: 14px 20px 10px;
+    text-align: center;
+  }
+  .site-title {
+    font-size: 28px;
+    letter-spacing: 8px;
+    color: var(--gold);
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+  .site-tagline {
+    font-size: 12px;
+    letter-spacing: 3px;
+    color: rgba(245,237,224,0.5);
+    text-transform: uppercase;
+    margin-top: 3px;
+  }
+  .red-banner {
+    background: var(--red);
+    color: white;
+    text-align: center;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 5px;
+  }
+
+  /* ── ZIP Search ── */
+  .zip-bar {
+    background: var(--brown2);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .zip-label { color: var(--gold); font-size: 13px; letter-spacing: 3px; text-transform: uppercase; }
+  .zip-input {
+    background: transparent;
+    border: 1px solid var(--amber);
+    color: var(--cream);
+    padding: 6px 12px;
+    font-size: 20px;
+    letter-spacing: 4px;
+    width: 120px;
+    text-align: center;
+    outline: none;
+  }
+  .zip-result {
+    color: var(--gold);
+    font-size: 13px;
+    letter-spacing: 1px;
+  }
+  .zip-result strong { color: var(--cream); }
+
+  /* ── Tab bar ── */
+  .tab-bar {
+    background: var(--brown);
+    display: flex;
+    border-bottom: 2px solid var(--amber);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 12px 6px;
+    text-align: center;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: rgba(245,237,224,0.35);
+    font-family: 'Georgia', serif;
+    transition: color 0.15s;
+  }
+  .tab-btn:hover { color: var(--cream); }
+  .tab-btn.active {
+    color: var(--gold);
+    border-bottom: 3px solid var(--gold);
+    margin-bottom: -2px;
+  }
+
+  /* ── Tab panels ── */
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── Flow chart structure ── */
+  .flow-wrap {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 20px 16px 40px;
+  }
+
+  /* ── Flow node ── */
+  .flow-node {
+    position: relative;
+    margin-bottom: 0;
+  }
+
+  /* Arrow connector */
+  .flow-arrow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 auto;
+    width: 2px;
+    height: 32px;
+    position: relative;
+  }
+  .flow-arrow::before {
+    content: '';
+    display: block;
+    width: 2px;
+    height: 26px;
+    background: var(--amber);
+    opacity: 0.5;
+  }
+  .flow-arrow::after {
+    content: '▼';
+    color: var(--amber);
+    font-size: 9px;
+    opacity: 0.7;
+    margin-top: -2px;
+  }
+
+  /* Section header (tier label) */
+  .flow-tier-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .flow-tier-label .tier-badge {
+    background: var(--brown);
+    color: var(--gold);
+    font-size: 8px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border: 1px solid var(--amber);
+    white-space: nowrap;
+  }
+  .flow-tier-label .tier-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, var(--amber), transparent);
+    opacity: 0.4;
+  }
+
+  /* Card grid row */
+  .card-row {
+    display: grid;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .card-row.cols-1 { grid-template-columns: 1fr; }
+  .card-row.cols-2 { grid-template-columns: 1fr 1fr; }
+  .card-row.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+  /* Expandable card */
+  .flow-card {
+    background: white;
+    border: 1px solid var(--lb);
+    border-left: 4px solid var(--amber);
+    cursor: pointer;
+    transition: all 0.15s;
+    overflow: hidden;
+  }
+  .flow-card:hover { box-shadow: 3px 3px 0 rgba(201,125,42,0.2); }
+  .flow-card.accent-green { border-left-color: var(--green); }
+  .flow-card.accent-blue  { border-left-color: var(--blue); }
+  .flow-card.accent-red   { border-left-color: var(--red); }
+  .flow-card.accent-brown { border-left-color: var(--brown); }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    gap: 8px;
+  }
+  .card-header-left { display: flex; align-items: center; gap: 8px; min-width: 0; }
+  .card-icon { font-size: 18px; flex-shrink: 0; }
+  .card-title { font-size: 11px; font-weight: 700; color: var(--brown); letter-spacing: 0.5px; }
+  .card-sub   { font-size: 9px; color: var(--mid); letter-spacing: 0.3px; margin-top: 1px; }
+  .card-toggle { font-size: 9px; color: var(--amber); font-family: monospace; flex-shrink: 0; }
+
+  .card-body {
+    display: none;
+    padding: 0 12px 12px;
+    border-top: 1px solid var(--lb);
+  }
+  .card-body.open { display: block; }
+
+  /* Party badge */
+  .party-d { background: rgba(26,107,181,0.12); color: var(--blue);  border: 1px solid rgba(26,107,181,0.3);  font-size: 8px; padding: 1px 6px; border-radius: 99px; font-weight: 700; }
+  .party-r { background: rgba(192,57,43,0.12);  color: var(--red);   border: 1px solid rgba(192,57,43,0.3);   font-size: 8px; padding: 1px 6px; border-radius: 99px; font-weight: 700; }
+  .party-np{ background: rgba(138,112,96,0.12); color: var(--mid);   border: 1px solid rgba(138,112,96,0.3);  font-size: 8px; padding: 1px 6px; border-radius: 99px; font-weight: 700; }
+
+  /* Funding bar */
+  .funding-bar-wrap { margin: 8px 0 4px; }
+  .funding-bar-label { display: flex; justify-content: space-between; font-size: 8px; color: var(--mid); margin-bottom: 3px; }
+  .funding-bar-track { height: 5px; background: var(--lb); border-radius: 3px; overflow: hidden; }
+  .funding-bar-fill  { height: 100%; border-radius: 3px; }
+
+  /* Pill tags */
+  .pill-row { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 6px; }
+  .pill {
+    font-size: 8px; padding: 2px 7px; border-radius: 99px;
+    background: var(--lb); color: var(--mid); border: 1px solid rgba(201,125,42,0.2);
+  }
+  .pill.amber { background: rgba(201,125,42,0.15); color: #7a4a10; border-color: rgba(201,125,42,0.4); }
+  .pill.green { background: rgba(45,106,79,0.12); color: var(--green); border-color: rgba(45,106,79,0.3); }
+  .pill.red   { background: rgba(192,57,43,0.1);  color: var(--red);   border-color: rgba(192,57,43,0.25); }
+
+  /* Member row inside expanded card */
+  .member-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--lb);
+    gap: 8px;
+  }
+  .member-row:last-child { border-bottom: none; }
+  .member-name { font-size: 11px; font-weight: 600; color: var(--ink); }
+  .member-title { font-size: 8px; color: var(--mid); margin-top: 1px; }
+  .member-right { text-align: right; flex-shrink: 0; }
+  .member-raised { font-size: 11px; color: var(--amber); font-weight: 700; }
+  .member-expand-hint { font-size: 8px; color: var(--amber); margin-top: 2px; cursor: pointer; }
+
+  /* Bill card inside expanded */
+  .bill-row {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--lb);
+  }
+  .bill-row:last-child { border-bottom: none; }
+  .bill-id   { font-size: 9px; letter-spacing: 2px; color: var(--amber); font-weight: 700; }
+  .bill-title{ font-size: 11px; font-weight: 600; color: var(--ink); margin: 2px 0; line-height: 1.3; }
+  .bill-meta { font-size: 8px; color: var(--mid); }
+  .bill-conflict { background: #fef2f2; border: 1px solid #fca5a5; border-radius: 3px; padding: 4px 7px; margin-top: 5px; font-size: 8px; color: #991b1b; }
+  .bill-clear    { background: #f0fdf4; border: 1px solid #86efac; border-radius: 3px; padding: 4px 7px; margin-top: 5px; font-size: 8px; color: #166534; }
+
+  /* Conflict indicator dots */
+  .dot-conflict { width: 7px; height: 7px; border-radius: 50%; background: var(--red); display: inline-block; margin-right: 4px; }
+  .dot-clear    { width: 7px; height: 7px; border-radius: 50%; background: var(--green); display: inline-block; margin-right: 4px; }
+
+  /* Money meter mini */
+  .money-meter { display: flex; gap: 6px; align-items: center; margin-top: 6px; }
+  .money-label { font-size: 8px; color: var(--mid); flex-shrink: 0; }
+  .money-bar-track { flex: 1; height: 4px; background: var(--lb); border-radius: 2px; overflow: hidden; }
+  .money-bar-fill  { height: 100%; border-radius: 2px; }
+  .money-amt   { font-size: 9px; color: var(--amber); font-weight: 700; flex-shrink: 0; }
+
+  /* Pizza slices legend */
+  .slice-row { display: flex; align-items: center; gap: 6px; padding: 4px 0; border-bottom: 1px solid var(--lb); }
+  .slice-row:last-child { border-bottom: none; }
+  .slice-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+  .slice-label { font-size: 9px; flex: 1; color: var(--ink); }
+  .slice-pct   { font-size: 9px; color: var(--mid); }
+  .slice-bar   { width: 60px; }
+
+  /* Lobbying bar */
+  .lob-row { padding: 7px 0; border-bottom: 1px solid var(--lb); }
+  .lob-row:last-child { border-bottom: none; }
+  .lob-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+  .lob-name   { font-size: 10px; font-weight: 600; }
+  .lob-amt    { font-size: 11px; color: var(--amber); font-weight: 700; }
+  .lob-track  { height: 5px; background: var(--lb); border-radius: 3px; overflow: hidden; }
+  .lob-fill   { height: 100%; border-radius: 3px; }
+
+  /* Chip filter row */
+  .chip-row { display: flex; gap: 6px; flex-wrap: wrap; margin: 10px 0; }
+  .chip {
+    font-size: 8px; padding: 3px 9px; border-radius: 99px;
+    border: 1px solid var(--lb); background: white; color: var(--mid);
+    cursor: pointer; transition: all 0.1s;
+  }
+  .chip.active { background: var(--amber); color: var(--ink); border-color: var(--amber); font-weight: 700; }
+
+  /* Info callout */
+  .callout {
+    background: rgba(201,125,42,0.07);
+    border: 1px solid rgba(201,125,42,0.3);
+    border-radius: 3px;
+    padding: 8px 10px;
+    font-size: 9px;
+    color: var(--brown);
+    line-height: 1.6;
+    margin-bottom: 10px;
+  }
+
+  /* Council meeting row */
+  .meeting-row { padding: 7px 0; border-bottom: 1px solid var(--lb); }
+  .meeting-row:last-child { border-bottom: none; }
+  .meeting-date  { font-size: 8px; color: var(--mid); letter-spacing: 1px; }
+  .meeting-title { font-size: 11px; font-weight: 600; color: var(--ink); margin: 2px 0; }
+  .meeting-body  { font-size: 8px; color: var(--mid); }
+
+  /* Status badge */
+  .status-badge {
+    display: inline-flex; align-items: center;
+    font-size: 7px; letter-spacing: 1.5px; text-transform: uppercase;
+    padding: 2px 6px; border-radius: 99px; margin-top: 4px;
+  }
+  .status-passed   { background: #dcfce7; color: #15803d; }
+  .status-referred { background: #fef9c3; color: #854d0e; }
+  .status-intro    { background: #ede9fe; color: #6b21a8; }
+
+  /* Expand hint */
+  .expand-hint { font-size: 8px; color: var(--amber); letter-spacing: 1px; margin-top: 6px; }
+
+  /* Section divider label */
+  .section-note { font-size: 8px; color: var(--mid); letter-spacing: 2px; text-align: center; text-transform: uppercase; padding: 4px 0; }
+
+  @media (max-width: 500px) {
+    .card-row.cols-3 { grid-template-columns: 1fr; }
+    .card-row.cols-2 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="site-header">
+  <div class="site-title">Follow the Dough</div>
+  <div class="site-tagline">Candidate funding · Federal bills · Lobbyists · Local politics</div>
+</header>
+<div class="red-banner">Know who's buying your ballot</div>
+
+<!-- ZIP Search -->
+<div class="zip-bar">
+  <span class="zip-label">Enter ZIP</span>
+  <input class="zip-input" type="text" value="90210" maxlength="5" id="zipInput">
+  <span class="zip-result">→ <strong>Beverly Hills, CA</strong> · California · Rep. Brad Sherman (D-CA)</span>
+</div>
+
+<!-- Tab bar -->
+<div class="tab-bar">
+  <button class="tab-btn" onclick="switchTab('city',this)">🏙 City</button>
+  <button class="tab-btn" onclick="switchTab('state',this)">🏛 State</button>
+  <button class="tab-btn active" onclick="switchTab('federal',this)">🇺🇸 Federal</button>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     CITY TAB
+════════════════════════════════════════════════ -->
+<div id="tab-city" class="tab-panel">
+<div class="flow-wrap">
+
+  <!-- Tier 1: City Council -->
+  <div class="flow-tier-label">
+    <span class="tier-badge">1 · Your City Council</span>
+    <div class="tier-line"></div>
+  </div>
+
+  <div class="card-row cols-1">
+    <div class="flow-card accent-green" onclick="toggle(this)">
+      <div class="card-header">
+        <div class="card-header-left">
+          <span class="card-icon">👥</span>
+          <div>
+            <div class="card-title">Beverly Hills City Council</div>
+            <div class="card-sub">5 members · Beverly Hills, CA · Tap to see all members</div>
+          </div>
+        </div>
+        <span class="card-toggle">▼ show</span>
+      </div>
+      <div class="card-body">
+        <div class="member-row">
+          <div>
+            <div class="member-name">Lili Bosse</div>
+            <div class="member-title">Mayor · Beverly Hills City Council</div>
+            <div class="pill-row"><span class="party-np">NP</span></div>
+          </div>
+          <div class="member-right">
+            <a href="#" style="font-size:8px;color:var(--amber)">Council page ↗</a>
+          </div>
+        </div>
+        <div class="member-row">
+          <div>
+            <div class="member-name">Julian Gold</div>
+            <div class="member-title">Vice Mayor · Beverly Hills City Council</div>
+            <div class="pill-row"><span class="party-np">NP</span></div>
+          </div>
+          <div class="member-right">
+            <a href="#" style="font-size:8px;color:var(--amber)">Council page ↗</a>
+          </div>
+        </div>
+        <div class="member-row">
+          <div>
+            <div class="member-name">Craig Corman</div>
+            <div class="member-title">Council Member</div>
+            <div class="pill-row"><span class="party-np">NP</span></div>
+          </div>
+          <div class="member-right">
+            <a href="#" style="font-size:8px;color:var(--amber)">Council page ↗</a>
+          </div>
+        </div>
+        <div class="expand-hint">+ 2 more members · Source: Legistar API (live)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow-arrow"></div>
+
+  <!-- Tier 2: Local Legislation -->
+  <div class="flow-tier-label">
+    <span class="tier-badge">2 · Local Legislation & Meetings</span>
+    <div class="tier-line"></div>
+  </div>
+
+  <div class="card-row cols-1">
+    <div class="flow-card accent-green" onclick="toggle(this)">
+      <div class="card-header">
+        <div class="card-header-left">
+          <span class="card-icon">📋</span>
+          <div>
+            <div class="card-title">City Council Meetings</div>
+            <div class="card-sub">Recent agendas & votes · Live from Legistar API</div>
+          </div>
+        </div>
+        <span class="card-toggle">▼ show</span>
+      </div>
+      <div class="card-body">
+        <div class="meeting-row">
+          <div class="meeting-date">Apr 8, 2026</div>
+          <div class="meeting-title">Regular City Council Meeting</div>
+          <div class="meeting-body">Agenda: Budget appropriations, zoning variance 1234-A, noise ordinance update</div>
+          <span class="status-badge status-passed">Completed</span>
+        </div>
+        <div class="meeting-row">
+          <div class="meeting-date">Mar 25, 2026</div>
+          <div class="meeting-title">Special Session — Housing Plan Review</div>
+          <div class="meeting-body">Affordable housing overlay district proposal · Public comment period</div>
+          <span class="status-badge status-referred">In Committee</span>
+        </div>
+        <div class="meeting-row">
+          <div class="meeting-date">Apr 22, 2026 · Upcoming</div>
+          <div class="meeting-title">Regular City Council Meeting</div>
+          <div class="meeting-body">Topics TBD · Agenda posted 72hr before meeting</div>
+          <span class="status-badge status-intro">Scheduled</span>
+        </div>
+        <div class="expand-hint">↗ All meetings on Legistar</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow-arrow"></div>
+
+  <!-- Tier 3: Local Budget note -->
+  <div class="flow-tier-label">
+    <span class="tier-badge">3 · Local Budget & Spending</span>
+    <div class="tier-line"></div>
+  </div>
+  <div class="card-row cols-1">
+    <div class="flow-card" onclick="toggle(this)">
+      <div class="card-header">
+        <div class="card-header-left">
+          <span class="card-icon">💰</span>
+          <div>
+            <div class="card-title">Beverly Hills City Budget</div>
+            <div class="card-sub">FY 2025–26 · Approved $650M operating budget</div>
+          </div>
+        </div>
+        <span class="card-toggle">▼ show</span>
+      </div>
+      <div class="card-body">
+        <div class="callout">
+          City budget data links directly to Beverly Hills' published financial documents.
+          Use this to track how your local tax dollars are allocated.
+        </div>
+        <div class="pill-row">
+          <span class="pill amber">Public Safety 38%</span>
+          <span class="pill amber">Infrastructure 22%</span>
+          <span class="pill amber">Parks & Rec 11%</span>
+          <span class="pill amber">Admin 16%</span>
+          <span class="pill amber">Other 13%</span>
+        </div>
+        <div class="expand-hint" style="margin-top:8px">↗ Full budget on Beverly Hills city website</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     STATE TAB
+════════════════════════════════════════════════ -->
+<div id="tab-state" class="tab-panel">
+<div class="flow-wrap">
+
+  <!-- Tier 1: Governor Race -->
+  <div class="flow-tier-label">
+    <span class="tier-badge">1 · Governor Race 2026</span>
+    <div class="tier-line"></div>
+  </div>
+
+  <div class="card-row cols-1">
+    <div class="flow-card accent-brown" onclick="toggle(this)">
+      <div class="card-header">
+        <div class="card-header-left">
+          <span class="card-icon">🏛️</span>
+          <div>
+            <div class="card-title">California Governor — Open Race 2026</div>
+            <div class="card-sub">10 announced candidates · Incumbent Gavin Newsom is term-limited</div>
+          </div>
+        </div>
+        <span class="card-toggle">▼ show</span>
+      </div>
+      <div class="card-body">
+        <div class="callout"><strong>What's at stake:</strong> California's governor controls a $320B state budget, appoints judges, can veto legislation, and sets policy for 40M people.</div>
+        <div style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--mid);margin-bottom:8px">Democrat Candidates</div>
+        <div class="member-row">
+          <div>
+            <div class="member-name">Antonio Villaraigosa</div>
+            <div class="member-title">Former Mayor of Los Angeles</div>
+            <div class="pill-row"><span class="party-d">Dem</span><span class="pill amber">Announced</span></div>
+          </div>
+          <div class="member-right">
+            <div class="member-raised">$12.4M</div>
+            <div class="member-expand-hint">Cal-Access ↗</div>
+          </div>
+        </div>
+        <div class="member-row">
+          <div>
+            <div class="member-name">Katie Porter</div>
+            <div class="member-title">U.S. Representative (CA-47)</div>
+            <div class="pill-row"><span class="party-d">Dem</span><span class="pill amber">Announced</span></div>
+          </div>
+          <div class="member-right">
+            <div class="member-raised">$9.1M</div>
+            <div class="member-expand-hint">Cal-Access ↗</div>
+          </div>
+        </div>
+        <div class="member-row">
+          <div>
+            <div class="member-name">Xavier Becerra</div>
+            <div class="member-title">Former U.S. Secretary of HHS</div>
+            <div class="pill-row"><span class="party-d">Dem</span><span class="pill amber">Announced</span></div>
+          </div>
+          <div class="member-right">
+            <div class="member-raised">$7.8M</div>
+          </div>
+        </div>
+        <div style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--mid);margin:10px 0 8px">Republican Candidates</div>
+        <div class="member-row">
+          <div>
+            <div class="member-name">Steve Hilton</div>
+            <div class="member-title">Former UK Policy Adviser / Fox News Host</div>
+            <div class="pill-row"><span class="party-r">Rep</span><span class="pill amber">Announced</span></div>
+          </div>
+          <div class="member-right">
+            <div class="member-raised">$2.1M</div>
+          </div>
+        </div>
+        <div class="member-row">
+          <div>
+            <div class="member-name">Chad Bianco</div>
+            <div class="member-title">Riverside County Sheriff</div>
+            <div class="pill-row"><span class="party-r">Rep</span><span class="pill amber">Announced</span></div>
+          </div>
+          <div class="member-right">
+            <div class="member-raised">$1.6M</div>
+          </div>
+        </div>
+        <div class="expand-hint">+ 5 more candidates · Source: CalMatters.org</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow-arrow"></div>
+
+  <!-- Tier 2: State Legislature -->
+  <div class="flow-tier-label">
+    <span class="tier-badge">2 · State Legislature</span>
+    <div class="tier-line"></div>
+  </div>
+
+  <div class="card-row cols-2">
+    <div class="flow-card accent-blue" onclick="toggle(this)">
+      <div class="card-header">
+        <div class="card-header-left">
+          <span class="card-icon">🏛</span>
+          <div>
+            <div class="card-title">State Senate</div>
+            <div class="card-sub">40 senators · Your senator: Ben Allen (D)</div>
+          </div>
+        </div>
+        <span class="card-toggle">▼</span>
+      </div>
+      <div class="card-body">
+        <div class="member-row">
+          <div>
+            <div class="member-name">Ben Allen</div>
+            <div class="member-title">SD-24 · Covers Beverly Hills</div>
+            <div class="pill-row"><span class="party-d">Dem</span></div>
+          </div>
+        </div>
+        <div class="money-meter">
+          <span class="money-label">2024 raised</span>
+          <div class="money-bar-track"><div class="money-bar-fill" style="width:65%;background:var(--blue)"></div></div>
+          <span class="money-amt">$2.1M</span>
+        </div>
+        <div class="pill-row"><span class="pill">Top donor: Education PAC</span><span class="pill">Real Estate</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card accent-green" onclick="toggle(this)">
+      <div class="card-header">
+        <div class="card-header-left">
+          <span class="card-icon">🏛</span>
+          <div>
+            <div class="card-title">State Assembly</div>
+            <div class="card-sub">80 members · Your rep: Rick Zbur (D)</div>
+          </div>
+        </div>
+        <span class="card-toggle">▼</span>
+      </div>
+      <div class="card-body">
+        <div class="member-row">
+          <div>
+            <div class="member-name">Rick Zbur</div>
+            <div class="member-title">AD-51 · Covers Beverly Hills</div>
+            <div class="pill-row"><span class="party-d">Dem</span></div>
+          </div>
+        </div>
+        <div class="money-meter">
+          <span class="money-label">2024 raised</span>
+          <div class="money-bar-track"><div class="money-bar-fill" style="width:42%;background:var(--green)"></div></div>
+          <span class="money-amt">$1.4M</span>
+        </div>
+        <div class="pill-row"><span class="pill">Top donor: Labor unions</span><span class="pill">Trial lawyers</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow-arrow"></div>
+
+  <!-- Tier 3: State Bills -->
+  <div class="flow-tier-label">
+    <span class="tier-badge">3 · State Bills</span>
+    <div class="tier-line"></div>
+  </div>
+
+  <div class="card-row cols-1">
+    <div class="flow-card accent-green" onclick="toggle(this)">
+      <div class="card-header">
+        <div class="card-header-left">
+          <span class="card-icon">📜</span>
+          <div>
+            <div class="card-title">California State Legislature Bills</div>
+            <div class="card-sub">Live from OpenStates API · 2025–2026 Session</div>
+          </div>
+        </div>
+        <span class="card-toggle">▼ show</span>
+      </div>
+      <div class="card-body">
+        <div class="chip-row">
+          <span class="chip active">📋 All</span>
+          <span class="chip">🏥 Healthcare</span>
+          <span class="chip">🏦 Finance</span>
+          <span class="chip">🛢️ Energy</span>
+          <span class="chip">💻 Technology</span>
+          <span class="chip">🏘️ Housing</span>
+        </div>
+        <div class="bill-row">
+          <div class="bill-id">AB 1430 · CA Legislature</div>
+          <div class="bill-title">California Affordable Housing Preservation and Construction Act of 2026</div>
+          <div class="bill-meta">Sponsor: Rick Zbur (D-AD51) · Apr 2, 2026 — Referred to Housing Committee</div>
+          <div class="bill-clear"><span class="dot-clear"></span>No obvious funding conflict detected for this sponsor.</div>
+        </div>
+        <div class="bill-row">
+          <div class="bill-id">SB 882 · CA Legislature</div>
+          <div class="bill-title">Pharmacy Benefit Manager Transparency and Accountability Act</div>
+          <div class="bill-meta">Sponsor: Scott Wiener (D-SD11) · Mar 18, 2026 — Passed Senate Health Committee</div>
+          <div class="bill-conflict"><span class="dot-conflict"></span>⚠ 41% of sponsor's identifiable funding comes from Healthcare & Pharma — the same industry this bill regulates.</div>
+        </div>
+        <div class="bill-row">
+          <div class="bill-id">AB 2105 · CA Legislature</div>
+          <div class="bill-title">Clean Energy Grid Modernization and Storage Investment Program</div>
+          <div class="bill-meta">Sponsor: Eduardo Garcia (D-AD36) · Apr 5, 2026 — Referred to Energy Committee</div>
+          <span class="status-badge status-referred">In Committee</span>
+        </div>
+        <div class="expand-hint">↗ More bills on OpenStates.org</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     FEDERAL TAB
+════════════════════════════════════════════════ -->
+<div id="tab-federal" class="tab-panel active">
+<div class="flow-wrap">
+
+  <!-- Tier 1: Your Reps -->
+  <div class="flow-tier-label">
+    <span class="tier-badge">1 · Your Federal Representatives</span>
+    <div class="tier-line"></div>
+  </div>
+
+  <div class="card-row cols-3">
+
+    <!-- Senator 1 -->
+    <div class="flow-card accent-blue" onclick="toggle(this)">
+      <div class="card-header">
+        <div class="card-header-left">
+          <span class="card-icon">🏛</span>
+          <div>
+            <div class="card-title">U.S. Senator</div>
+            <div class="card-sub">Adam Schiff · D-CA</div>
+          </div>
+        </div>
+        <span class="card-toggle">▼</span>
+      </div>
+      <div class="card-body">
+        <div class="pill-row"><span class="party-d">Democrat</span></div>
+        <div class="money-meter">
+          <span class="money-label">Raised</span>
+          <div class="money-bar-track"><div class="money-bar-fill" style="width:90%;background:var(--blue)"></div></div>
+          <span class="money-amt">$38M</span>
+        </div>
+        <div style="margin-top:8px">
+          <div class="slice-row"><span class="slice-dot" style="background:#9b59b6"></span><span class="slice-label">Technology</span><span class="slice-pct">28%</span></div>
+          <div class="slice-row"><span class="slice-dot" style="background:#3498db"></span><span class="slice-label">Finance</span><span class="slice-pct">19%</span></div>
+          <div class="slice-row"><span class="slice-dot" style="background:#27ae60"></span><span class="slice-label">Healthcare</span><span class="slice-pct">14%</span></div>
+        </div>
+        <div class="expand-hint">↗ Full FEC record</div>
+      </div>
+    </div>
+
+    <!-- Senator 2 -->
+    <div class="flow-card accent-blue" onclick="toggle(this)">
+      <div class="card-header">
+        <div class="card-header-left">
+          <span class="card-icon">🏛</span>
+          <div>
+            <div class="card-title">U.S. Senator</div>
+            <div class="card-sub">Alex Padilla · D-CA</div>
+          </div>
+        </div>
+        <span class="card-toggle">▼</span>
+      </div>
+      <div class="card-body">
+        <div class="pill-row"><span class="party-d">Democrat</span></div>
+        <div class="money-meter">
+          <span class="money-label">Raised</span>
+          <div class="money-bar-track"><div class="money-bar-fill" style="width:55%;background:var(--blue)"></div></div>
+          <span class="money-amt">$21M</span>
+        </div>
+        <div style="margin-top:8px">
+          <div class="slice-row"><span class="slice-dot" style="background:#2d6a4f"></span><span class="slice-label">Labor & Unions</span><span class="slice-pct">32%</span></div>
+          <div class="slice-row"><span class="slice-dot" style="background:#3498db"></span><span class="slice-label">Finance</span><span class="slice-pct">21%</span></div>
+          <div class="slice-row"><span class="slice-dot" style="background:#e67e22"></span><span class="slice-label">Real Estate</span><span class="slice-pct">11%</span></div>
+        </div>
+        <div class="expand-hint">↗ Full FEC record</div>
+      </div>
+    </div>
+
+    <!-- Rep -->
+    <div class="flow-card accent-green" onclick="toggle(this)">
+      <div class="card-header">
+        <div class="card-header-left">
+          <span class="card-icon">🗳</span>
+          <div>
+            <div class="card-title">House Rep.</div>
+            <div class="card-sub">Brad Sherman · D-CA-32</div>
+          </div>
+        </div>
+        <span class="card-toggle">▼</span>
+      </div>
+      <div class="card-body">
+        <div class="pill-row"><span class="party-d">Democrat</span></div>
+        <div class="money-meter">
+          <span class="money-label">Raised</span>
+          <div class="money-bar-track"><div class="money-bar-fill" style="width:30%;background:var(--green)"></div></div>
+          <span class="money-amt">$3.2M</span>
+        </div>
+        <div style="margin-top:8px">
+          <div class="slice-row"><span class="slice-dot" style="background:#3498db"></span><span class="slice-label">Finance & Banking</span><span class="slice-pct">45%</span></div>
+          <div class="slice-row"><span class="slice-dot" style="background:#1565c0"></span><span class="slice-label">Pro-Israel Groups</span><span class="slice-pct">18%</span></div>
+          <div class="slice-row"><span class="slice-dot" style="background:#27ae60"></span><span class="slice-label">Healthcare</span><span class="slice-pct">9%</span></div>
+        </div>
+        <div class="expand-hint">↗ Full FEC record</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="flow-arrow"></div>
+
+  <!-- Tier 2: Federal Bills -->
+  <div class="flow-tier-label">
+    <span class="tier-badge">2 · Federal Bills Proposed</span>
+    <div class="tier-line"></div>
+  </div>
+
+  <div class="card-row cols-1">
+    <div class="flow-card accent-amber" onclick="toggle(this)" style="border-left-color:var(--amber)">
+      <div class="card-header">
+        <div class="card-header-left">
+          <span class="card-icon">📋</span>
+          <div>
+            <div class="card-title">119th Congress — Federal Bills</div>
+            <div class="card-sub">Live from Congress.gov API · Filter by topic or view from your reps</div>
+          </div>
+        </div>
+        <span class="card-toggle">▼ show</span>
+      </div>
+      <div class="card-body">
+        <div class="chip-row">
+          <span class="chip">📍 From My Reps</span>
+          <span class="chip active">📋 All</span>
+          <span class="chip">🏥 Healthcare</span>
+          <span class="chip">🛡️ Defense</span>
+          <span class="chip">🏦 Finance</span>
+          <span class="chip">🛢️ Energy</span>
+          <span class="chip">💻 Technology</span>
+        </div>
+
+        <div class="bill-row">
+          <div class="bill-id">HR 6321 · 119th Congress</div>
+          <div class="bill-title">Medicare Drug Price Negotiation Expansion Act of 2026</div>
+          <div class="bill-meta">Sponsor: Katie Porter (D-CA-47) · Apr 1, 2026 — Referred to Energy &amp; Commerce</div>
+          <div class="bill-conflict"><span class="dot-conflict"></span>⚠ 38% of Porter's identifiable funding comes from Healthcare & Pharma — the same industry this bill regulates.</div>
+        </div>
+
+        <div class="bill-row">
+          <div class="bill-id">S 2244 · 119th Congress</div>
+          <div class="bill-title">American Clean Energy and Security Investment Act</div>
+          <div class="bill-meta">Sponsor: Alex Padilla (D-CA) · Mar 15, 2026 — Referred to Environment Committee</div>
+          <div class="bill-clear"><span class="dot-clear"></span>✓ No obvious funding conflict — Padilla's top donors (Labor, Finance) don't have a direct stake in energy legislation.</div>
+        </div>
+
+        <div class="bill-row">
+          <div class="bill-id">HR 4892 · 119th Congress</div>
+          <div class="bill-title">Bank Secrecy and Anti-Money Laundering Modernization Act</div>
+          <div class="bill-meta">Sponsor: Brad Sherman (D-CA-32) · Feb 28, 2026 — Passed House Financial Services</div>
+          <div class="bill-conflict"><span class="dot-conflict"></span>⚠ 45% of Sherman's identifiable funding comes from Finance & Banking — the same industry this bill regulates.</div>
+        </div>
+
+        <div class="expand-hint">↗ All 119th Congress bills on Congress.gov</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow-arrow"></div>
+
+  <!-- Tier 3: Lobbying -->
+  <div class="flow-tier-label">
+    <span class="tier-badge">3 · Who Lobbies Congress?</span>
+    <div class="tier-line"></div>
+  </div>
+
+  <div class="card-row cols-1">
+    <div class="flow-card" onclick="toggle(this)" style="border-left-color:#795548">
+      <div class="card-header">
+        <div class="card-header-left">
+          <span class="card-icon">🏛️</span>
+          <div>
+            <div class="card-title">Federal Lobbying — 2024 Totals</div>
+            <div class="card-sub">$2.7B spent lobbying Congress · All required by law to register</div>
+          </div>
+        </div>
+        <span class="card-toggle">▼ show</span>
+      </div>
+      <div class="card-body">
+        <div class="callout">Lobbying is separate from campaign donations — this is money paid to registered lobbyists to directly influence legislation. Source: OpenSecrets.org 2024.</div>
+        <div class="lob-row">
+          <div class="lob-header"><span class="lob-name">🏥 Healthcare &amp; Pharma</span><span class="lob-amt">$770M</span></div>
+          <div class="lob-track"><div class="lob-fill" style="width:100%;background:#27ae60"></div></div>
+        </div>
+        <div class="lob-row">
+          <div class="lob-header"><span class="lob-name">🏦 Finance &amp; Wall Street</span><span class="lob-amt">$680M</span></div>
+          <div class="lob-track"><div class="lob-fill" style="width:88%;background:#3498db"></div></div>
+        </div>
+        <div class="lob-row">
+          <div class="lob-header"><span class="lob-name">💻 Tech &amp; Communications</span><span class="lob-amt">$420M</span></div>
+          <div class="lob-track"><div class="lob-fill" style="width:55%;background:#9b59b6"></div></div>
+        </div>
+        <div class="lob-row">
+          <div class="lob-header"><span class="lob-name">🛢️ Energy &amp; Oil</span><span class="lob-amt">$310M</span></div>
+          <div class="lob-track"><div class="lob-fill" style="width:40%;background:#795548"></div></div>
+        </div>
+        <div class="lob-row">
+          <div class="lob-header"><span class="lob-name">🛡️ Defense Contractors</span><span class="lob-amt">$175M</span></div>
+          <div class="lob-track"><div class="lob-fill" style="width:23%;background:#2c3e50"></div></div>
+        </div>
+        <div class="lob-row">
+          <div class="lob-header"><span class="lob-name">👷 Labor &amp; Unions</span><span class="lob-amt">$55M</span></div>
+          <div class="lob-track"><div class="lob-fill" style="width:7%;background:#2d6a4f"></div></div>
+        </div>
+        <div style="font-size:8px;color:var(--mid);margin-top:8px;padding-top:6px;border-top:1px solid var(--lb)">
+          Labor unions are outspent by corporate interests <strong>12 to 1</strong>. ↗ <a href="https://www.opensecrets.org/federal-lobbying" style="color:var(--amber)">Full database on OpenSecrets.org</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script>
+function toggle(card) {
+  const body = card.querySelector('.card-body');
+  const toggle = card.querySelector('.card-toggle');
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  toggle.textContent = isOpen
+    ? (toggle.textContent.includes('▲') ? toggle.textContent.replace('▲','▼').replace('hide','show') : '▼')
+    : (toggle.textContent.includes('▼') ? toggle.textContent.replace('▼','▲').replace('show','hide') : '▲');
+}
+
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+}
+
+// Auto-open federal reps card on load
+window.addEventListener('load', () => {
+  const firstFederalCard = document.querySelector('#tab-federal .flow-card');
+  if (firstFederalCard) toggle(firstFederalCard);
+});
+</script>
+</body>
+</html>

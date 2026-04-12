@@ -31,7 +31,7 @@ export default function Header() {
             <line x1="143" y1="35" x2="110" y2="62" stroke="#e8c97a" strokeWidth="1.2" strokeDasharray="4 3" opacity="0.5" />
           </svg>
           <div className="text-left">
-            <div className="font-display text-[11px] tracking-[0.3em] uppercase text-gold/70 mb-0.5">Follow</div>
+            <div className="font-display text-[14px] tracking-[0.3em] uppercase text-gold/70 mb-0.5">Follow</div>
             <Link href="/" className="block">
               <div className="font-display font-bold text-[2.8rem] leading-none tracking-tight text-gold"
                 style={{ textShadow: '2px 3px 0 rgba(0,0,0,0.3)' }}>
@@ -40,10 +40,10 @@ export default function Header() {
             </Link>
           </div>
         </div>
-        <div className="inline-flex items-center gap-2 bg-ftdred/90 px-4 py-1.5 rounded-full text-[10px] font-semibold tracking-wide text-white mt-3">
+        <div className="inline-flex items-center gap-2 bg-ftdred/90 px-4 py-1.5 rounded-full text-[13px] font-semibold tracking-wide text-white mt-3">
           🗳 Know who&apos;s buying your ballot
         </div>
-        <p className="text-[10px] tracking-wide text-gold/30 mt-2 font-mono">
+        <p className="text-[13px] tracking-wide text-gold/30 mt-2 font-mono">
           Candidate funding · Federal bills · Lobbyists · Local politics
         </p>
       </div>

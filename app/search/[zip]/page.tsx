@@ -50,7 +50,7 @@ export default function SearchPage() {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex-1 py-3 px-1 text-center font-display text-[11px] tracking-[2px] cursor-pointer border-none transition-colors ${
+            className={`flex-1 py-3 px-1 text-center font-display text-[16px] tracking-[2px] cursor-pointer border-none transition-colors ${
               activeTab === tab.id
                 ? 'text-gold border-b-[3px] border-b-gold -mb-px'
                 : 'text-cream/35 hover:text-cream'
@@ -70,7 +70,7 @@ export default function SearchPage() {
           <BillsTab zip={zip} state={si.state} stateName={si.name} />
         )}
         {activeTab === 'statebills' && (
-          <StateBillsTab state={si.state} />
+          <StateBillsTab state={si.state} stateName={si.name} />
         )}
         {activeTab === 'council' && (
           <CouncilTab zip={zip} />

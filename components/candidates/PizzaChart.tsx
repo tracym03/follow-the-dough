@@ -82,8 +82,8 @@ export default function PizzaChart({ slices, title }: { slices: Slice[]; title?:
     <div className="px-4 pb-4 pt-1">
       {title && (
         <div className="mb-2">
-          <span className="text-[9px] font-semibold tracking-wide text-brown uppercase">🥧 {title}</span>
-          <p className="text-[8px] text-mid mt-0.5">Tap a slice for details</p>
+          <span className="text-[12px] font-semibold tracking-wide text-brown uppercase">🥧 {title}</span>
+          <p className="text-[11px] text-mid mt-0.5">Tap a slice for details</p>
         </div>
       )}
 
@@ -156,14 +156,14 @@ export default function PizzaChart({ slices, title }: { slices: Slice[]; title?:
               >
                 <div className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ background: col }} />
                 <div className="flex-1 min-w-0">
-                  <div className="text-[10px] font-medium truncate">{s.emoji} {s.label}</div>
+                  <div className="text-[13px] font-medium truncate">{s.emoji} {s.label}</div>
                   <div className="h-1 bg-lb rounded-full mt-0.5">
                     <div className="h-full rounded-full" style={{ width: `${pct}%`, background: col }} />
                   </div>
                 </div>
                 <div className="text-right shrink-0 ml-1">
-                  <div className="text-[10px] font-bold">{pct}%</div>
-                  <div className="text-[8px] text-mid">${(s.value / 1_000_000).toFixed(1)}M</div>
+                  <div className="text-[13px] font-bold">{pct}%</div>
+                  <div className="text-[11px] text-mid">${(s.value / 1_000_000).toFixed(1)}M</div>
                 </div>
               </button>
             );
@@ -173,7 +173,7 @@ export default function PizzaChart({ slices, title }: { slices: Slice[]; title?:
 
       {/* Active slice callout */}
       {activeSlice !== null && (
-        <div className="mt-2 bg-brown text-cream rounded-lg px-3 py-2 text-[10px]">
+        <div className="mt-2 bg-brown text-cream rounded-lg px-3 py-2 text-[13px]">
           <span className="font-semibold text-gold">{sliceData[activeSlice].emoji} {sliceData[activeSlice].label}: </span>
           <span className="text-cream/80">
             ${sliceData[activeSlice].value.toLocaleString()} · {Math.round((sliceData[activeSlice].value / total) * 100)}% of total
