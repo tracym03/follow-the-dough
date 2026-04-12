@@ -24,7 +24,7 @@ const KNOWN_GOV_CANDIDATES: Record<string, Array<{
   name: string; party: string; title?: string;
   raisedFmt?: string; financeUrl?: string; note?: string;
 }>> = {
-  // Source: CalMatters.org — updated April 2026
+  // Source: CalMatters.org — updated April 12, 2026
   CA: [
     { name: 'Antonio Villaraigosa', party: 'Democrat',    title: 'Former Mayor of Los Angeles',                    note: 'Announced' },
     { name: 'Xavier Becerra',       party: 'Democrat',    title: 'Former U.S. Secretary of HHS / Former CA AG',    note: 'Announced' },
@@ -67,7 +67,6 @@ const KNOWN_GOV_CANDIDATES: Record<string, Array<{
   ],
   NC: [
     { name: 'Josh Stein', party: 'Democrat', title: 'Incumbent Governor', note: 'Running for re-election' },
-    { name: 'Mark Robinson', party: 'Republican', title: 'Former Lt. Governor', note: 'Race TBD' },
   ],
   MI: [
     { name: 'Gretchen Whitmer', party: 'Democrat', title: 'Incumbent Governor', note: 'Term-limited — open race' },
@@ -75,7 +74,7 @@ const KNOWN_GOV_CANDIDATES: Record<string, Array<{
   ],
   AZ: [
     { name: 'Katie Hobbs', party: 'Democrat', title: 'Incumbent Governor', note: 'Running for re-election' },
-    { name: 'Kari Lake', party: 'Republican', note: 'Lost 2022 Gov race, now in Senate race' },
+    { name: 'Kari Lake', party: 'Republican', note: 'Lost 2022 Gov race + 2024 Senate race — 2026 plans unclear' },
   ],
   CO: [
     { name: 'Jared Polis', party: 'Democrat', title: 'Incumbent Governor', note: 'Term-limited — open race' },
@@ -142,7 +141,6 @@ const KNOWN_GOV_CANDIDATES: Record<string, Array<{
   ],
   TN: [
     { name: 'Bill Lee', party: 'Republican', title: 'Incumbent Governor', note: 'Term-limited — open race' },
-    { name: 'Bill Hagerty', party: 'Republican', title: 'U.S. Senator', note: 'Rumored candidate' },
   ],
   OK: [
     { name: 'Kevin Stitt', party: 'Republican', title: 'Incumbent Governor', note: 'Term-limited — open race' },
@@ -152,7 +150,7 @@ const KNOWN_GOV_CANDIDATES: Record<string, Array<{
     { name: 'Henry McMaster', party: 'Republican', title: 'Incumbent Governor', note: 'Running for re-election' },
   ],
   SD: [
-    { name: 'Kristi Noem', party: 'Republican', title: 'Incumbent Governor', note: 'Running for re-election (or exploring federal options)' },
+    { name: 'Tony Gosch', party: 'Republican', title: 'Governor (succeeded Noem)', note: 'Open race — Noem resigned to become U.S. Secretary of Homeland Security' },
   ],
   WY: [
     { name: 'Mark Gordon', party: 'Republican', title: 'Incumbent Governor', note: 'Term-limited — open race' },
