@@ -37,12 +37,19 @@ function mapBill(raw: any, stateCode: string): any {
   };
 }
 
+const OCD_ID: Record<string, string> = {
+  CA: 'ocd-jurisdiction/country:us/state:ca/government',
+  NY: 'ocd-jurisdiction/country:us/state:ny/government',
+  TX: 'ocd-jurisdiction/country:us/state:tx/government',
+  FL: 'ocd-jurisdiction/country:us/state:fl/government',
+};
+
 async function fetchForState(stateCode: string) {
   const url = new URL(`${BASE}/bills`);
-  url.searchParams.set('jurisdiction', stateCode.toLowerCase());
+  url.searchParams.set('jurisdiction', OCD_ID[stateCode] ?? stateCode.toLowerCase());
   url.searchParams.set('sort', 'updated_desc');
   url.searchParams.set('per_page', '25');
-  url.searchParams.set('include', 'sponsorships');
+  url.searchParams.append('include', 'sponsorships');
 
   const r = await fetch(url.toString(), {
     headers: { 'X-API-KEY': KEY, Accept: 'application/json' },
@@ -60,7 +67,7 @@ async function fetchForState(stateCode: string) {
 // Cache per state — Next.js includes function args in the cache key
 const getStateBills = unstable_cache(
   async (stateCode: string) => fetchForState(stateCode),
-  ['state-bills-os-v1'],
+  ['state-bills-os-v2'],
   { revalidate: 21600 },
 );
 

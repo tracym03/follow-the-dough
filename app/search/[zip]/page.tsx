@@ -20,7 +20,7 @@ export default function SearchPage() {
 
   if (!si) {
     return (
-      <main>
+      <main className="overflow-x-hidden">
         <Header />
         <ZipSearch defaultZip={zip} />
         <div className="max-w-2xl mx-auto px-4 py-12 text-center">
@@ -38,7 +38,7 @@ export default function SearchPage() {
   ];
 
   return (
-    <main>
+    <main className="overflow-x-hidden">
       <Header />
       <ZipSearch defaultZip={zip} />
 

@@ -177,10 +177,9 @@ export default function FederalTab({ zip, state, stateName }: { zip: string; sta
               <FlowCard
                 key={`hi-${i}`}
                 title={`Your House Rep${candData?.district ? ` · District ${candData.district}` : ''}`}
-                sub={`${d.c?.name} · ${partyLabel(d.c?.party)}`}
+                sub={`${d.c?.name} · ${partyLabel(d.c?.party)} — tap to see funding breakdown`}
                 icon="🏛️"
                 accentColor="#c9a84c"
-                defaultOpen={true}
               >
                 <CandidateCard data={d} electionYear={candData?.electionYear || 2024} />
               </FlowCard>
@@ -191,10 +190,9 @@ export default function FederalTab({ zip, state, stateName }: { zip: string; sta
               <FlowCard
                 key={`si-${i}`}
                 title={senateIncumbents.length > 1 ? `Your U.S. Senator ${i + 1} of 2` : 'Your U.S. Senator'}
-                sub={`${d.c?.name} · ${partyLabel(d.c?.party)}`}
+                sub={`${d.c?.name} · ${partyLabel(d.c?.party)} — tap to see funding breakdown`}
                 icon="🏛️"
                 accentColor="#c9a84c"
-                defaultOpen={i === 0 && houseIncumbents.length === 0}
               >
                 <CandidateCard data={d} electionYear={candData?.electionYear || 2024} />
               </FlowCard>
