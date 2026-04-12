@@ -4,18 +4,17 @@ import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import Header from '@/components/Header';
 import ZipSearch from '@/components/ZipSearch';
-import CandidatesTab from '@/components/candidates/CandidatesTab';
-import BillsTab from '@/components/bills/BillsTab';
-import StateBillsTab from '@/components/bills/StateBillsTab';
+import FederalTab from '@/components/FederalTab';
+import StateTab from '@/components/StateTab';
 import CouncilTab from '@/components/council/CouncilTab';
 import { zipToState } from '@/lib/utils';
 
-type Tab = 'candidates' | 'bills' | 'statebills' | 'council';
+type Tab = 'city' | 'state' | 'federal';
 
 export default function SearchPage() {
   const params = useParams();
   const zip = (params.zip as string) || '';
-  const [activeTab, setActiveTab] = useState<Tab>('candidates');
+  const [activeTab, setActiveTab] = useState<Tab>('federal');
 
   const si = zipToState(zip);
 
@@ -33,10 +32,9 @@ export default function SearchPage() {
   }
 
   const tabs: { id: Tab; label: string }[] = [
-    { id: 'candidates',  label: '🗳 Candidates' },
-    { id: 'bills',       label: '📋 Federal Bills' },
-    { id: 'statebills',  label: '📜 State Bills' },
-    { id: 'council',     label: '🏛 City Council' },
+    { id: 'city',    label: '🏙 City' },
+    { id: 'state',   label: '🏛 State' },
+    { id: 'federal', label: '🇺🇸 Federal' },
   ];
 
   return (
@@ -63,17 +61,14 @@ export default function SearchPage() {
 
       {/* Tab panels */}
       <div>
-        {activeTab === 'candidates' && (
-          <CandidatesTab zip={zip} state={si.state} stateName={si.name} />
-        )}
-        {activeTab === 'bills' && (
-          <BillsTab zip={zip} state={si.state} stateName={si.name} />
-        )}
-        {activeTab === 'statebills' && (
-          <StateBillsTab state={si.state} stateName={si.name} />
-        )}
-        {activeTab === 'council' && (
+        {activeTab === 'city' && (
           <CouncilTab zip={zip} />
+        )}
+        {activeTab === 'state' && (
+          <StateTab zip={zip} state={si.state} stateName={si.name} />
+        )}
+        {activeTab === 'federal' && (
+          <FederalTab zip={zip} state={si.state} stateName={si.name} />
         )}
       </div>
     </main>
