@@ -46,6 +46,31 @@ function FlowCard({ title, sub, icon, accentColor = '#c9a84c', children, default
   );
 }
 
+// Compact card for the representative grid — matches mockup style
+function RepCard({ office, name, party, raised, accentColor, isSelected, onClick }: {
+  office: string; name: string; party: string; raised: number;
+  accentColor: string; isSelected: boolean; onClick: () => void;
+}) {
+  const fmt = (n: number) => n >= 1e6 ? `$${(n / 1e6).toFixed(1)}M` : n > 0 ? `$${Math.round(n / 1000)}K` : '—';
+  const partyColor = party === 'DEM' ? 'bg-blue-100 text-ftdblue' : party === 'REP' ? 'bg-red-100 text-ftdred' : 'bg-lb text-mid';
+  const partyName  = party === 'DEM' ? 'Dem' : party === 'REP' ? 'Rep' : party || '?';
+  return (
+    <button
+      onClick={onClick}
+      className={`w-full text-left bg-white border border-lb border-l-4 p-3 transition-all hover:shadow-md ${isSelected ? 'ring-2 ring-amber/60' : ''}`}
+      style={{ borderLeftColor: accentColor }}
+    >
+      <div className="text-[10px] tracking-[2px] uppercase text-mid mb-1">{office}</div>
+      <div className="font-display text-[14px] text-brown leading-tight mb-1">{name}</div>
+      <div className="flex items-center justify-between gap-1">
+        <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${partyColor}`}>{partyName}</span>
+        <span className="font-display text-[13px] text-amber">{fmt(raised)}</span>
+      </div>
+      <div className="text-[10px] text-amber/70 mt-1.5 text-right">{isSelected ? '▲ hide' : '▼ tap to see funding'}</div>
+    </button>
+  );
+}
+
 function TierLabel({ num, label }: { num: number; label: string }) {
   return (
     <div className="flex items-center gap-3 mb-4 mt-2">
@@ -77,6 +102,7 @@ export default function FederalTab({ zip, state, stateName }: { zip: string; sta
   const [candData, setCandData]       = useState<any>(null);
   const [candLoading, setCandLoading] = useState(true);
   const [candError, setCandError]     = useState('');
+  const [selectedRepId, setSelectedRepId] = useState<string | null>(null);
 
   // Bills
   const [filter, setFilter]               = useState('All');
@@ -172,68 +198,78 @@ export default function FederalTab({ zip, state, stateName }: { zip: string; sta
           <div className="bg-red-50 border border-ftdred p-3 text-red-800 text-[13px] mb-4">⚠ {candError}</div>
         ) : (
           <>
-            {/* ── House ── */}
-            {houseCands.length > 0 && (
+            {/* ── Currently serving: compact grid ── */}
+            {(houseIncumbents.length > 0 || senateIncumbents.length > 0 || senateCands.length > 0) && (
               <>
-                <div className="text-[11px] tracking-[3px] uppercase text-mid mb-2 mt-1">
-                  🏛 U.S. House · District {candData?.district || '?'}
+                {/* Rep grid: senators + house rep side by side */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-3">
+                  {senateIncumbents.map((d: any, i: number) => {
+                    const id = d.c?.candidate_id || `si-${i}`;
+                    return (
+                      <RepCard
+                        key={id}
+                        office="U.S. Senator"
+                        name={d.c?.name || ''}
+                        party={d.c?.party || ''}
+                        raised={d.t?.receipts ?? 0}
+                        accentColor="#1565c0"
+                        isSelected={selectedRepId === id}
+                        onClick={() => setSelectedRepId(selectedRepId === id ? null : id)}
+                      />
+                    );
+                  })}
+                  {/* Senate candidates not flagged as incumbent (e.g. open seat winner) */}
+                  {senateCands
+                    .filter((d: any) => d.c?.incumbent_challenge !== 'I')
+                    .filter((d: any) => !senateIncumbents.find((s: any) => s.c?.candidate_id === d.c?.candidate_id))
+                    .slice(0, Math.max(0, 2 - senateIncumbents.length))
+                    .map((d: any, i: number) => {
+                      const id = d.c?.candidate_id || `su-${i}`;
+                      return (
+                        <RepCard
+                          key={id}
+                          office="U.S. Senator"
+                          name={d.c?.name || ''}
+                          party={d.c?.party || ''}
+                          raised={d.t?.receipts ?? 0}
+                          accentColor="#1565c0"
+                          isSelected={selectedRepId === id}
+                          onClick={() => setSelectedRepId(selectedRepId === id ? null : id)}
+                        />
+                      );
+                  })}
+                  {houseIncumbents.map((d: any, i: number) => {
+                    const id = d.c?.candidate_id || `hi-${i}`;
+                    return (
+                      <RepCard
+                        key={id}
+                        office={`House Rep · District ${candData?.district || '?'}`}
+                        name={d.c?.name || ''}
+                        party={d.c?.party || ''}
+                        raised={d.t?.receipts ?? 0}
+                        accentColor="#c9a84c"
+                        isSelected={selectedRepId === id}
+                        onClick={() => setSelectedRepId(selectedRepId === id ? null : id)}
+                      />
+                    );
+                  })}
                 </div>
-                {houseIncumbents.map((d: any, i: number) => (
-                  <FlowCard
-                    key={`hi-${i}`}
-                    title={`Your House Rep · District ${candData?.district || '?'}`}
-                    sub={`${d.c?.name} · ${partyLabel(d.c?.party)} — tap to see funding breakdown`}
-                    icon="🏛️"
-                    accentColor="#c9a84c"
-                  >
-                    <CandidateCard data={d} electionYear={candData?.electionYear || 2024} />
-                  </FlowCard>
-                ))}
-                {houseChallengers.map((d: any, i: number) => (
-                  <FlowCard
-                    key={`hc-${i}`}
-                    title={`House Challenger · District ${candData?.district || '?'}`}
-                    sub={`${d.c?.name} · ${partyLabel(d.c?.party)} — tap to see funding breakdown`}
-                    icon="🗳️"
-                    accentColor="#9e9e9e"
-                  >
-                    <CandidateCard data={d} electionYear={candData?.electionYear || 2024} />
-                  </FlowCard>
-                ))}
-              </>
-            )}
 
-            {/* ── Senate ── */}
-            {senateCands.length > 0 && (
-              <>
-                <div className="text-[11px] tracking-[3px] uppercase text-mid mb-2 mt-4">
-                  🏛 U.S. Senate · {stateName}
-                </div>
-                {senateCands.map((d: any, i: number) => {
-                  const isInc = d.c?.incumbent_challenge === 'I';
+                {/* Expanded panel — shows full CandidateCard for selected rep */}
+                {selectedRepId && (() => {
+                  const allReps = [...senateCands, ...houseCands];
+                  const selected = allReps.find((d: any) => d.c?.candidate_id === selectedRepId);
+                  if (!selected) return null;
                   return (
-                    <FlowCard
-                      key={`s-${i}`}
-                      title={isInc ? `Your U.S. Senator` : `Senate Candidate`}
-                      sub={`${d.c?.name} · ${partyLabel(d.c?.party)} — tap to see funding breakdown`}
-                      icon="🏛️"
-                      accentColor={isInc ? '#c9a84c' : '#9e9e9e'}
-                    >
-                      <CandidateCard data={d} electionYear={candData?.electionYear || 2024} />
-                    </FlowCard>
+                    <div className="mb-4 border border-amber/30 rounded overflow-hidden">
+                      <CandidateCard data={selected} electionYear={candData?.electionYear || 2024} />
+                    </div>
                   );
-                })}
-                <div className="text-[11px] text-mid italic px-1 mb-3">
-                  Senators serve staggered 6-year terms — only those who ran in {candData?.electionYear || 2024} appear here.{' '}
-                  <a href={`https://www.senate.gov/states/${stateName.replace(/ /g, '_')}/intro.htm`}
-                    target="_blank" rel="noopener noreferrer" className="text-amber underline">
-                    See all {stateName} senators ↗
-                  </a>
-                </div>
+                })()}
               </>
             )}
 
-            {/* No candidates at all */}
+            {/* No currently-serving found */}
             {houseCands.length === 0 && senateCands.length === 0 && (
               <div className="text-center py-6 bg-lb border border-amber/40 rounded mb-4">
                 <div className="font-display text-xl text-amber mb-1">No FEC Filings Found</div>
@@ -243,6 +279,45 @@ export default function FederalTab({ zip, state, stateName }: { zip: string; sta
                     target="_blank" rel="noopener noreferrer" className="text-amber underline">FEC.gov</a>.
                 </p>
               </div>
+            )}
+
+            {/* Challengers */}
+            {(houseChallengers.length > 0 || senateChallengers.length > 0) && (
+              <>
+                <div className="flex items-center gap-3 my-3">
+                  <div className="flex-1 h-px bg-lb" />
+                  <span className="text-[10px] tracking-[2px] uppercase text-mid shrink-0">who wants their seats in 2026?</span>
+                  <div className="flex-1 h-px bg-lb" />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3">
+                  {[...houseChallengers, ...senateChallengers].map((d: any, i: number) => {
+                    const id = d.c?.candidate_id || `ch-${i}`;
+                    const isSen = d.c?.office === 'S';
+                    return (
+                      <RepCard
+                        key={id}
+                        office={isSen ? 'Senate Challenger' : `House Challenger · District ${candData?.district || '?'}`}
+                        name={d.c?.name || ''}
+                        party={d.c?.party || ''}
+                        raised={d.t?.receipts ?? 0}
+                        accentColor="#9e9e9e"
+                        isSelected={selectedRepId === id}
+                        onClick={() => setSelectedRepId(selectedRepId === id ? null : id)}
+                      />
+                    );
+                  })}
+                </div>
+                {selectedRepId && (() => {
+                  const challengers = [...houseChallengers, ...senateChallengers];
+                  const selected = challengers.find((d: any) => d.c?.candidate_id === selectedRepId);
+                  if (!selected) return null;
+                  return (
+                    <div className="mb-4 border border-lb rounded overflow-hidden">
+                      <CandidateCard data={selected} electionYear={candData?.electionYear || 2024} />
+                    </div>
+                  );
+                })()}
+              </>
             )}
           </>
         )}

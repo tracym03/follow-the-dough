@@ -37,19 +37,20 @@ function mapBill(raw: any, stateCode: string): any {
   };
 }
 
-const OCD_ID: Record<string, string> = {
-  CA: 'ocd-jurisdiction/country:us/state:ca/government',
-  NY: 'ocd-jurisdiction/country:us/state:ny/government',
-  TX: 'ocd-jurisdiction/country:us/state:tx/government',
-  FL: 'ocd-jurisdiction/country:us/state:fl/government',
+// OpenStates v3 accepts full state names most reliably
+const STATE_NAMES: Record<string, string> = {
+  CA: 'California',
+  NY: 'New York',
+  TX: 'Texas',
+  FL: 'Florida',
 };
 
 async function fetchForState(stateCode: string) {
   const url = new URL(`${BASE}/bills`);
-  url.searchParams.set('jurisdiction', OCD_ID[stateCode] ?? stateCode.toLowerCase());
+  url.searchParams.set('jurisdiction', STATE_NAMES[stateCode] ?? stateCode);
   url.searchParams.set('sort', 'updated_desc');
   url.searchParams.set('per_page', '25');
-  url.searchParams.append('include', 'sponsorships');
+  url.searchParams.set('include', 'sponsorships');
 
   const r = await fetch(url.toString(), {
     headers: { 'X-API-KEY': KEY, Accept: 'application/json' },
@@ -67,7 +68,7 @@ async function fetchForState(stateCode: string) {
 // Cache per state — Next.js includes function args in the cache key
 const getStateBills = unstable_cache(
   async (stateCode: string) => fetchForState(stateCode),
-  ['state-bills-os-v2'],
+  ['state-bills-os-v3'],
   { revalidate: 21600 },
 );
 

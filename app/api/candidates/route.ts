@@ -222,12 +222,18 @@ async function fetchCandidatesForYear(state: string, district: string | null, ye
 
   const houseStatewide = fecGetMulti('/candidates/totals/', houseBase).catch(() => ({ results: [] }));
 
+  // Senate: query this cycle AND 2 years prior to catch senators on off-year cycles
+  // (e.g. Padilla elected 2022 won't appear in 2024 data; Schiff elected 2024 won't appear in 2026 data)
   const senateResp = fecGetMulti('/candidates/totals/', {
     state, office: 'S', election_year: year, sort: '-receipts', per_page: '6', is_election: 'true',
   }).catch(() => ({ results: [] }));
 
-  const [houseDistrictResp, houseAllResp, senateData] = await Promise.all([
-    houseWithDistrict, houseStatewide, senateResp,
+  const senatePriorResp = fecGetMulti('/candidates/totals/', {
+    state, office: 'S', election_year: year - 2, sort: '-receipts', per_page: '4', is_election: 'true',
+  }).catch(() => ({ results: [] }));
+
+  const [houseDistrictResp, houseAllResp, senateData, senatePriorData] = await Promise.all([
+    houseWithDistrict, houseStatewide, senateResp, senatePriorResp,
   ]);
 
   const districtResults: any[] = houseDistrictResp.results || [];
@@ -238,7 +244,18 @@ async function fetchCandidatesForYear(state: string, district: string | null, ye
     ? districtResults.slice(0, 6)
     : stateResults.slice(0, 4);
 
-  const senateCands: any[] = (senateData.results || []).slice(0, 4);
+  // Merge current + prior cycle senate, deduplicate by candidate_id, top 4 by receipts
+  const allSenate = [...(senateData.results || []), ...(senatePriorData.results || [])];
+  const seenIds = new Set<string>();
+  const senateCands: any[] = allSenate
+    .filter((c: any) => {
+      if (seenIds.has(c.candidate_id)) return false;
+      seenIds.add(c.candidate_id);
+      return true;
+    })
+    .sort((a: any, b: any) => (b.receipts ?? 0) - (a.receipts ?? 0))
+    .slice(0, 4);
+
   return [...houseCands, ...senateCands];
 }
 
@@ -268,7 +285,7 @@ const getCandidateData = unstable_cache(
 
     return { candidates: details, state, zip, district, electionYear, usingFallback };
   },
-  [`candidates-v4-${new Date().toISOString().slice(0, 10)}`],
+  [`candidates-v5-${new Date().toISOString().slice(0, 10)}`],
   { revalidate: 3600 }
 );
 
