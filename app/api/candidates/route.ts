@@ -222,8 +222,10 @@ async function fetchCandidatesForYear(state: string, district: string | null, ye
 
   const houseStatewide = fecGetMulti('/candidates/totals/', houseBase).catch(() => ({ results: [] }));
 
-  // Senate: query this cycle AND 2 years prior to catch senators on off-year cycles
-  // (e.g. Padilla elected 2022 won't appear in 2024 data; Schiff elected 2024 won't appear in 2026 data)
+  // Senate: query 3 cycles to always catch BOTH senators regardless of which year they won.
+  // US senators serve 6-year staggered terms, so a state's two seats are on different cycles.
+  // e.g. CA 2026: Padilla (elected 2022, cycle=2022), Schiff (elected 2024, cycle=2024).
+  // Querying year, year-2, year-4 guarantees we cover both seats from any starting year.
   const senateResp = fecGetMulti('/candidates/totals/', {
     state, office: 'S', election_year: year, sort: '-receipts', per_page: '6', is_election: 'true',
   }).catch(() => ({ results: [] }));
@@ -232,8 +234,12 @@ async function fetchCandidatesForYear(state: string, district: string | null, ye
     state, office: 'S', election_year: year - 2, sort: '-receipts', per_page: '4', is_election: 'true',
   }).catch(() => ({ results: [] }));
 
-  const [houseDistrictResp, houseAllResp, senateData, senatePriorData] = await Promise.all([
-    houseWithDistrict, houseStatewide, senateResp, senatePriorResp,
+  const senatePrior2Resp = fecGetMulti('/candidates/totals/', {
+    state, office: 'S', election_year: year - 4, sort: '-receipts', per_page: '2', is_election: 'true',
+  }).catch(() => ({ results: [] }));
+
+  const [houseDistrictResp, houseAllResp, senateData, senatePriorData, senatePrior2Data] = await Promise.all([
+    houseWithDistrict, houseStatewide, senateResp, senatePriorResp, senatePrior2Resp,
   ]);
 
   const districtResults: any[] = houseDistrictResp.results || [];
@@ -245,12 +251,13 @@ async function fetchCandidatesForYear(state: string, district: string | null, ye
     : stateResults.slice(0, 4);
 
   // Tag senate candidates with the cycle they came from so the UI can show
-  // one senator per seat (current-cycle winner + prior-cycle incumbent)
-  const senCurrent = (senateData.results || []).map((c: any) => ({ ...c, _senCycle: year }));
-  const senPrior   = (senatePriorData.results || []).map((c: any) => ({ ...c, _senCycle: year - 2 }));
+  // one senator per seat — top from each distinct cycle = the two sitting senators
+  const senCurrent = (senateData.results    || []).map((c: any) => ({ ...c, _senCycle: year }));
+  const senPrior   = (senatePriorData.results  || []).map((c: any) => ({ ...c, _senCycle: year - 2 }));
+  const senPrior2  = (senatePrior2Data.results || []).map((c: any) => ({ ...c, _senCycle: year - 4 }));
 
-  // Merge, dedup by candidate_id (prefer current cycle), top 4 by receipts
-  const allSenate = [...senCurrent, ...senPrior];
+  // Merge all three cycles, dedup by candidate_id (prefer most recent cycle), top 6 by receipts
+  const allSenate = [...senCurrent, ...senPrior, ...senPrior2];
   const seenIds = new Set<string>();
   const senateCands: any[] = allSenate
     .filter((c: any) => {
@@ -259,7 +266,7 @@ async function fetchCandidatesForYear(state: string, district: string | null, ye
       return true;
     })
     .sort((a: any, b: any) => (b.receipts ?? 0) - (a.receipts ?? 0))
-    .slice(0, 4);
+    .slice(0, 6);
 
   return [...houseCands, ...senateCands];
 }

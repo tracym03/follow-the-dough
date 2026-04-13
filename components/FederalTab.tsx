@@ -144,19 +144,35 @@ export default function FederalTab({ zip, state, stateName }: { zip: string; sta
   const houseCands  = (candData?.candidates || []).filter((d: any) => d.c?.office === 'H');
   const senateCands = (candData?.candidates || []).filter((d: any) => d.c?.office === 'S');
 
+  // Minimum receipts a challenger must have raised to appear (filters out $0 ghost filers)
+  const CHALLENGER_MIN = 50_000;
+
   // House: top candidate by receipts (the winner/leading candidate, regardless of incumbent status)
   const houseLeaders     = houseCands.slice(0, 1);
   const houseLeaderIds   = new Set(houseLeaders.map((d: any) => d.c?.candidate_id));
-  const houseChallengers = houseCands.filter((d: any) => !houseLeaderIds.has(d.c?.candidate_id));
+  const houseChallengers = houseCands.filter((d: any) =>
+    !houseLeaderIds.has(d.c?.candidate_id) && (d.t?.receipts ?? 0) >= CHALLENGER_MIN
+  );
 
-  // Senate: show one senator per seat — top from current cycle (open seat winner or frontrunner)
-  // + top from prior cycle (the other senator on a different re-election schedule)
+  // Senate: show one senator per seat — pick the top-funded candidate from each distinct _senCycle.
+  // US senators serve staggered 6-year terms so we query year, year-2, AND year-4.
+  // e.g. CA 2026: Schiff (_senCycle=2024), Padilla (_senCycle=2022) → both senators shown.
   const electionYear = candData?.electionYear || 2024;
-  const senFromCurrent = senateCands.find((d: any) => d.c?._senCycle === electionYear);
-  const senFromPrior   = senateCands.find((d: any) => d.c?._senCycle === electionYear - 2);
-  const senateLeaders  = [senFromCurrent, senFromPrior].filter(Boolean) as any[];
+  const senCycleGroups = new Map<number, any>();
+  for (const d of senateCands) {
+    const cycle = d.c?._senCycle as number;
+    if (cycle !== undefined && !senCycleGroups.has(cycle)) senCycleGroups.set(cycle, d);
+  }
+  const senateLeaders  = Array.from(senCycleGroups.values()).slice(0, 2);
   const senateLeaderIds   = new Set(senateLeaders.map((d: any) => d.c?.candidate_id));
-  const senateChallengers = senateCands.filter((d: any) => !senateLeaderIds.has(d.c?.candidate_id));
+
+  // Senate challengers: only current-cycle filers (actual 2026 candidates, not prior-cycle holdovers)
+  // with meaningful fundraising — excludes Porter/Garvey (2024 cycle) and $0 filers
+  const senateChallengers = senateCands.filter((d: any) =>
+    !senateLeaderIds.has(d.c?.candidate_id) &&
+    d.c?._senCycle === electionYear &&
+    (d.t?.receipts ?? 0) >= CHALLENGER_MIN
+  );
 
   const isReps        = filter === 'From My Reps';
   const browseBills   = browseData?.bills ?? [] as any[];
