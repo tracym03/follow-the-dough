@@ -49,7 +49,7 @@ async function fetchForState(stateCode: string) {
   const url = new URL(`${BASE}/bills`);
   url.searchParams.set('jurisdiction', STATE_NAMES[stateCode] ?? stateCode);
   url.searchParams.set('sort', 'updated_desc');
-  url.searchParams.set('per_page', '25');
+  url.searchParams.set('per_page', '20'); // OpenStates caps at 20 when include=sponsorships
   url.searchParams.set('include', 'sponsorships');
 
   url.searchParams.set('apikey', KEY);
@@ -69,7 +69,7 @@ async function fetchForState(stateCode: string) {
 // Cache per state — Next.js includes function args in the cache key
 const getStateBills = unstable_cache(
   async (stateCode: string) => fetchForState(stateCode),
-  ['state-bills-os-v4'],
+  ['state-bills-os-v5'],
   { revalidate: 21600 },
 );
 

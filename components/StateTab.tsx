@@ -2,6 +2,133 @@
 
 import { useEffect, useState } from 'react';
 import BillCard, { detectBillTopic } from '@/components/bills/BillCard';
+import PizzaChart from '@/components/candidates/PizzaChart';
+import { fmt } from '@/lib/utils';
+
+// Per-state campaign finance search URLs
+const STATE_FINANCE_SEARCH: Record<string, (name: string) => string> = {
+  CA: (n) => `https://cal-access.sos.ca.gov/Campaign/Candidates/list.aspx?search=${encodeURIComponent(n)}`,
+  NY: (n) => `https://publicreporting.elections.ny.gov/Candidate/Index?candidateName=${encodeURIComponent(n)}`,
+  TX: ()  => `https://www.ethics.state.tx.us/search/cf/CandidateSearch.php`,
+  FL: (n) => `https://efts.dos.state.fl.us/public/index.html#/searchresults?searchtype=candidates&query=${encodeURIComponent(n)}`,
+};
+
+const STATE_FINANCE_LABELS: Record<string, string> = {
+  CA: 'Cal-Access (CA campaign finance)',
+  NY: 'NY Board of Elections',
+  TX: 'Texas Ethics Commission',
+  FL: 'Florida Division of Elections',
+};
+
+function LegFundingSection({ name, state, chamber }: { name: string; state: string; chamber: 'upper' | 'lower' }) {
+  const [open, setOpen]       = useState(false);
+  const [data, setData]       = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+
+  const fecChamber = chamber === 'upper' ? 'S' : 'H';
+  const financeUrl = STATE_FINANCE_SEARCH[state]?.(name);
+  const financeLabel = STATE_FINANCE_LABELS[state] || 'State campaign finance';
+
+  function toggle() {
+    if (!open && !data && !loading) {
+      setLoading(true);
+      fetch(`/api/sponsor?name=${encodeURIComponent(name)}&state=${state}&chamber=${fecChamber}`)
+        .then(r => r.json())
+        .then(setData)
+        .catch(() => setData({ found: false }))
+        .finally(() => setLoading(false));
+    }
+    setOpen(v => !v);
+  }
+
+  const slices: any[] = data?.industrySlices || [];
+  const raised: number = data?.raised ?? 0;
+  const indivPct = raised > 0 ? Math.round(((data?.indivT ?? 0) / raised) * 100) : 0;
+  const pacPct   = raised > 0 ? Math.round(((data?.pacT   ?? 0) / raised) * 100) : 0;
+
+  return (
+    <div className="border-t border-lb mt-3">
+      <button
+        onClick={toggle}
+        className={`w-full flex items-center justify-between px-0 py-2 text-left transition-colors ${open ? 'text-amber' : 'text-mid hover:text-brown'}`}
+      >
+        <div className="flex items-center gap-2">
+          <span>💰</span>
+          <span className="text-[13px] font-semibold">Who funds them?</span>
+        </div>
+        <span className="text-[11px] font-mono">{open ? '▲ hide' : '▼ show'}</span>
+      </button>
+
+      {open && (
+        <div className="pt-2">
+          {loading && (
+            <div className="flex items-center gap-2 py-2 text-[13px] text-mid">
+              <div className="w-3 h-3 border-2 border-amber/20 border-t-amber rounded-full animate-spin shrink-0" />
+              Looking up FEC filings…
+            </div>
+          )}
+
+          {!loading && data?.found && (
+            <>
+              <div className="flex gap-2 flex-wrap mb-3">
+                {raised > 0 && (
+                  <span className="text-[12px] px-2 py-0.5 rounded-full bg-amber/20 text-brown">
+                    💵 {fmt(raised)} raised
+                  </span>
+                )}
+                {indivPct > 0 && (
+                  <span className="text-[12px] px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-800">
+                    👤 {indivPct}% individual
+                  </span>
+                )}
+                {pacPct > 0 && (
+                  <span className="text-[12px] px-2 py-0.5 rounded-full bg-purple-100 text-purple-800">
+                    🏛 {pacPct}% PAC
+                  </span>
+                )}
+              </div>
+              {slices.length >= 2 ? (
+                <PizzaChart title={`${name} — Industry Funders`} slices={slices} />
+              ) : (
+                <p className="text-[12px] text-mid italic mb-2">Not enough PAC data to break down by industry.</p>
+              )}
+              <div className="flex gap-3 flex-wrap mt-2 pt-2 border-t border-lb text-[12px]">
+                <a href={`https://www.fec.gov/data/candidate/${data.candidateId}/?cycle=2024&tab=receipts`}
+                  target="_blank" rel="noopener noreferrer" className="text-amber">FEC record ↗</a>
+                <a href={`https://www.opensecrets.org/members-of-congress/summary?name=${encodeURIComponent(name)}`}
+                  target="_blank" rel="noopener noreferrer" className="text-amber">OpenSecrets ↗</a>
+              </div>
+            </>
+          )}
+
+          {!loading && data && !data.found && (
+            <div className="text-[12px] text-mid leading-relaxed">
+              <p className="mb-2">
+                No federal FEC record found — state legislators file with their state, not the FEC.
+              </p>
+              <div className="flex flex-col gap-1.5">
+                {financeUrl && (
+                  <a href={financeUrl} target="_blank" rel="noopener noreferrer"
+                    className="text-amber underline">
+                    💰 Search {financeLabel} ↗
+                  </a>
+                )}
+                <a href={`https://www.opensecrets.org/states/legislators.php?state=${state}`}
+                  target="_blank" rel="noopener noreferrer" className="text-amber underline">
+                  💰 OpenSecrets — {state} state legislators ↗
+                </a>
+                <a href={`https://ballotpedia.org/${name.replace(/ /g, '_')}`}
+                  target="_blank" rel="noopener noreferrer" className="text-mid underline">
+                  Ballotpedia profile ↗
+                </a>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
 const STATE_OPTIONS = [
   { code: 'CA', name: 'California', emoji: '🌴', financeUrl: 'https://cal-access.sos.ca.gov/Campaign/Candidates/' },
@@ -301,10 +428,7 @@ export default function StateTab({ zip, state, stateName }: { zip: string; state
                             ↗ Ballotpedia
                           </a>
                         </div>
-                        <p className="text-[11px] text-mid italic mt-3">
-                          State legislators are funded through your state&apos;s campaign finance system.
-                          Federal FEC data does not cover state races.
-                        </p>
+                        <LegFundingSection name={leg.name} state={state} chamber={chamber} />
                       </div>
                     </FlowCard>
                   ))}
