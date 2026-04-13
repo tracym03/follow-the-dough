@@ -244,8 +244,13 @@ async function fetchCandidatesForYear(state: string, district: string | null, ye
     ? districtResults.slice(0, 6)
     : stateResults.slice(0, 4);
 
-  // Merge current + prior cycle senate, deduplicate by candidate_id, top 4 by receipts
-  const allSenate = [...(senateData.results || []), ...(senatePriorData.results || [])];
+  // Tag senate candidates with the cycle they came from so the UI can show
+  // one senator per seat (current-cycle winner + prior-cycle incumbent)
+  const senCurrent = (senateData.results || []).map((c: any) => ({ ...c, _senCycle: year }));
+  const senPrior   = (senatePriorData.results || []).map((c: any) => ({ ...c, _senCycle: year - 2 }));
+
+  // Merge, dedup by candidate_id (prefer current cycle), top 4 by receipts
+  const allSenate = [...senCurrent, ...senPrior];
   const seenIds = new Set<string>();
   const senateCands: any[] = allSenate
     .filter((c: any) => {
@@ -285,7 +290,7 @@ const getCandidateData = unstable_cache(
 
     return { candidates: details, state, zip, district, electionYear, usingFallback };
   },
-  [`candidates-v5-${new Date().toISOString().slice(0, 10)}`],
+  [`candidates-v6-${new Date().toISOString().slice(0, 10)}`],
   { revalidate: 3600 }
 );
 

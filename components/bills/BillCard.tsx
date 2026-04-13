@@ -98,9 +98,14 @@ function getConflictSentence(
 ): { conflict: boolean; sentence: string } | null {
   if (!billTopic || !industrySlices?.length) return null;
 
-  // Check each of the sponsor's top 3 industries against the bill's industry keys
-  const topSlices = industrySlices.slice(0, 3);
-  for (const slice of topSlices) {
+  // Check all industries that represent ≥3% of the sponsor's identifiable funding.
+  // Using a percentage floor (not a rank cap) catches real conflicts regardless of
+  // position, while ignoring token contributions that don't represent actual influence.
+  const totalFunding = industrySlices.reduce((s: number, sl: any) => s + sl.value, 0);
+  const meaningful = totalFunding > 0
+    ? industrySlices.filter((sl: any) => sl.value / totalFunding >= 0.03)
+    : industrySlices.slice(0, 5);
+  for (const slice of meaningful) {
     const sliceLabel = slice.label.toLowerCase();
     const hasConflict = billTopic.industryKeys.some(
       key => sliceLabel.includes(key) || key.includes(sliceLabel.split(' ')[0])
@@ -214,6 +219,11 @@ function SponsorFundingSection({
                 }`}>
                   {conflict.conflict ? '⚠️ Potential conflict: ' : (conflict as any).noData ? '🔍 ' : '✓ '}
                   {conflict.sentence}
+                  {!conflict.conflict && !(conflict as any).noData && (
+                    <span className="block text-[12px] font-normal opacity-70 mt-1">
+                      How determined: we flag a conflict if this bill&apos;s topic industry accounts for ≥3% of the sponsor&apos;s identifiable PAC + employer funding (live FEC data). This is a first-pass screen — always verify at OpenSecrets.
+                    </span>
+                  )}
                 </div>
               )}
 

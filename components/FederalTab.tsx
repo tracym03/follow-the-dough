@@ -141,12 +141,22 @@ export default function FederalTab({ zip, state, stateName }: { zip: string; sta
     }
   }
 
-  const houseCands       = (candData?.candidates || []).filter((d: any) => d.c?.office === 'H');
-  const senateCands      = (candData?.candidates || []).filter((d: any) => d.c?.office === 'S');
-  const houseIncumbents  = houseCands.filter((d: any) => d.c?.incumbent_challenge === 'I');
-  const houseChallengers = houseCands.filter((d: any) => d.c?.incumbent_challenge !== 'I');
-  const senateIncumbents  = senateCands.filter((d: any) => d.c?.incumbent_challenge === 'I');
-  const senateChallengers = senateCands.filter((d: any) => d.c?.incumbent_challenge !== 'I');
+  const houseCands  = (candData?.candidates || []).filter((d: any) => d.c?.office === 'H');
+  const senateCands = (candData?.candidates || []).filter((d: any) => d.c?.office === 'S');
+
+  // House: top candidate by receipts (the winner/leading candidate, regardless of incumbent status)
+  const houseLeaders     = houseCands.slice(0, 1);
+  const houseLeaderIds   = new Set(houseLeaders.map((d: any) => d.c?.candidate_id));
+  const houseChallengers = houseCands.filter((d: any) => !houseLeaderIds.has(d.c?.candidate_id));
+
+  // Senate: show one senator per seat — top from current cycle (open seat winner or frontrunner)
+  // + top from prior cycle (the other senator on a different re-election schedule)
+  const electionYear = candData?.electionYear || 2024;
+  const senFromCurrent = senateCands.find((d: any) => d.c?._senCycle === electionYear);
+  const senFromPrior   = senateCands.find((d: any) => d.c?._senCycle === electionYear - 2);
+  const senateLeaders  = [senFromCurrent, senFromPrior].filter(Boolean) as any[];
+  const senateLeaderIds   = new Set(senateLeaders.map((d: any) => d.c?.candidate_id));
+  const senateChallengers = senateCands.filter((d: any) => !senateLeaderIds.has(d.c?.candidate_id));
 
   const isReps        = filter === 'From My Reps';
   const browseBills   = browseData?.bills ?? [] as any[];
@@ -199,12 +209,12 @@ export default function FederalTab({ zip, state, stateName }: { zip: string; sta
         ) : (
           <>
             {/* ── Currently serving: compact grid ── */}
-            {(houseIncumbents.length > 0 || senateIncumbents.length > 0 || senateCands.length > 0) && (
+            {(houseLeaders.length > 0 || senateLeaders.length > 0) && (
               <>
                 {/* Rep grid: senators + house rep side by side */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-3">
-                  {senateIncumbents.map((d: any, i: number) => {
-                    const id = d.c?.candidate_id || `si-${i}`;
+                  {senateLeaders.map((d: any, i: number) => {
+                    const id = d.c?.candidate_id || `sl-${i}`;
                     return (
                       <RepCard
                         key={id}
@@ -218,28 +228,8 @@ export default function FederalTab({ zip, state, stateName }: { zip: string; sta
                       />
                     );
                   })}
-                  {/* Senate candidates not flagged as incumbent (e.g. open seat winner) */}
-                  {senateCands
-                    .filter((d: any) => d.c?.incumbent_challenge !== 'I')
-                    .filter((d: any) => !senateIncumbents.find((s: any) => s.c?.candidate_id === d.c?.candidate_id))
-                    .slice(0, Math.max(0, 2 - senateIncumbents.length))
-                    .map((d: any, i: number) => {
-                      const id = d.c?.candidate_id || `su-${i}`;
-                      return (
-                        <RepCard
-                          key={id}
-                          office="U.S. Senator"
-                          name={d.c?.name || ''}
-                          party={d.c?.party || ''}
-                          raised={d.t?.receipts ?? 0}
-                          accentColor="#1565c0"
-                          isSelected={selectedRepId === id}
-                          onClick={() => setSelectedRepId(selectedRepId === id ? null : id)}
-                        />
-                      );
-                  })}
-                  {houseIncumbents.map((d: any, i: number) => {
-                    const id = d.c?.candidate_id || `hi-${i}`;
+                  {houseLeaders.map((d: any, i: number) => {
+                    const id = d.c?.candidate_id || `hl-${i}`;
                     return (
                       <RepCard
                         key={id}
@@ -270,7 +260,7 @@ export default function FederalTab({ zip, state, stateName }: { zip: string; sta
             )}
 
             {/* No currently-serving found */}
-            {houseCands.length === 0 && senateCands.length === 0 && (
+            {houseLeaders.length === 0 && senateLeaders.length === 0 && (
               <div className="text-center py-6 bg-lb border border-amber/40 rounded mb-4">
                 <div className="font-display text-xl text-amber mb-1">No FEC Filings Found</div>
                 <p className="text-[13px] text-mid px-4">
@@ -286,7 +276,11 @@ export default function FederalTab({ zip, state, stateName }: { zip: string; sta
               <>
                 <div className="flex items-center gap-3 my-3">
                   <div className="flex-1 h-px bg-lb" />
-                  <span className="text-[10px] tracking-[2px] uppercase text-mid shrink-0">who wants their seats in 2026?</span>
+                  <span className="text-[10px] tracking-[2px] uppercase text-mid shrink-0">
+                    {candData?.usingFallback
+                      ? `who else ran in ${candData.electionYear || 2024}?`
+                      : 'who wants their seats in 2026?'}
+                  </span>
                   <div className="flex-1 h-px bg-lb" />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3">
@@ -385,6 +379,20 @@ export default function FederalTab({ zip, state, stateName }: { zip: string; sta
           </div>
         ) : billsError ? (
           <div className="bg-red-50 border border-ftdred p-3 text-red-800 text-[13px] mb-4">⚠ {billsError}</div>
+        ) : isReps && repsData?.noStateMembers ? (
+          <div className="bg-lb border border-amber/40 rounded px-4 py-3 text-[13px] text-brown">
+            <strong className="block mb-1">Congress API returned no {stateName} members</strong>
+            <p className="text-mid mb-2">
+              The free demo API key doesn&apos;t support state filtering reliably. To see real bills from your representatives, add a free personal key from{' '}
+              <a href="https://api.congress.gov/sign-up/" target="_blank" rel="noopener noreferrer" className="text-amber underline">api.congress.gov/sign-up</a>
+              {' '}and set <code className="bg-white/60 px-1 rounded">CONGRESS_API_KEY</code> in your Vercel environment variables.
+            </p>
+            <a href={`https://www.congress.gov/members?q=%7B%22congress%22%3A%22119%22%2C%22state%22%3A%22${state}%22%7D`}
+              target="_blank" rel="noopener noreferrer"
+              className="text-[12px] text-ftdgreen underline">
+              Browse {stateName} members on Congress.gov ↗
+            </a>
+          </div>
         ) : filteredBills.length === 0 ? (
           <div className="text-center py-8 text-mid text-[13px] font-mono">
             No {filter === 'From My Reps' ? stateName : filter} bills found.

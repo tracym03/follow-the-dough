@@ -17,13 +17,14 @@ async function fetchLegislators(zip: string) {
   const lat = place.latitude;
   const lng = place.longitude;
 
-  // 2. lat/lng → state legislators via OpenStates /people/geo
-  const url = new URL(`${BASE}/people/geo`);
+  // 2. lat/lng → state legislators via OpenStates /people.geo (note: dot not slash)
+  const url = new URL(`${BASE}/people.geo`);
   url.searchParams.set('lat', lat);
   url.searchParams.set('lng', lng);
+  url.searchParams.set('apikey', KEY);
 
   const res = await fetch(url.toString(), {
-    headers: { 'X-API-KEY': KEY, Accept: 'application/json' },
+    headers: { Accept: 'application/json' },
     next: { revalidate: 86400 },
   });
   if (!res.ok) throw new Error(`OpenStates returned ${res.status}`);
@@ -51,7 +52,7 @@ async function fetchLegislators(zip: string) {
 
 const getLegislators = unstable_cache(
   async (zip: string) => fetchLegislators(zip),
-  ['state-legislators-v1'],
+  ['state-legislators-v2'],
   { revalidate: 86400 },
 );
 

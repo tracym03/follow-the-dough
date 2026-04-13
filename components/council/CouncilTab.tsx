@@ -230,37 +230,39 @@ export default function CouncilTab({ zip }: { zip: string }) {
             {/* Council Members */}
             {data.persons?.length > 0 && (
               <section>
-                <h3 className="font-display text-lg tracking-widest text-brown border-b-2 border-gold pb-1.5 mb-3">
-                  Council Members
-                </h3>
+                <div className="flex items-baseline justify-between border-b-2 border-gold pb-1.5 mb-3">
+                  <h3 className="font-display text-lg tracking-widest text-brown">
+                    Council Members
+                  </h3>
+                  {CITY_COUNCIL_PAGES[selectedCity] && (
+                    <a
+                      href={CITY_COUNCIL_PAGES[selectedCity]}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[13px] text-amber hover:underline shrink-0 ml-3"
+                    >
+                      Full Council Page ↗
+                    </a>
+                  )}
+                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {(data.persons as any[]).slice(0, 20).map((p: any, i: number) => {
                     const initials = [p.PersonFirstName?.[0], p.PersonLastName?.[0]].filter(Boolean).join('');
                     const meta = getMemberMeta(selectedCity, p.PersonFirstName || '', p.PersonLastName || '');
-                    const profileUrl = meta.url || CITY_COUNCIL_PAGES[selectedCity];
                     const partyColor = meta.party ? PARTY_COLORS[meta.party] : null;
                     const partyLabel = meta.party ? PARTY_LABELS[meta.party] : null;
+                    const email = p.PersonEmail || '';
+                    const phone = p.PersonPhone || '';
                     return (
-                      <div key={i} className="bg-white border border-amber/30 rounded-lg px-4 py-3 flex items-center gap-3 hover:shadow-sm transition-shadow">
-                        <div className="w-10 h-10 rounded-full bg-brown text-gold font-display text-xl flex items-center justify-center shrink-0">
+                      <div key={i} className="bg-white border border-amber/30 rounded-lg px-4 py-3 flex items-start gap-3 hover:shadow-sm transition-shadow">
+                        <div className="w-10 h-10 rounded-full bg-brown text-gold font-display text-xl flex items-center justify-center shrink-0 mt-0.5">
                           {initials}
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2 flex-wrap">
-                            {profileUrl ? (
-                              <a
-                                href={profileUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="font-semibold text-[16px] text-amber underline underline-offset-2 decoration-amber/40 hover:decoration-amber truncate"
-                              >
-                                {p.PersonFirstName} {p.PersonLastName}
-                              </a>
-                            ) : (
-                              <span className="font-semibold text-[16px] text-ink truncate">
-                                {p.PersonFirstName} {p.PersonLastName}
-                              </span>
-                            )}
+                            <span className="font-semibold text-[16px] text-ink">
+                              {p.PersonFirstName} {p.PersonLastName}
+                            </span>
                             {partyLabel && partyColor && (
                               <span
                                 className="text-[12px] font-bold px-1.5 py-0.5 rounded-full shrink-0"
@@ -270,8 +272,24 @@ export default function CouncilTab({ zip }: { zip: string }) {
                               </span>
                             )}
                           </div>
-                          {p.PersonTitle && <div className="text-[14px] text-mid">{p.PersonTitle}</div>}
-                          {p.PersonPhone && <div className="text-[14px] text-mid">{p.PersonPhone}</div>}
+                          {p.PersonTitle && <div className="text-[13px] text-mid">{p.PersonTitle}</div>}
+                          <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1">
+                            {phone && (
+                              <a href={`tel:${phone.replace(/\D/g, '')}`} className="text-[13px] text-ftdblue hover:underline">
+                                📞 {phone}
+                              </a>
+                            )}
+                            {email && (
+                              <a href={`mailto:${email}`} className="text-[13px] text-ftdblue hover:underline truncate">
+                                ✉ {email}
+                              </a>
+                            )}
+                            {meta.url && (
+                              <a href={meta.url} target="_blank" rel="noopener noreferrer" className="text-[13px] text-amber hover:underline">
+                                Bio ↗
+                              </a>
+                            )}
+                          </div>
                         </div>
                       </div>
                     );

@@ -32,7 +32,7 @@ const KNOWN_GOV_CANDIDATES: Record<string, Array<{
     { name: 'Tony Thurmond',        party: 'Democrat',    title: 'State Superintendent of Public Instruction',     note: 'Announced' },
     { name: 'Matt Mahan',           party: 'Democrat',    title: 'Mayor of San Jose',                              note: 'Announced' },
     { name: 'Tom Steyer',           party: 'Democrat',    title: 'Businessman / Former Presidential Candidate',    note: 'Announced' },
-    { name: 'Eric Swalwell',        party: 'Democrat',    title: 'U.S. Representative (CA-14)',                    note: 'Announced' },
+    { name: 'Eric Swalwell',        party: 'Democrat',    title: 'U.S. Representative (CA-14)',                    note: 'Dropped out' },
     { name: 'Betty Yee',            party: 'Democrat',    title: 'Former CA State Controller',                     note: 'Announced' },
     { name: 'Steve Hilton',         party: 'Republican',  title: 'Former UK Policy Adviser / Fox News Host',       note: 'Announced' },
     { name: 'Chad Bianco',          party: 'Republican',  title: 'Riverside County Sheriff',                       note: 'Announced' },
@@ -230,7 +230,7 @@ const getStateRaces = unstable_cache(
       dataNote: 'Candidate list based on public announcements as of early 2026. Campaign finance data links to your state\'s official database.',
     };
   },
-  ['stateraces-2026-v3'],
+  ['stateraces-2026-v4'],
   { revalidate: 3600 * 24 } // 24 hours — static data doesn't need frequent refresh
 );
 

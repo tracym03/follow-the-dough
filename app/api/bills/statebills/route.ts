@@ -52,8 +52,9 @@ async function fetchForState(stateCode: string) {
   url.searchParams.set('per_page', '25');
   url.searchParams.set('include', 'sponsorships');
 
+  url.searchParams.set('apikey', KEY);
   const r = await fetch(url.toString(), {
-    headers: { 'X-API-KEY': KEY, Accept: 'application/json' },
+    headers: { Accept: 'application/json' },
     next: { revalidate: 21600 },
   });
   if (!r.ok) throw new Error(`OpenStates returned ${r.status}`);
@@ -68,7 +69,7 @@ async function fetchForState(stateCode: string) {
 // Cache per state — Next.js includes function args in the cache key
 const getStateBills = unstable_cache(
   async (stateCode: string) => fetchForState(stateCode),
-  ['state-bills-os-v3'],
+  ['state-bills-os-v4'],
   { revalidate: 21600 },
 );
 
