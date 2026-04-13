@@ -24,18 +24,18 @@ const KNOWN_GOV_CANDIDATES: Record<string, Array<{
   name: string; party: string; title?: string;
   raisedFmt?: string; financeUrl?: string; note?: string;
 }>> = {
-  // Source: CalMatters.org — updated April 12, 2026
+  // Source: CalMatters, GV Wire, campaign press releases — updated April 2026
   CA: [
-    { name: 'Antonio Villaraigosa', party: 'Democrat',    title: 'Former Mayor of Los Angeles',                    note: 'Announced' },
-    { name: 'Xavier Becerra',       party: 'Democrat',    title: 'Former U.S. Secretary of HHS / Former CA AG',    note: 'Announced' },
-    { name: 'Katie Porter',         party: 'Democrat',    title: 'U.S. Representative (CA-47)',                    note: 'Announced' },
-    { name: 'Tony Thurmond',        party: 'Democrat',    title: 'State Superintendent of Public Instruction',     note: 'Announced' },
-    { name: 'Matt Mahan',           party: 'Democrat',    title: 'Mayor of San Jose',                              note: 'Announced' },
-    { name: 'Tom Steyer',           party: 'Democrat',    title: 'Businessman / Former Presidential Candidate',    note: 'Announced' },
+    { name: 'Tom Steyer',           party: 'Democrat',    title: 'Businessman / Former Presidential Candidate',    note: 'Announced', raisedFmt: '$112M (self-funded)' },
+    { name: 'Matt Mahan',           party: 'Democrat',    title: 'Mayor of San Jose',                              note: 'Announced', raisedFmt: '$11.5M' },
+    { name: 'Steve Hilton',         party: 'Republican',  title: 'Former Fox News Host',                           note: 'Announced', raisedFmt: '$6.6M' },
+    { name: 'Antonio Villaraigosa', party: 'Democrat',    title: 'Former Mayor of Los Angeles',                    note: 'Announced', raisedFmt: '$6.3M' },
+    { name: 'Katie Porter',         party: 'Democrat',    title: 'Former U.S. Representative (CA-47)',             note: 'Announced', raisedFmt: '$6.1M' },
+    { name: 'Chad Bianco',          party: 'Republican',  title: 'Riverside County Sheriff',                       note: 'Announced', raisedFmt: '~$4.6M' },
+    { name: 'Xavier Becerra',       party: 'Democrat',    title: 'Former U.S. Secretary of HHS / Former CA AG',    note: 'Announced', raisedFmt: '$2.9M' },
+    { name: 'Betty Yee',            party: 'Democrat',    title: 'Former CA State Controller',                     note: 'Announced', raisedFmt: '$345K' },
+    { name: 'Tony Thurmond',        party: 'Democrat',    title: 'State Superintendent of Public Instruction',     note: 'Announced', raisedFmt: '$181K' },
     { name: 'Eric Swalwell',        party: 'Democrat',    title: 'U.S. Representative (CA-14)',                    note: 'Dropped out' },
-    { name: 'Betty Yee',            party: 'Democrat',    title: 'Former CA State Controller',                     note: 'Announced' },
-    { name: 'Steve Hilton',         party: 'Republican',  title: 'Former UK Policy Adviser / Fox News Host',       note: 'Announced' },
-    { name: 'Chad Bianco',          party: 'Republican',  title: 'Riverside County Sheriff',                       note: 'Announced' },
   ],
   TX: [
     { name: 'Greg Abbott', party: 'Republican', title: 'Incumbent Governor', note: 'Incumbent' },
@@ -227,10 +227,10 @@ const getStateRaces = unstable_cache(
       govCandidates,
       govSource,
       financeDb,
-      dataNote: 'Candidate list based on public announcements as of early 2026. Campaign finance data links to your state\'s official database.',
+      dataNote: 'Fundraising figures from CalMatters & campaign reports (through Q1 2026). State finance data via Cal-Access.',
     };
   },
-  ['stateraces-2026-v4'],
+  ['stateraces-2026-v5'],
   { revalidate: 3600 * 24 } // 24 hours — static data doesn't need frequent refresh
 );
 

@@ -286,12 +286,19 @@ export default function StateTab({ zip, state, stateName }: { zip: string; state
               {govData.govCandidates?.length > 0 ? (
                 <>
                   <div className="text-[11px] tracking-[3px] uppercase text-mid mb-3">🗳️ Known 2026 Candidates</div>
-                  {govData.govCandidates.map((c: any, i: number) => (
-                    <div key={i} className="py-2 border-b border-dashed border-lb last:border-0">
+                  {govData.govCandidates.map((c: any, i: number) => {
+                    const droppedOut = c.note === 'Dropped out';
+                    return (
+                    <div key={i} className={`py-2 border-b border-dashed border-lb last:border-0 ${droppedOut ? 'opacity-50' : ''}`}>
                       <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <div className="text-[15px] font-bold text-ink">{c.name}</div>
+                        <div className="min-w-0">
+                          <div className={`text-[15px] font-bold ${droppedOut ? 'line-through text-mid' : 'text-ink'}`}>{c.name}</div>
                           {c.title && <div className="text-[12px] text-mid mt-0.5">{c.title}</div>}
+                          {c.raisedFmt && !droppedOut && (
+                            <div className="text-[12px] font-display text-amber mt-1">
+                              💰 {c.raisedFmt} raised
+                            </div>
+                          )}
                         </div>
                         <div className="flex flex-col items-end gap-1 shrink-0">
                           {c.party && (
@@ -301,11 +308,11 @@ export default function StateTab({ zip, state, stateName }: { zip: string; state
                               {c.party}
                             </span>
                           )}
-                          {c.note && <span className="text-[11px] text-amber italic">{c.note}</span>}
+                          {c.note && <span className={`text-[11px] italic ${droppedOut ? 'text-ftdred' : 'text-amber'}`}>{c.note}</span>}
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    </div>);
+                  })}
                   <div className="mt-3 pt-2 border-t border-lb flex flex-col gap-1.5">
                     <div className="text-[11px] text-mid">Follow the money for this race:</div>
                     {govData.financeDb && (
