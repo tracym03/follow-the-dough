@@ -271,16 +271,24 @@ export default function FederalTab({ zip, state, stateName }: { zip: string; sta
               </div>
             )}
 
-            {/* Challengers */}
-            {(houseChallengers.length > 0 || senateChallengers.length > 0) && (
+            {/* Challengers — only show when using live 2026 data */}
+            {candData?.usingFallback ? (
+              <div className="bg-lb border border-amber/30 rounded px-4 py-3 text-[13px] text-mid">
+                <strong className="text-brown block mb-1">2026 challengers not yet filed</strong>
+                It&apos;s early in the cycle — no challengers have registered significant fundraising with
+                the FEC yet. Check back closer to the 2026 election, or see who has filed so far:
+                <a
+                  href={`https://www.fec.gov/data/candidates/?state=${state}&election_year=2026`}
+                  target="_blank" rel="noopener noreferrer"
+                  className="text-amber underline block mt-1.5">
+                  View 2026 {stateName} candidates on FEC.gov ↗
+                </a>
+              </div>
+            ) : (houseChallengers.length > 0 || senateChallengers.length > 0) && (
               <>
                 <div className="flex items-center gap-3 my-3">
                   <div className="flex-1 h-px bg-lb" />
-                  <span className="text-[10px] tracking-[2px] uppercase text-mid shrink-0">
-                    {candData?.usingFallback
-                      ? `who else ran in ${candData.electionYear || 2024}?`
-                      : 'who wants their seats in 2026?'}
-                  </span>
+                  <span className="text-[10px] tracking-[2px] uppercase text-mid shrink-0">who wants their seats in 2026?</span>
                   <div className="flex-1 h-px bg-lb" />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3">
