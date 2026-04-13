@@ -297,7 +297,7 @@ const getCandidateData = unstable_cache(
 
     return { candidates: details, state, zip, district, electionYear, usingFallback };
   },
-  [`candidates-v6-${new Date().toISOString().slice(0, 10)}`],
+  [`candidates-v7-${new Date().toISOString().slice(0, 10)}`],
   { revalidate: 3600 }
 );
 
