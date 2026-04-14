@@ -18,9 +18,9 @@ export default function ZipSearch({ defaultZip = '' }: { defaultZip?: string }) 
   }
 
   return (
-    <div className="bg-ink px-6 py-4 flex flex-col items-center gap-2">
+    <div className="bg-ink px-4 py-4 flex flex-col items-center gap-2">
       <div className="text-[13px] tracking-[4px] uppercase text-amber font-mono">Enter your ZIP code</div>
-      <div className="flex w-full max-w-sm">
+      <div className="flex">
         <input
           type="text"
           inputMode="numeric"
@@ -29,18 +29,18 @@ export default function ZipSearch({ defaultZip = '' }: { defaultZip?: string }) 
           value={zip}
           onChange={(e) => setZip(e.target.value.replace(/\D/g, ''))}
           onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-          className="flex-1 bg-brown border-2 border-amber border-r-0 text-cream font-display text-3xl tracking-widest px-4 py-2 outline-none focus:border-gold placeholder:text-amber/30"
+          className="w-32 bg-brown border-2 border-amber border-r-0 text-cream font-display text-2xl tracking-widest px-3 py-2 outline-none focus:border-gold placeholder:text-amber/30"
         />
         <button
           onClick={handleSearch}
-          className="bg-amber border-2 border-amber text-ink font-display text-lg tracking-widest px-5 cursor-pointer hover:bg-gold transition-colors"
+          className="bg-amber border-2 border-amber text-ink font-display text-base tracking-widest px-4 py-2 cursor-pointer hover:bg-gold transition-colors whitespace-nowrap"
         >
-          Search
+          Search →
         </button>
       </div>
       {error && <p className="text-ftdred text-xs font-mono tracking-wider">{error}</p>}
-      <div className="text-[12px] tracking-[2px] uppercase text-amber/20 font-mono">
-        FEC · Congress.gov · LDA · Legistar — all free, all public record
+      <div className="text-[11px] tracking-[1px] uppercase text-amber/20 font-mono text-center">
+        FEC · Congress.gov · LDA · Legistar
       </div>
     </div>
   );
