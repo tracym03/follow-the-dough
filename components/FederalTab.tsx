@@ -350,8 +350,15 @@ export default function FederalTab({ zip, state, stateName }: { zip: string; sta
 
         <FlowArrow />
 
-        {/* ── TIER 2: Federal Bills ── */}
-        <TierLabel num={2} label="Federal Bills Before Congress" />
+        {/* ── TIER 2: Lobbying ── */}
+        <TierLabel num={2} label="Who's Lobbying Congress?" />
+
+        <LobbyingOverview embedded={true} />
+
+        <FlowArrow />
+
+        {/* ── TIER 3: Federal Bills ── */}
+        <TierLabel num={3} label="Federal Bills Before Congress" />
 
         {/* Topic chips */}
         <div className="mb-4">
@@ -446,12 +453,6 @@ export default function FederalTab({ zip, state, stateName }: { zip: string; sta
           </div>
         )}
 
-        <FlowArrow />
-
-        {/* ── TIER 3: Lobbying ── */}
-        <TierLabel num={3} label="Who's Lobbying Congress?" />
-
-        <LobbyingOverview embedded={true} />
 
       </div>
     </div>
