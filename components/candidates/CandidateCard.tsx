@@ -83,8 +83,50 @@ function getIndustryContext(pacIndustrySlices: any[]): Array<{ label: string; va
     .map((sl: any) => ({ label: sl.label, value: sl.value, ...INDUSTRY_VOTE_CONTEXT[sl.label] }));
 }
 
-function getPacType(profile: any): { label: string; cls: string; explanation: string } {
-  if (!profile) return { label: 'Political Committee', cls: 'bg-lb text-mid', explanation: 'A committee that donated to this candidate.' };
+// Known 501(c)(4) dark money organizations and affiliated Super PACs.
+// These groups are not required by law to disclose their donors.
+const DARK_MONEY_ORGS = [
+  'americans for prosperity',
+  'majority forward',
+  'one nation',
+  'senate leadership fund',
+  'club for growth',
+  'priorities usa',
+  'crossroads gps',
+  'american action network',
+  'congressional leadership fund',
+  'america first action',
+  'american bridge',
+  'demand justice',
+  'sixteen thirty fund',
+  'freedom partners',
+  'american commitment',
+  'american future fund',
+  'concerned women for america',
+  'nra institute',
+  'nra political victory fund',
+  'national rifle association political',
+  'susan b anthony list',
+  'planned parenthood action',
+  'human rights campaign',
+  "emily's list",
+  'league of conservation voters action',
+  'faith and freedom coalition',
+  'restore our future',
+  'american crossroads',
+  'republican jewish coalition',
+  'defending democracy together',
+];
+
+function isDarkMoney(name: string): boolean {
+  if (!name) return false;
+  const lower = name.toLowerCase();
+  return DARK_MONEY_ORGS.some(org => lower.includes(org));
+}
+
+function getPacType(profile: any, name?: string): { label: string; cls: string; explanation: string; darkMoney: boolean } {
+  const nameDark = isDarkMoney(name || '');
+  if (!profile) return { label: 'Political Committee', cls: 'bg-lb text-mid', explanation: 'A committee that donated to this candidate.', darkMoney: nameDark };
   const comm = profile.committee_type || '';
   const desig = profile.designation || '';
   const org = profile.organization_type || '';
@@ -92,31 +134,37 @@ function getPacType(profile: any): { label: string; cls: string; explanation: st
     label: 'Super PAC ⚡',
     cls: 'bg-pink-100 text-pink-800',
     explanation: 'Super PACs can raise and spend unlimited amounts. They cannot legally coordinate with the candidate but often run ads supporting them.',
+    darkMoney: nameDark,
   };
   if (desig === 'L') return {
     label: 'Leadership PAC',
     cls: 'bg-yellow-100 text-yellow-800',
     explanation: 'A PAC controlled by an elected official, often used to donate to allies and build political influence.',
+    darkMoney: nameDark,
   };
   if (org === 'L' || comm === 'W') return {
     label: 'Labor / Trade PAC',
     cls: 'bg-green-100 text-green-800',
     explanation: 'Funded by union members or trade association members. Represents workers or an industry sector.',
+    darkMoney: nameDark,
   };
   if (org === 'C' || org === 'M' || org === 'T') return {
     label: 'Corporate PAC',
     cls: 'bg-purple-100 text-purple-800',
     explanation: 'Funded by employees of a corporation. Represents the political interests of that company.',
+    darkMoney: nameDark,
   };
   if (comm === 'Y') return {
     label: 'Party Committee',
     cls: 'bg-blue-100 text-ftdblue',
     explanation: 'An official party organization (e.g. DCCC, NRCC) funneling party money to the candidate.',
+    darkMoney: nameDark,
   };
   return {
     label: 'Political Committee',
     cls: 'bg-lb text-mid',
     explanation: 'A registered political committee that donated to this candidate.',
+    darkMoney: nameDark,
   };
 }
 
@@ -394,14 +442,31 @@ export default function CandidateCard({ data, electionYear = 2026 }: { data: any
             const amt = p.total || p.contribution_receipt_amount || 0;
             const pct = Math.min(100, Math.round((amt / (pac[0]?.contribution_receipt_amount || amt || 1)) * 100));
             const { funder, pacAlias, hasCorp } = getRealFunder(p);
-            const ptype = getPacType(p.profile);
+            const ptype = getPacType(p.profile, funder);
             const st = p.profile?.state || '';
             const commId = p.contributor_committee_id || '';
             const isExpanded = expandedPac === i;
             const totalRaised = p.profile?.receipts ?? null;
+            const isSuperPac = ptype.label.startsWith('Super PAC');
+            const trailGoesCold = isSuperPac && p.pacDonors != null && p.pacDonors.length === 0;
+            const hasDarkMoneyDonors = p.pacDonors?.some((d: any) => d.isOrg && isDarkMoney(d.name || ''));
+            const showDarkWarning = ptype.darkMoney || trailGoesCold || hasDarkMoneyDonors;
 
             return (
-              <div key={i} className="bg-purple-50 border border-purple-200 border-l-[3px] border-l-ftdpurple mb-2 rounded-sm overflow-hidden">
+              <div key={i} className={`border border-l-[3px] mb-2 rounded-sm overflow-hidden ${
+                showDarkWarning
+                  ? 'bg-red-50 border-red-200 border-l-ftdred'
+                  : 'bg-purple-50 border-purple-200 border-l-ftdpurple'
+              }`}>
+                {/* Dark money risk banner */}
+                {showDarkWarning && (
+                  <div className="bg-red-100 border-b border-red-200 px-3 py-1.5 flex items-center gap-1.5">
+                    <span className="text-[12px]">🕵</span>
+                    <span className="text-[11px] font-semibold tracking-wider uppercase text-ftdred">Dark Money Risk</span>
+                    <span className="text-[11px] text-red-700 ml-1">— donor identities may not be publicly disclosed</span>
+                  </div>
+                )}
+
                 {/* PAC main row */}
                 <button
                   onClick={() => setExpandedPac(isExpanded ? null : i)}
@@ -423,24 +488,36 @@ export default function CandidateCard({ data, electionYear = 2026 }: { data: any
                       </div>
                     </div>
                     <div className="text-right shrink-0">
-                      <div className="font-display text-[17px] text-ftdpurple">{fmt(amt)}</div>
+                      <div className={`font-display text-[17px] ${showDarkWarning ? 'text-ftdred' : 'text-ftdpurple'}`}>{fmt(amt)}</div>
                       <div className="text-[11px] text-mid">{isExpanded ? '▲ less' : '▼ who funds this?'}</div>
                     </div>
                   </div>
-                  <div className="h-[3px] bg-purple-200 rounded mt-2">
-                    <div className="h-full bg-ftdpurple rounded" style={{ width: `${pct}%` }} />
+                  <div className={`h-[3px] rounded mt-2 ${showDarkWarning ? 'bg-red-200' : 'bg-purple-200'}`}>
+                    <div className={`h-full rounded ${showDarkWarning ? 'bg-ftdred' : 'bg-ftdpurple'}`} style={{ width: `${pct}%` }} />
                   </div>
                 </button>
 
                 {/* Expanded PAC detail */}
                 {isExpanded && (
-                  <div className="px-3 pb-3 border-t border-purple-200 bg-white">
+                  <div className="px-3 pb-3 border-t border-red-200 bg-white">
                     {/* Plain English explanation */}
                     <p className="text-[13px] text-mid italic mt-2 mb-2 leading-relaxed">{ptype.explanation}</p>
 
                     {totalRaised && (
                       <div className="text-[12px] text-mid mb-2">
                         This PAC raised <strong className="text-ink">{fmt(totalRaised)}</strong> total this cycle.
+                      </div>
+                    )}
+
+                    {/* "Trail Goes Cold" wall — Super PAC with no itemized donors */}
+                    {trailGoesCold && (
+                      <div className="bg-red-50 border border-red-300 rounded px-3 py-2 mb-2">
+                        <div className="text-[12px] font-semibold text-ftdred mb-1">⛔ Trail Goes Cold Here</div>
+                        <p className="text-[12px] text-red-800 leading-relaxed">
+                          This Super PAC has filed no itemized individual donors with the FEC. This is the most common
+                          dark money pattern — 501(c)(4) nonprofits route money into Super PACs, but because
+                          nonprofits are not required by law to disclose who funds them, the original source is invisible.
+                        </p>
                       </div>
                     )}
 
@@ -451,21 +528,29 @@ export default function CandidateCard({ data, electionYear = 2026 }: { data: any
                         {p.pacDonors.map((d: any, j: number) => {
                           const dName = cleanStr(d.name) || 'Unknown';
                           const dEmp = cleanStr(d.employer);
+                          const dIsDark = d.isOrg && isDarkMoney(dName);
                           return (
-                            <div key={j} className="flex justify-between items-start gap-2 py-1.5 border-b border-purple-100 last:border-0">
-                              <div>
-                                <div className="text-[13px] font-bold">{d.isOrg ? '🏛 ' : '👤 '}{dName}</div>
-                                {!d.isOrg && dEmp && dEmp !== dName && (
-                                  <div className="text-[11px] text-mid">{dEmp}</div>
-                                )}
-                                {d.isOrg && <div className="text-[11px] text-mid">Organization</div>}
+                            <div key={j} className={`py-1.5 border-b border-purple-100 last:border-0 ${dIsDark ? 'bg-red-50 -mx-3 px-3' : ''}`}>
+                              <div className="flex justify-between items-start gap-2">
+                                <div>
+                                  <div className="text-[13px] font-bold">{d.isOrg ? '🏛 ' : '👤 '}{dName}</div>
+                                  {!d.isOrg && dEmp && dEmp !== dName && (
+                                    <div className="text-[11px] text-mid">{dEmp}</div>
+                                  )}
+                                  {d.isOrg && !dIsDark && <div className="text-[11px] text-mid">Organization</div>}
+                                  {dIsDark && (
+                                    <div className="text-[11px] text-ftdred font-semibold mt-0.5">
+                                      ⚠ 501(c)(4) — donor identities not publicly disclosed by law
+                                    </div>
+                                  )}
+                                </div>
+                                <span className="font-display text-[16px] text-ftdpurple whitespace-nowrap">{fmt(d.amount)}</span>
                               </div>
-                              <span className="font-display text-[16px] text-ftdpurple whitespace-nowrap">{fmt(d.amount)}</span>
                             </div>
                           );
                         })}
                       </>
-                    ) : (
+                    ) : !trailGoesCold && (
                       <p className="text-[12px] text-mid italic">
                         {hasCorp
                           ? `This PAC is directly connected to ${funder}. Funded by company employees under federal contribution limits.`
@@ -488,6 +573,16 @@ export default function CandidateCard({ data, electionYear = 2026 }: { data: any
               </div>
             );
           })}
+
+          {/* Dark money explainer footer */}
+          <div className="mt-2 px-3 py-2.5 bg-red-50 border border-red-200 rounded text-[12px] leading-relaxed text-red-900">
+            <strong className="block mb-0.5 text-ftdred">⚠ About Dark Money</strong>
+            501(c)(4) &ldquo;social welfare&rdquo; nonprofits are not required by law to disclose their donors.
+            They can route unlimited funds into Super PACs — making the true source untraceable. OpenSecrets
+            documented over <strong>$1 billion</strong> in dark money contributions in the 2024 cycle alone.{' '}
+            <a href="https://www.opensecrets.org/dark-money/basics" target="_blank" rel="noopener noreferrer"
+              className="underline text-ftdred">Learn more ↗</a>
+          </div>
         </div>
       )}
 
