@@ -23,19 +23,108 @@ const SENATE_STATES_2026 = [
 const KNOWN_GOV_CANDIDATES: Record<string, Array<{
   name: string; party: string; title?: string;
   raisedFmt?: string; financeUrl?: string; note?: string;
+  donorProfile?: string;
+  topDonors?: Array<{ name: string; amount?: number; type: 'individual' | 'pac' | 'corp' | 'note'; note?: string }>;
+  calAccessUrl?: string;
 }>> = {
-  // Source: Cal-Access (CA SOS), CalMatters, KRON4 — updated May 2026 (figures through mid-April 2026)
+  // Source: Cal-Access (CA SOS), CalMatters, ABC7, Local News Matters — updated May 2026
   CA: [
-    { name: 'Tom Steyer',           party: 'Democrat',    title: 'Businessman / Former Presidential Candidate',    note: 'Announced', raisedFmt: '$122.7M (self-funded)' },
-    { name: 'Matt Mahan',           party: 'Democrat',    title: 'Mayor of San Jose',                              note: 'Announced', raisedFmt: '$12.7M' },
-    { name: 'Antonio Villaraigosa', party: 'Democrat',    title: 'Former Mayor of Los Angeles',                    note: 'Announced', raisedFmt: '$7.0M' },
-    { name: 'Katie Porter',         party: 'Democrat',    title: 'Former U.S. Representative (CA-47)',             note: 'Announced', raisedFmt: '$6.2M' },
-    { name: 'Steve Hilton',         party: 'Republican',  title: 'Former Fox News Host',                           note: 'Announced', raisedFmt: '$6.6M+' },
-    { name: 'Chad Bianco',          party: 'Republican',  title: 'Riverside County Sheriff',                       note: 'Announced', raisedFmt: '$4.4M' },
-    { name: 'Xavier Becerra',       party: 'Democrat',    title: 'Former U.S. Secretary of HHS / Former CA AG',    note: 'Announced', raisedFmt: '$2.9M' },
-    { name: 'Betty Yee',            party: 'Democrat',    title: 'Former CA State Controller',                     note: 'Announced', raisedFmt: '$1.9M' },
-    { name: 'Tony Thurmond',        party: 'Democrat',    title: 'State Superintendent of Public Instruction',     note: 'Announced', raisedFmt: '$1.6M' },
-    { name: 'Eric Swalwell',        party: 'Democrat',    title: 'U.S. Representative (CA-14)',                    note: 'Dropped out' },
+    {
+      name: 'Tom Steyer', party: 'Democrat',
+      title: 'Businessman / Former Presidential Candidate',
+      note: 'Announced', raisedFmt: '$122.7M (self-funded)',
+      donorProfile: 'Almost entirely self-funded — $122.5M of his own money. The largest self-funded gubernatorial campaign in CA history.',
+      calAccessUrl: 'https://cal-access.sos.ca.gov/Campaign/Candidates/list.aspx?search=steyer',
+    },
+    {
+      name: 'Matt Mahan', party: 'Democrat',
+      title: 'Mayor of San Jose',
+      note: 'Announced', raisedFmt: '$12.7M',
+      donorProfile: 'Silicon Valley tech billionaires & venture capitalists — Roblox CEO, Google co-founder, Palantir co-founder, YCombinator, LinkedIn.',
+      calAccessUrl: 'https://cal-access.sos.ca.gov/Campaign/Candidates/list.aspx?search=mahan',
+      topDonors: [
+        { name: 'David & Jan Baszucki (Roblox CEO)',      amount: 156800, type: 'individual' },
+        { name: 'Govern for California PAC (VC / tech)',  amount: 300000, type: 'pac' },
+        { name: 'Sergey Brin (Google co-founder)',        amount: 78400,  type: 'individual' },
+        { name: 'Joe Lonsdale (Palantir co-founder)',     amount: 78400,  type: 'individual' },
+        { name: 'Garry Tan (YCombinator CEO)',            amount: 78400,  type: 'individual' },
+        { name: 'Michael Moritz (Sequoia Capital)',       amount: 78400,  type: 'individual' },
+        { name: 'Kyle Vogt (former Cruise CEO)',          amount: 78400,  type: 'individual' },
+        { name: 'Marc Merrill (Riot Games co-founder)',   amount: 78400,  type: 'individual' },
+        { name: 'Harjeet Taggar (Y Combinator)',          amount: 50000,  type: 'individual' },
+        { name: 'Reid Hoffman (LinkedIn co-founder)',     amount: 39200,  type: 'individual' },
+      ],
+    },
+    {
+      name: 'Antonio Villaraigosa', party: 'Democrat',
+      title: 'Former Mayor of Los Angeles',
+      note: 'Announced', raisedFmt: '$7.0M',
+      donorProfile: 'Labor unions (construction & trade) and energy sector, strong LA County base. Backed by building trades and police unions.',
+      calAccessUrl: 'https://cal-access.sos.ca.gov/Campaign/Candidates/list.aspx?search=villaraigosa',
+      topDonors: [
+        { name: 'Chevron',                                              type: 'corp',       note: 'Major energy sector donor' },
+        { name: 'CA State Pipe Trades Council PAC',                     type: 'pac' },
+        { name: 'CA State Assoc. of Electrical Workers PAC',            type: 'pac' },
+        { name: 'CA-Nevada Conf. of Operating Engineers',               type: 'pac' },
+        { name: 'PORAC (Peace Officers Research Assoc. of CA)',         type: 'pac',        note: 'Police & law enforcement' },
+        { name: 'Building & Construction Trades Council of CA',         type: 'pac' },
+        { name: 'Clean Energy Capital (energy sector)',                 type: 'corp' },
+      ],
+    },
+    {
+      name: 'Katie Porter', party: 'Democrat',
+      title: 'Former U.S. Representative (CA-47)',
+      note: 'Announced', raisedFmt: '$6.2M',
+      donorProfile: 'Grassroots small donors — 48,000+ contributors, average under $30. Publicly pledges no corporate money.',
+      calAccessUrl: 'https://cal-access.sos.ca.gov/Campaign/Candidates/list.aspx?search=porter',
+      topDonors: [
+        { name: '48,000+ small-dollar donors',                  type: 'note',       note: 'Average contribution under $30 — largest donor base in the race' },
+        { name: 'National Union of Healthcare Workers PAC',     type: 'pac' },
+        { name: 'No corporate donations (stated policy)',       type: 'note',       note: 'Porter has publicly refused all corporate PAC money' },
+        { name: '$3.75M cash on hand — most of any challenger', type: 'note' },
+      ],
+    },
+    {
+      name: 'Steve Hilton', party: 'Republican',
+      title: 'Former Fox News Host',
+      note: 'Announced', raisedFmt: '$6.6M+',
+      calAccessUrl: 'https://cal-access.sos.ca.gov/Campaign/Candidates/list.aspx?search=hilton',
+    },
+    {
+      name: 'Chad Bianco', party: 'Republican',
+      title: 'Riverside County Sheriff',
+      note: 'Announced', raisedFmt: '$4.4M',
+      calAccessUrl: 'https://cal-access.sos.ca.gov/Campaign/Candidates/list.aspx?search=bianco',
+    },
+    {
+      name: 'Xavier Becerra', party: 'Democrat',
+      title: 'Former U.S. Secretary of HHS / Former CA AG',
+      note: 'Announced', raisedFmt: '$2.9M',
+      donorProfile: 'Traditional Democratic donors and some corporate (Chevron). Warning: spent 4× what he raised Jan–Apr 2026 — only $507K cash on hand.',
+      calAccessUrl: 'https://cal-access.sos.ca.gov/Campaign/Candidates/list.aspx?search=becerra',
+      topDonors: [
+        { name: 'Chevron',                                      type: 'corp' },
+        { name: '2,885 total contributors (mixed sources)',     type: 'note' },
+        { name: '⚠ Only $507K cash on hand (April 2026)',      type: 'note', note: 'Spent 4× what he raised Jan–Apr — fundraising pace is unsustainable' },
+      ],
+    },
+    {
+      name: 'Betty Yee', party: 'Democrat',
+      title: 'Former CA State Controller',
+      note: 'Announced', raisedFmt: '$1.9M',
+      calAccessUrl: 'https://cal-access.sos.ca.gov/Campaign/Candidates/list.aspx?search=yee',
+    },
+    {
+      name: 'Tony Thurmond', party: 'Democrat',
+      title: 'State Superintendent of Public Instruction',
+      note: 'Announced', raisedFmt: '$1.6M',
+      calAccessUrl: 'https://cal-access.sos.ca.gov/Campaign/Candidates/list.aspx?search=thurmond',
+    },
+    {
+      name: 'Eric Swalwell', party: 'Democrat',
+      title: 'U.S. Representative (CA-14)',
+      note: 'Dropped out',
+    },
   ],
   TX: [
     { name: 'Greg Abbott',     party: 'Republican', title: 'Incumbent Governor',                   note: 'Running for 4th term' },
@@ -236,7 +325,7 @@ const getStateRaces = unstable_cache(
       dataNote: 'Fundraising figures from Cal-Access (CA SOS), CalMatters & KRON4 (through mid-April 2026). State finance data via Cal-Access.',
     };
   },
-  ['stateraces-2026-v7'],
+  ['stateraces-2026-v8'],
   { revalidate: 3600 * 24 } // 24 hours — static data doesn't need frequent refresh
 );
 

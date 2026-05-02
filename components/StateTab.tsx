@@ -198,10 +198,61 @@ function FlowArrow() {
   );
 }
 
+function GovDonorPanel({ c }: { c: any }) {
+  const fmtAmt = (n: number) => n >= 1e6 ? `$${(n/1e6).toFixed(1)}M` : `$${Math.round(n/1000)}K`;
+  return (
+    <div className="mt-2 border-t border-dashed border-lb pt-3 pb-1">
+      {c.donorProfile && (
+        <div className="mb-2 px-2 py-1.5 bg-amber/10 border border-amber/30 rounded text-[13px] text-brown leading-snug">
+          💰 {c.donorProfile}
+        </div>
+      )}
+      {c.topDonors?.length > 0 && (
+        <>
+          <div className="text-[11px] tracking-[2px] uppercase text-mid mb-1.5">Top donors / funding sources:</div>
+          {c.topDonors.map((d: any, j: number) => (
+            <div key={j} className={`flex items-start justify-between gap-2 py-1.5 border-b border-lb/60 last:border-0 ${
+              d.type === 'note' ? 'opacity-80' : ''}`}>
+              <div className="min-w-0">
+                <div className="flex items-center gap-1">
+                  <span className="text-[12px]">
+                    {d.type === 'pac' ? '🏛' : d.type === 'corp' ? '🏢' : d.type === 'note' ? 'ℹ️' : '👤'}
+                  </span>
+                  <span className={`text-[13px] font-medium leading-tight ${d.type === 'note' ? 'text-mid italic' : 'text-ink'}`}>
+                    {d.name}
+                  </span>
+                </div>
+                {d.note && <div className="text-[11px] text-mid ml-5 mt-0.5">{d.note}</div>}
+              </div>
+              {d.amount && (
+                <span className="font-display text-[14px] text-amber shrink-0">{fmtAmt(d.amount)}</span>
+              )}
+            </div>
+          ))}
+        </>
+      )}
+      <div className="flex gap-2 flex-wrap mt-2 pt-1">
+        {c.calAccessUrl && (
+          <a href={c.calAccessUrl} target="_blank" rel="noopener noreferrer"
+            className="text-[11px] tracking-wider uppercase text-ftdgreen border border-ftdgreen rounded px-2 py-0.5 hover:bg-green-50">
+            ↗ Full filings on Cal-Access
+          </a>
+        )}
+        <a href={`https://www.opensecrets.org/states/race?id=CAG&cycle=2026`}
+          target="_blank" rel="noopener noreferrer"
+          className="text-[11px] tracking-wider uppercase text-amber border border-amber rounded px-2 py-0.5 hover:bg-yellow-50">
+          ↗ OpenSecrets CA Gov race
+        </a>
+      </div>
+    </div>
+  );
+}
+
 export default function StateTab({ zip, state, stateName }: { zip: string; state: string; stateName: string }) {
   // Governor data
   const [govData, setGovData]       = useState<any>(null);
   const [govLoading, setGovLoading] = useState(true);
+  const [expandedGovIdx, setExpandedGovIdx] = useState<number | null>(null);
 
   // State legislators
   const [legData, setLegData]       = useState<any>(null);
@@ -288,9 +339,14 @@ export default function StateTab({ zip, state, stateName }: { zip: string; state
                   <div className="text-[11px] tracking-[3px] uppercase text-mid mb-3">🗳️ Known 2026 Candidates</div>
                   {govData.govCandidates.map((c: any, i: number) => {
                     const droppedOut = c.note === 'Dropped out';
+                    const hasDonorData = !droppedOut && (c.donorProfile || c.topDonors?.length > 0 || c.calAccessUrl);
+                    const isExpanded = expandedGovIdx === i;
                     return (
-                    <div key={i} className={`py-2 border-b border-dashed border-lb last:border-0 ${droppedOut ? 'opacity-50' : ''}`}>
-                      <div className="flex items-start justify-between gap-2">
+                    <div key={i} className={`border-b border-dashed border-lb last:border-0 ${droppedOut ? 'opacity-50' : ''}`}>
+                      <div
+                        className={`py-2 flex items-start justify-between gap-2 ${hasDonorData ? 'cursor-pointer hover:bg-lb/40 -mx-1 px-1 rounded transition-colors' : ''}`}
+                        onClick={() => hasDonorData && setExpandedGovIdx(isExpanded ? null : i)}
+                      >
                         <div className="min-w-0">
                           <div className={`text-[15px] font-bold ${droppedOut ? 'line-through text-mid' : 'text-ink'}`}>{c.name}</div>
                           {c.title && <div className="text-[12px] text-mid mt-0.5">{c.title}</div>}
@@ -304,13 +360,18 @@ export default function StateTab({ zip, state, stateName }: { zip: string; state
                           {c.party && (
                             <span className={`text-[11px] tracking-widest uppercase px-2 py-0.5 rounded-full
                               ${c.party.includes('Dem') ? 'bg-blue-100 text-ftdblue' :
-                                c.party.includes('Rep') ? 'bg-red-100 text-ftdred' : 'bg-lb text-mid'}`}>
+                                c.party.includes('Rep') ? 'bg-red-100 text-ftdred' :
+                                c.party.includes('Ind') ? 'bg-purple-100 text-ftdpurple' : 'bg-lb text-mid'}`}>
                               {c.party}
                             </span>
                           )}
                           {c.note && <span className={`text-[11px] italic ${droppedOut ? 'text-ftdred' : 'text-amber'}`}>{c.note}</span>}
+                          {hasDonorData && (
+                            <span className="text-[10px] text-mid font-mono">{isExpanded ? '▲ hide' : '▼ who funds them?'}</span>
+                          )}
                         </div>
                       </div>
+                      {isExpanded && <GovDonorPanel c={c} />}
                     </div>);
                   })}
                   <div className="mt-3 pt-2 border-t border-lb flex flex-col gap-1.5">
