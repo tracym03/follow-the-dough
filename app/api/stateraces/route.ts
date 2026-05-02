@@ -38,16 +38,18 @@ const KNOWN_GOV_CANDIDATES: Record<string, Array<{
     { name: 'Eric Swalwell',        party: 'Democrat',    title: 'U.S. Representative (CA-14)',                    note: 'Dropped out' },
   ],
   TX: [
-    { name: 'Greg Abbott', party: 'Republican', title: 'Incumbent Governor', note: 'Incumbent' },
+    { name: 'Greg Abbott',     party: 'Republican', title: 'Incumbent Governor',                   note: 'Running for 4th term' },
+    { name: 'Gina Hinojosa',   party: 'Democrat',   title: 'State Representative',                 note: 'Democratic nominee' },
   ],
   FL: [
-    { name: 'Ron DeSantis', party: 'Republican', title: 'Incumbent Governor', note: 'Term-limited — open race' },
-    { name: 'Jimmy Patronis', party: 'Republican', title: 'State CFO', note: 'Announced' },
-    { name: 'Nikki Fried', party: 'Democrat', title: 'Former Ag Commissioner', note: 'Exploring' },
+    { name: 'Ron DeSantis',   party: 'Republican', title: 'Incumbent Governor',                    note: 'Term-limited — open race' },
+    { name: 'Byron Donalds',  party: 'Republican', title: 'U.S. Representative (FL-19)',           note: 'Announced — Trump-endorsed' },
+    { name: 'Paul Renner',    party: 'Republican', title: 'Former FL House Speaker',               note: 'Announced' },
+    { name: 'David Jolly',    party: 'Democrat',   title: 'Former U.S. Representative',            note: 'Announced' },
   ],
   NY: [
-    { name: 'Kathy Hochul', party: 'Democrat', title: 'Incumbent Governor', note: 'Running for re-election' },
-    { name: 'Lee Zeldin', party: 'Republican', title: 'Former Congressman', note: 'Possible challenger' },
+    { name: 'Kathy Hochul',     party: 'Democrat',   title: 'Incumbent Governor',                  note: 'Running for re-election — Dem party endorsed' },
+    { name: 'Bruce Blakeman',   party: 'Republican', title: 'Nassau County Executive',             note: 'Announced — Trump-endorsed' },
   ],
   IL: [
     { name: 'JB Pritzker', party: 'Democrat', title: 'Incumbent Governor', note: 'Running for re-election' },
@@ -56,9 +58,9 @@ const KNOWN_GOV_CANDIDATES: Record<string, Array<{
     { name: 'Josh Shapiro', party: 'Democrat', title: 'Incumbent Governor', note: 'Running for re-election' },
   ],
   OH: [
-    { name: 'Mike DeWine', party: 'Republican', title: 'Incumbent Governor', note: 'Term-limited — open race' },
-    { name: 'Jon Husted', party: 'Republican', title: 'Lt. Governor', note: 'Announced' },
-    { name: 'Nan Whaley', party: 'Democrat', title: 'Former Mayor of Dayton', note: 'Exploring' },
+    { name: 'Mike DeWine',        party: 'Republican', title: 'Incumbent Governor',                note: 'Term-limited — open race' },
+    { name: 'Vivek Ramaswamy',    party: 'Republican', title: 'Entrepreneur / Former Presidential Candidate', note: 'Announced — May 5 primary' },
+    { name: 'Amy Acton',          party: 'Democrat',   title: 'Former Ohio Dept. of Health Director', note: 'Announced — sole Dem candidate' },
   ],
   GA: [
     { name: 'Brian Kemp', party: 'Republican', title: 'Incumbent Governor', note: 'Term-limited — open race' },
@@ -69,8 +71,12 @@ const KNOWN_GOV_CANDIDATES: Record<string, Array<{
     { name: 'Josh Stein', party: 'Democrat', title: 'Incumbent Governor', note: 'Running for re-election' },
   ],
   MI: [
-    { name: 'Gretchen Whitmer', party: 'Democrat', title: 'Incumbent Governor', note: 'Term-limited — open race' },
-    { name: 'Tudor Dixon', party: 'Republican', title: 'Former Gubernatorial Candidate', note: 'Possible candidate' },
+    { name: 'Gretchen Whitmer', party: 'Democrat',     title: 'Incumbent Governor',                      note: 'Term-limited — open race' },
+    { name: 'Jocelyn Benson',   party: 'Democrat',     title: 'Secretary of State',                      note: 'Announced — Democratic frontrunner' },
+    { name: 'John James',       party: 'Republican',   title: 'U.S. Representative (MI-10)',             note: 'Announced — Republican frontrunner' },
+    { name: 'Mike Duggan',      party: 'Independent',  title: 'Mayor of Detroit',                        note: 'Announced — running as independent; pulling from both parties' },
+    { name: 'Chris Swanson',    party: 'Democrat',     title: 'Genesee County Sheriff',                  note: 'Announced' },
+    { name: 'Mike Cox',         party: 'Republican',   title: 'Former Michigan Attorney General',        note: 'Announced' },
   ],
   AZ: [
     { name: 'Katie Hobbs', party: 'Democrat', title: 'Incumbent Governor', note: 'Running for re-election' },
@@ -230,7 +236,7 @@ const getStateRaces = unstable_cache(
       dataNote: 'Fundraising figures from Cal-Access (CA SOS), CalMatters & KRON4 (through mid-April 2026). State finance data via Cal-Access.',
     };
   },
-  ['stateraces-2026-v6'],
+  ['stateraces-2026-v7'],
   { revalidate: 3600 * 24 } // 24 hours — static data doesn't need frequent refresh
 );
 
