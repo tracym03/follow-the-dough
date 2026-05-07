@@ -87,14 +87,33 @@ const KNOWN_GOV_CANDIDATES: Record<string, Array<{
     {
       name: 'Steve Hilton', party: 'Republican',
       title: 'Former Fox News Host',
-      note: 'Announced', raisedFmt: '$6.6M+',
+      note: 'Announced', raisedFmt: '$7.1M',
+      donorProfile: 'Broad grassroots conservative base — 30,000+ small-dollar donors tapped via his national TV & podcast profile. Out-of-state donors significant. Self-funded ~$200K.',
       calAccessUrl: 'https://cal-access.sos.ca.gov/Campaign/Candidates/list.aspx?search=hilton',
+      topDonors: [
+        { name: '30,000+ small-dollar donors (national conservative base)', type: 'note', note: 'Largest individual donor count among Republican candidates' },
+        { name: 'Steve Hilton (self)',                                       type: 'individual', amount: 200000, note: 'Self-funded contribution' },
+        { name: 'Lighthouse Worldwide Solutions Inc.',                       type: 'corp',       note: 'Notable out-of-state company donor' },
+        { name: 'Out-of-state conservative donor networks',                  type: 'note',       note: 'National media profile drives donations from across the US, not just California' },
+      ],
     },
     {
       name: 'Chad Bianco', party: 'Republican',
       title: 'Riverside County Sheriff',
       note: 'Announced', raisedFmt: '$4.4M',
+      donorProfile: 'Real estate developers, construction contractors, and law enforcement PACs. Regional California base built from years as Riverside County Sheriff.',
       calAccessUrl: 'https://cal-access.sos.ca.gov/Campaign/Candidates/list.aspx?search=bianco',
+      topDonors: [
+        { name: 'PORAC (Peace Officers Research Assoc. of CA)',  type: 'pac',        note: 'Statewide law enforcement PAC' },
+        { name: 'Santa Barbara County Deputy Sheriffs\' Assoc.', type: 'pac',        note: 'Law enforcement' },
+        { name: 'Charles Wagner (Caymus Vineyards)',             type: 'individual', note: 'Wine industry' },
+        { name: 'Dan Stephenson (Rancon Group)',                 type: 'individual', note: 'Real estate developer' },
+        { name: 'Nachhattar Chandi & affiliated entities',       type: 'individual', note: 'Real estate developer' },
+        { name: 'Krista Hundley (Hunco Development)',            type: 'individual', note: 'Real estate development' },
+        { name: 'Sierra Pacific Electrical Contracting',         type: 'corp' },
+        { name: 'West Coast Drywall & Company Inc.',             type: 'corp' },
+        { name: 'Tom Day (Portrait Construction)',               type: 'individual', note: 'Construction' },
+      ],
     },
     {
       name: 'Xavier Becerra', party: 'Democrat',
@@ -325,7 +344,7 @@ const getStateRaces = unstable_cache(
       dataNote: 'Fundraising figures from Cal-Access (CA SOS), CalMatters & KRON4 (through mid-April 2026). State finance data via Cal-Access.',
     };
   },
-  ['stateraces-2026-v8'],
+  ['stateraces-2026-v9'],
   { revalidate: 3600 * 24 } // 24 hours — static data doesn't need frequent refresh
 );
 
