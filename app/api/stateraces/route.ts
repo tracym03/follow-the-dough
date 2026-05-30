@@ -27,13 +27,13 @@ const KNOWN_GOV_CANDIDATES: Record<string, Array<{
   topDonors?: Array<{ name: string; amount?: number; type: 'individual' | 'pac' | 'corp' | 'note'; note?: string }>;
   calAccessUrl?: string;
 }>> = {
-  // Source: Cal-Access (CA SOS), CalMatters, ABC7, Local News Matters — updated May 2026
+  // Source: Cal-Access (CA SOS), CalMatters, KPBS, KRON4 — updated May 30 2026
   CA: [
     {
       name: 'Tom Steyer', party: 'Democrat',
       title: 'Businessman / Former Presidential Candidate',
-      note: 'Announced', raisedFmt: '$122.7M (self-funded)',
-      donorProfile: 'Almost entirely self-funded — $122.5M of his own money. The largest self-funded gubernatorial campaign in CA history.',
+      note: 'Announced', raisedFmt: '$213M (self-funded)',
+      donorProfile: 'Almost entirely self-funded — $213M of his own money. The largest self-funded gubernatorial campaign in California history. Total race spending (all candidates) has passed $480M.',
       calAccessUrl: 'https://cal-access.sos.ca.gov/Campaign/Candidates/list.aspx?search=steyer',
     },
     {
@@ -119,12 +119,15 @@ const KNOWN_GOV_CANDIDATES: Record<string, Array<{
       name: 'Xavier Becerra', party: 'Democrat',
       title: 'Former U.S. Secretary of HHS / Former CA AG',
       note: 'Announced', raisedFmt: '$2.9M',
-      donorProfile: 'Traditional Democratic donors and some corporate (Chevron). Warning: spent 4× what he raised Jan–Apr 2026 — only $507K cash on hand.',
+      donorProfile: 'Getting momentum from Swalwell donor exodus — 500+ Swalwell donors switched to Becerra after Swalwell dropped out. Now backed by healthcare and labor.',
       calAccessUrl: 'https://cal-access.sos.ca.gov/Campaign/Candidates/list.aspx?search=becerra',
       topDonors: [
-        { name: 'Chevron',                                      type: 'corp' },
-        { name: '2,885 total contributors (mixed sources)',     type: 'note' },
-        { name: '⚠ Only $507K cash on hand (April 2026)',      type: 'note', note: 'Spent 4× what he raised Jan–Apr — fundraising pace is unsustainable' },
+        { name: 'DaVita (dialysis company)',                            type: 'corp',  note: 'Switched from Swalwell after dropout' },
+        { name: 'California Medical Association PAC',                   type: 'pac',   note: 'Major Swalwell backer now supporting Becerra' },
+        { name: 'California Professional Firefighters PAC',             type: 'pac',   note: 'Switched to Becerra after Swalwell dropped out' },
+        { name: 'Chevron',                                              type: 'corp' },
+        { name: '500+ Swalwell donors (now redirected to Becerra)',     type: 'note' },
+        { name: '⚠ Only $507K cash on hand (April 2026)',              type: 'note',  note: 'Spent 4× what he raised Jan–Apr — watch cash position' },
       ],
     },
     {
@@ -152,6 +155,7 @@ const KNOWN_GOV_CANDIDATES: Record<string, Array<{
   FL: [
     { name: 'Ron DeSantis',   party: 'Republican', title: 'Incumbent Governor',                    note: 'Term-limited — open race' },
     { name: 'Byron Donalds',  party: 'Republican', title: 'U.S. Representative (FL-19)',           note: 'Announced — Trump-endorsed' },
+    { name: 'Jay Collins',    party: 'Republican', title: 'Lt. Governor / Former Army Green Beret', note: 'Announced — Jan 2026' },
     { name: 'Paul Renner',    party: 'Republican', title: 'Former FL House Speaker',               note: 'Announced' },
     { name: 'David Jolly',    party: 'Democrat',   title: 'Former U.S. Representative',            note: 'Announced' },
   ],
@@ -166,9 +170,9 @@ const KNOWN_GOV_CANDIDATES: Record<string, Array<{
     { name: 'Josh Shapiro', party: 'Democrat', title: 'Incumbent Governor', note: 'Running for re-election' },
   ],
   OH: [
-    { name: 'Mike DeWine',        party: 'Republican', title: 'Incumbent Governor',                note: 'Term-limited — open race' },
-    { name: 'Vivek Ramaswamy',    party: 'Republican', title: 'Entrepreneur / Former Presidential Candidate', note: 'Announced — May 5 primary' },
-    { name: 'Amy Acton',          party: 'Democrat',   title: 'Former Ohio Dept. of Health Director', note: 'Announced — sole Dem candidate' },
+    { name: 'Mike DeWine',        party: 'Republican', title: 'Incumbent Governor',                         note: 'Term-limited — open race' },
+    { name: 'Vivek Ramaswamy',    party: 'Republican', title: 'Entrepreneur / Former Presidential Candidate', note: 'Won Republican primary — May 5, 2026' },
+    { name: 'Amy Acton',          party: 'Democrat',   title: 'Former Ohio Dept. of Health Director',        note: 'Announced — sole Dem candidate' },
   ],
   GA: [
     { name: 'Brian Kemp', party: 'Republican', title: 'Incumbent Governor', note: 'Term-limited — open race' },
@@ -180,11 +184,11 @@ const KNOWN_GOV_CANDIDATES: Record<string, Array<{
   ],
   MI: [
     { name: 'Gretchen Whitmer', party: 'Democrat',     title: 'Incumbent Governor',                      note: 'Term-limited — open race' },
-    { name: 'Jocelyn Benson',   party: 'Democrat',     title: 'Secretary of State',                      note: 'Announced — Democratic frontrunner' },
+    { name: 'Jocelyn Benson',   party: 'Democrat',     title: 'Secretary of State',                      note: 'Announced — Democratic frontrunner (leads James 34–29 in May poll)' },
     { name: 'John James',       party: 'Republican',   title: 'U.S. Representative (MI-10)',             note: 'Announced — Republican frontrunner' },
-    { name: 'Mike Duggan',      party: 'Independent',  title: 'Mayor of Detroit',                        note: 'Announced — running as independent; pulling from both parties' },
     { name: 'Chris Swanson',    party: 'Democrat',     title: 'Genesee County Sheriff',                  note: 'Announced' },
     { name: 'Mike Cox',         party: 'Republican',   title: 'Former Michigan Attorney General',        note: 'Announced' },
+    { name: 'Mike Duggan',      party: 'Independent',  title: 'Former Mayor of Detroit',                 note: 'Dropped out — May 21, 2026' },
   ],
   AZ: [
     { name: 'Katie Hobbs', party: 'Democrat', title: 'Incumbent Governor', note: 'Running for re-election' },
@@ -341,10 +345,10 @@ const getStateRaces = unstable_cache(
       govCandidates,
       govSource,
       financeDb,
-      dataNote: 'Fundraising figures from Cal-Access (CA SOS), CalMatters & KRON4 (through mid-April 2026). State finance data via Cal-Access.',
+      dataNote: 'Fundraising figures from Cal-Access (CA SOS), CalMatters, KPBS & KRON4 (through May 2026). State finance data via Cal-Access.',
     };
   },
-  ['stateraces-2026-v9'],
+  ['stateraces-2026-v10'],
   { revalidate: 3600 * 24 } // 24 hours — static data doesn't need frequent refresh
 );
 
