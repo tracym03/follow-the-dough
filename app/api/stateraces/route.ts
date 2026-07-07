@@ -27,14 +27,14 @@ const KNOWN_GOV_CANDIDATES: Record<string, Array<{
   topDonors?: Array<{ name: string; amount?: number; type: 'individual' | 'pac' | 'corp' | 'note'; note?: string }>;
   calAccessUrl?: string;
 }>> = {
-  // Source: Cal-Access (CA SOS), CalMatters, ABC7, NPR — updated June 16 2026
+  // Source: Cal-Access (CA SOS), CalMatters, ABC7, NPR — updated July 7 2026
   // ✅ June 2 primary complete — Becerra (D) and Hilton (R) advance to November general
   CA: [
     // ── GENERAL ELECTION CONTESTANTS ──
     {
       name: 'Xavier Becerra', party: 'Democrat',
       title: 'Former U.S. Secretary of HHS / Former CA AG',
-      note: '🏆 Advances to November — 28% primary vote',
+      note: '🏆 Advances to November — 26.7% primary vote (final)',
       raisedFmt: '$2.9M',
       donorProfile: 'Backed by healthcare, labor, and 500+ Swalwell donors who switched after Swalwell dropped out. Won despite being outspent 70-to-1 by Steyer.',
       calAccessUrl: 'https://cal-access.sos.ca.gov/Campaign/Candidates/list.aspx?search=becerra',
@@ -49,7 +49,7 @@ const KNOWN_GOV_CANDIDATES: Record<string, Array<{
     {
       name: 'Steve Hilton', party: 'Republican',
       title: 'Former Fox News Host',
-      note: '🏆 Advances to November — 25% primary vote',
+      note: '🏆 Advances to November — 26.4% primary vote (final)',
       raisedFmt: '$7.1M',
       donorProfile: 'Broad grassroots conservative base — 30,000+ small-dollar donors via his national TV & podcast profile. Significant out-of-state donations. Self-funded ~$200K.',
       calAccessUrl: 'https://cal-access.sos.ca.gov/Campaign/Candidates/list.aspx?search=hilton',
@@ -135,12 +135,12 @@ const KNOWN_GOV_CANDIDATES: Record<string, Array<{
     { name: 'Amy Acton',          party: 'Democrat',   title: 'Former Ohio Dept. of Health Director',        note: 'Announced — sole Dem candidate' },
   ],
   GA: [
+    // ── GENERAL ELECTION CONTESTANTS ──
+    { name: 'Rick Jackson',         party: 'Republican', title: 'Businessperson',                       note: '🏆 Republican nominee — won June 16 runoff' },
+    { name: 'Keisha Lance Bottoms', party: 'Democrat',   title: 'Former Mayor of Atlanta',              note: '🏆 Democratic nominee' },
+    // ── DID NOT ADVANCE ──
+    { name: 'Burt Jones',           party: 'Republican', title: 'Lt. Governor of Georgia',              note: 'Lost Republican primary runoff — June 16 (had Trump + Kemp endorsements)' },
     { name: 'Brian Kemp',           party: 'Republican', title: 'Incumbent Governor',                    note: 'Term-limited — open race' },
-    { name: 'Keisha Lance Bottoms', party: 'Democrat',   title: 'Former Mayor of Atlanta',              note: 'Democratic nominee' },
-    { name: 'Burt Jones',           party: 'Republican', title: 'Lt. Governor of Georgia',              note: 'In Republican primary runoff — June 16 (Trump + Kemp endorsed)' },
-    { name: 'Rick Jackson',         party: 'Republican', title: 'Businessperson',                       note: 'In Republican primary runoff — June 16' },
-    { name: 'Stacey Abrams',        party: 'Democrat',   title: 'Former Gubernatorial Candidate',       note: 'Did not run in 2026' },
-    { name: 'Marjorie Taylor Greene', party: 'Republican', title: 'U.S. Representative (GA-14)',        note: 'Decided not to run' },
   ],
   NC: [
     { name: 'Josh Stein', party: 'Democrat', title: 'Incumbent Governor', note: 'Running for re-election' },
@@ -148,9 +148,10 @@ const KNOWN_GOV_CANDIDATES: Record<string, Array<{
   MI: [
     { name: 'Gretchen Whitmer', party: 'Democrat',     title: 'Incumbent Governor',                      note: 'Term-limited — open race' },
     { name: 'Jocelyn Benson',   party: 'Democrat',     title: 'Secretary of State',                      note: 'Announced — Democratic frontrunner (leads James 34–29 in May poll)' },
-    { name: 'John James',       party: 'Republican',   title: 'U.S. Representative (MI-10)',             note: 'Announced — Republican frontrunner' },
+    { name: 'John James',       party: 'Republican',   title: 'U.S. Representative (MI-10)',             note: 'Trump-endorsed (June 22) — Republican frontrunner. Primary Aug 4.' },
     { name: 'Chris Swanson',    party: 'Democrat',     title: 'Genesee County Sheriff',                  note: 'Announced' },
-    { name: 'Mike Cox',         party: 'Republican',   title: 'Former Michigan Attorney General',        note: 'Announced' },
+    { name: 'Mike Cox',         party: 'Republican',   title: 'Former Michigan Attorney General',        note: 'Announced — still in race despite Trump endorsing James' },
+    { name: 'Aric Nesbitt',     party: 'Republican',   title: 'Michigan Senate Republican Leader',       note: 'Dropped out — June 22, 2026 (endorsed John James after Trump endorsement)' },
     { name: 'Mike Duggan',      party: 'Independent',  title: 'Former Mayor of Detroit',                 note: 'Dropped out — May 21, 2026' },
   ],
   AZ: [
@@ -308,10 +309,10 @@ const getStateRaces = unstable_cache(
       govCandidates,
       govSource,
       financeDb,
-      dataNote: 'June 2 primary complete — Becerra (D) vs Hilton (R) in November general. Fundraising from Cal-Access, CalMatters & NPR (through June 2026).',
+      dataNote: 'June 2 CA primary complete — Becerra (D) vs Hilton (R) in November general. GA: Rick Jackson (R) won June 16 runoff, faces Bottoms (D). Fundraising from Cal-Access, CalMatters & NPR (through July 2026).',
     };
   },
-  ['stateraces-2026-v11'],
+  ['stateraces-2026-v12'],
   { revalidate: 3600 * 24 } // 24 hours — static data doesn't need frequent refresh
 );
 
