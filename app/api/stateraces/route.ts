@@ -170,8 +170,15 @@ const KNOWN_GOV_CANDIDATES: Record<string, Array<{
     { name: 'Tim Walz', party: 'Democrat', title: 'Incumbent Governor', note: 'Running for re-election' },
   ],
   WI: [
-    { name: 'Tony Evers', party: 'Democrat', title: 'Incumbent Governor', note: 'Running for re-election' },
-    { name: 'Eric Toney', party: 'Republican', title: 'Former AG candidate', note: 'Possible candidate' },
+    // Tony Evers is term-limited / retiring — open race. Primary: August 11, 2026.
+    { name: 'Tony Evers',      party: 'Democrat',   title: 'Incumbent Governor',                   note: 'Retiring — open race' },
+    { name: 'Mandela Barnes',  party: 'Democrat',   title: 'Former Lt. Governor',                  note: 'Announced — Democratic frontrunner (ran for Senate 2022)' },
+    { name: 'Sara Rodriguez',  party: 'Democrat',   title: 'Lt. Governor',                         note: 'Announced' },
+    { name: 'David Crowley',   party: 'Democrat',   title: 'Milwaukee County Executive',           note: 'Announced' },
+    { name: 'Kelda Roys',      party: 'Democrat',   title: 'State Senator',                        note: 'Announced' },
+    { name: 'Francesca Hong',  party: 'Democrat',   title: 'State Representative',                 note: 'Announced' },
+    { name: 'Tom Tiffany',     party: 'Republican', title: 'U.S. Representative (WI-07)',          note: 'Announced — Republican frontrunner. Primary Aug 11.' },
+    { name: 'Andrew Manske',   party: 'Republican', title: 'Republican candidate',                 note: 'Announced' },
   ],
   NV: [
     { name: 'Joe Lombardo', party: 'Republican', title: 'Incumbent Governor', note: 'Running for re-election' },
@@ -312,7 +319,7 @@ const getStateRaces = unstable_cache(
       dataNote: 'June 2 CA primary complete — Becerra (D) vs Hilton (R) in November general. GA: Rick Jackson (R) won June 16 runoff, faces Bottoms (D). Fundraising from Cal-Access, CalMatters & NPR (through July 2026).',
     };
   },
-  ['stateraces-2026-v12'],
+  ['stateraces-2026-v13'],
   { revalidate: 3600 * 24 } // 24 hours — static data doesn't need frequent refresh
 );
 
