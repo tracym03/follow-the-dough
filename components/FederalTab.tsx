@@ -5,6 +5,43 @@ import CandidateCard from '@/components/candidates/CandidateCard';
 import BillCard, { detectBillTopic } from '@/components/bills/BillCard';
 import LobbyingOverview from '@/components/bills/LobbyingOverview';
 
+// ── National spotlight bills — shown regardless of ZIP ───────────────────────
+const SPOTLIGHT_BILLS: Array<{ bill: any; why: string; conflict: string }> = [
+  {
+    bill: {
+      number: '139',
+      type: 'HR',
+      congress: 119,
+      title: 'Sunshine Protection Act of 2025',
+      sponsor: 'Rep. Vern Buchanan (R-FL)',
+      sponsorName: 'Vern Buchanan',
+      sponsorState: 'FL',
+      sponsorParty: 'R',
+      sponsorChamber: 'H',
+      latestAction: 'Passed House 308–117 — now before Senate',
+      actionDate: '2026-07-14',
+    },
+    why: 'Would make daylight saving time permanent nationwide. Passed the House 308–117 on July 14, 2026 with broad bipartisan support — now heads to the Senate.',
+    conflict: 'Sponsor Rep. Vern Buchanan (R-FL) built a $100M+ fortune owning 15+ auto dealerships across Florida. Car dealerships profit directly from longer evening daylight — consumers browse and test-drive after work. His top career donor industry is real estate (19%+ of career contributions), which benefits from extended evening foot traffic. Energy angle: modern research (NBER 2011, Nature Energy 2018) shows permanent DST increases electricity consumption in hot southern climates like Florida, where longer evenings spike air-conditioning use — meaning utilities that sell more power quietly benefit too.',
+  },
+];
+
+function SpotlightEntry({ item }: { item: typeof SPOTLIGHT_BILLS[0] }) {
+  return (
+    <div className="mb-5 border-2 border-amber rounded overflow-hidden shadow-sm">
+      <div className="bg-amber/10 border-b border-amber px-4 py-3">
+        <div className="text-[11px] tracking-[2px] uppercase text-amber font-semibold mb-1">📌 Why Follow the Dough is watching</div>
+        <p className="text-[13px] text-brown leading-snug">{item.why}</p>
+      </div>
+      <div className="bg-red-50 border-b border-red-200 px-4 py-3">
+        <div className="text-[11px] tracking-[2px] uppercase text-ftdred font-semibold mb-1">⚠️ Potential conflicts of interest</div>
+        <p className="text-[13px] text-red-800 leading-snug">{item.conflict}</p>
+      </div>
+      <BillCard bill={item.bill} />
+    </div>
+  );
+}
+
 const TOPIC_FILTERS = [
   { label: 'All',                   emoji: '📋' },
   { label: 'Healthcare & Pharma',   emoji: '🏥' },
@@ -359,6 +396,21 @@ export default function FederalTab({ zip, state, stateName }: { zip: string; sta
 
         {/* ── TIER 3: Federal Bills ── */}
         <TierLabel num={3} label="Federal Bills Before Congress" />
+
+        {/* National Spotlight */}
+        {SPOTLIGHT_BILLS.length > 0 && (
+          <div className="mb-5">
+            <div className="flex items-center gap-3 mb-2">
+              <h2 className="font-display text-[15px] tracking-[3px] text-brown">🔦 National Spotlight</h2>
+              <span className="text-[11px] px-2 py-0.5 rounded-full bg-amber text-ink font-semibold">{SPOTLIGHT_BILLS.length}</span>
+              <div className="flex-1 h-px bg-gradient-to-r from-amber to-transparent" />
+            </div>
+            <p className="text-[12px] text-mid mb-3">High-profile bills worth tracking — shown regardless of your ZIP code.</p>
+            {SPOTLIGHT_BILLS.map((item, i) => (
+              <SpotlightEntry key={i} item={item} />
+            ))}
+          </div>
+        )}
 
         {/* Topic chips */}
         <div className="mb-4">
