@@ -31,13 +31,15 @@ function normalizeName(raw: string): string {
 
 // Search FEC for a candidate, trying multiple election cycles.
 // Senators run every 6 years — many won't appear in 2024.
-async function findCandidate(name: string, state: string, chamber: string) {
-  const cycles = chamber === 'S' ? [2024, 2022, 2020, 2018] : [2024, 2022];
+// Includes 2026 since FEC has already reclassified many House members'
+// candidate records under the upcoming cycle rather than 2024.
+async function findCandidateByQuery(q: string, state: string, chamber: string) {
+  const cycles = chamber === 'S' ? [2026, 2024, 2022, 2020, 2018] : [2026, 2024, 2022];
 
   for (const year of cycles) {
     // Try with state filter first
     const withState = await fecGet('/candidates/', {
-      q: name, state, office: chamber,
+      q, state, office: chamber,
       election_year: year, sort: '-receipts', per_page: 5,
     });
     const stateResults: any[] = withState?.results ?? [];
@@ -47,7 +49,7 @@ async function findCandidate(name: string, state: string, chamber: string) {
 
     // Fallback: no state filter (catches edge cases)
     const noState = await fecGet('/candidates/', {
-      q: name, office: chamber,
+      q, office: chamber,
       election_year: year, sort: '-receipts', per_page: 5,
     });
     const noStateResults: any[] = noState?.results ?? [];
@@ -56,6 +58,19 @@ async function findCandidate(name: string, state: string, chamber: string) {
     }
   }
   return null;
+}
+
+// FEC's `q` search matches legal names, not nicknames — "Mike Rogers" misses
+// "ROGERS, MICHAEL" because "Mike" isn't a prefix of "Michael" (unlike e.g.
+// "Vern" → "Vernon", which does match). Fall back to a last-name-only query,
+// disambiguated by the existing state/office filters, when the full name misses.
+async function findCandidate(name: string, state: string, chamber: string) {
+  const full = await findCandidateByQuery(name, state, chamber);
+  if (full) return full;
+
+  const lastName = name.trim().split(/\s+/).pop() ?? name;
+  if (lastName === name) return null;
+  return findCandidateByQuery(lastName, state, chamber);
 }
 
 // Get the candidate's principal campaign committee ID.
