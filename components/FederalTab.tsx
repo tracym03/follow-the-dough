@@ -24,6 +24,40 @@ const SPOTLIGHT_BILLS: Array<{ bill: any; why: string; conflict: string }> = [
     why: 'Would make daylight saving time permanent nationwide. Passed the House 308–117 on July 14, 2026 with broad bipartisan support — now heads to the Senate.',
     conflict: 'Sponsor Rep. Vern Buchanan (R-FL) built a $100M+ fortune owning 15+ auto dealerships across Florida. Car dealerships profit directly from longer evening daylight — consumers browse and test-drive after work. His top career donor industry is real estate (19%+ of career contributions), which benefits from extended evening foot traffic. Energy angle: modern research (NBER 2011, Nature Energy 2018) shows permanent DST increases electricity consumption in hot southern climates like Florida, where longer evenings spike air-conditioning use — meaning utilities that sell more power quietly benefit too.',
   },
+  {
+    bill: {
+      number: '8800',
+      type: 'HR',
+      congress: 119,
+      title: 'National Defense Authorization Act for Fiscal Year 2027',
+      sponsor: 'Rep. Mike Rogers (R-AL)',
+      sponsorName: 'Mike Rogers',
+      sponsorState: 'AL',
+      sponsorParty: 'R',
+      sponsorChamber: 'H',
+      latestAction: 'Passed House 219–206 — now before Senate',
+      actionDate: '2026-07-22',
+    },
+    why: 'The $1.15T defense policy bill passed the House 219–206 on July 22, 2026. Section 219 directs the Pentagon to integrate U.S. and Israeli military research and development; Section 622 expands intelligence-sharing with Israel. An amendment from Reps. Thomas Massie (R-KY) and Ro Khanna (D-CA) to strip Section 219 was blocked from a floor vote by the Rules Committee.',
+    conflict: 'Sponsor Rep. Mike Rogers (R-AL), chairman of the House Armed Services Committee, has taken $22,900 from AIPAC’s PAC and $11,200 from NORPAC over his career (FEC records) — but the bigger money is from defense contractors: $107,500 from Raytheon/RTX, $94,000 from Lockheed Martin, $93,500 from Northrop Grumman, $80,500 from Boeing and $30,000 from L3Harris, the same companies that build the missile-defense and munitions systems this bill’s Israel R&D-integration section would fund. Rogers’ own district includes Huntsville/Redstone Arsenal, Alabama’s missile-defense corridor, giving his home-district industry a direct stake in expanded joint U.S.-Israel weapons development.',
+  },
+  {
+    bill: {
+      number: '9716',
+      type: 'HR',
+      congress: 119,
+      title: 'Protecting Rights in Video and Equipment Acquired Discovery (PRIVACY) Act',
+      sponsor: 'Rep. Keith Self (R-TX)',
+      sponsorName: 'Keith Self',
+      sponsorState: 'TX',
+      sponsorParty: 'R',
+      sponsorChamber: 'H',
+      latestAction: 'Referred to House Judiciary & Oversight Committees',
+      actionDate: '2026-07-15',
+    },
+    why: 'Introduced July 15, 2026 by Rep. Keith Self (R-TX), with Reps. Eli Crane (R-AZ) and Andrew Clyde (R-GA) as cosponsors. Would require federal agencies to get a warrant before querying local police surveillance networks — including Flock Safety’s automated license-plate readers, now deployed by 5,000+ agencies in 49 states — caps data retention at 30 days, and bars federal funds from buying the systems. Referred to Judiciary and Oversight; no committee vote yet.',
+    conflict: 'Flock Safety, the company this bill would rein in, has spent $1.5M+ on federal lobbying since Q4 2024 across five D.C. firms (Mercury Public Affairs, BGR Government Affairs, Cornerstone Government Affairs, Carlough Solutions, Modern Fortis) lobbying the House, Senate and White House on “homeland security” issues (Senate LDA filings). One of its lobbyists, Erskine Wells of BGR, previously served as Deputy Chief of Staff and Legislative Assistant to Sen. Roger Wicker (R-MS) — now chairman of the Senate Armed Services Committee. A similar bipartisan effort to restrict police license-plate-reader programs (the Perry–García Highway Bill amendment) was blocked at committee markup in May 2026 as this lobbying campaign ramped up.',
+  },
 ];
 
 function SpotlightEntry({ item }: { item: typeof SPOTLIGHT_BILLS[0] }) {
