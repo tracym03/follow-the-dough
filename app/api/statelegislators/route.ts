@@ -30,16 +30,21 @@ async function fetchLegislators(zip: string) {
   if (!res.ok) throw new Error(`OpenStates returned ${res.status}`);
   const data = await res.json();
 
-  const legislators = (data.results || []).map((p: any) => ({
-    name:     p.name,
-    party:    p.party,
-    chamber:  p.current_role?.org_classification ?? '',   // 'upper' | 'lower'
-    district: p.current_role?.district ?? '',
-    title:    p.current_role?.title ?? '',
-    url:      p.openstates_url ?? '',
-    image:    p.image ?? '',
-    email:    p.email ?? '',
-  }));
+  // people.geo returns every official for the point — federal (US Senate/House)
+  // and state — mixed together. org_classification alone can't tell them apart
+  // ('upper' means US Senate too), so filter on jurisdiction.classification.
+  const legislators = (data.results || [])
+    .filter((p: any) => p.jurisdiction?.classification === 'state')
+    .map((p: any) => ({
+      name:     p.name,
+      party:    p.party,
+      chamber:  p.current_role?.org_classification ?? '',   // 'upper' | 'lower'
+      district: p.current_role?.district ?? '',
+      title:    p.current_role?.title ?? '',
+      url:      p.openstates_url ?? '',
+      image:    p.image ?? '',
+      email:    p.email ?? '',
+    }));
 
   // Sort: upper (state senate) first, then lower (assembly/house)
   legislators.sort((a: any, b: any) => {
@@ -52,7 +57,7 @@ async function fetchLegislators(zip: string) {
 
 const getLegislators = unstable_cache(
   async (zip: string) => fetchLegislators(zip),
-  ['state-legislators-v2'],
+  ['state-legislators-v3'],
   { revalidate: 86400 },
 );
 
