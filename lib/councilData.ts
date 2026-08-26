@@ -31,7 +31,7 @@ export const CITY_COUNCIL_PAGES: Record<string, string> = {
   glendale:        'https://www.glendaleca.gov/government/departments/city-clerk/city-council',
   pasadena:        'https://www.cityofpasadena.net/city-council/',
   // Northern CA
-  sfgov:           'https://sfbos.org/supervisors',
+  sfgov:           'https://www.sf.gov/departments--board-supervisors',
   sanjose:         'https://www.sanjoseca.gov/your-government/departments-offices/city-council',
   oakland:         'https://www.oaklandca.gov/departments/city-council',
   sacramento:      'https://www.cityofsacramento.gov/mayor-and-city-council',
@@ -89,7 +89,7 @@ const MEMBERS: Record<string, CouncilMemberMeta> = {
   'huntingtonbeach:grace van der mark': { party: 'R', url: 'https://www.huntingtonbeachca.gov/government/city-council/grace-van-der-mark.cfm' },
   'huntingtonbeach:pat burns':          { party: 'R', url: 'https://www.huntingtonbeachca.gov/government/city-council/pat-burns.cfm' },
   'huntingtonbeach:casey mckeon':       { party: 'R', url: 'https://www.huntingtonbeachca.gov/government/city-council/casey-mckeon.cfm' },
-  'huntingtonbeach:tony strickland':    { party: 'R', url: 'https://www.huntingtonbeachca.gov/government/city-council/tony-strickland.cfm' },
+  'huntingtonbeach:andrew gruel':        { party: 'R', url: 'https://www.huntingtonbeachca.gov/government/city_council/index.php' }, // appointed March 2025, replacing Tony Strickland (elected to CA Senate D36) — no individual bio page, listed on main council page
   'huntingtonbeach:natalie moser':      { party: 'D', url: 'https://www.huntingtonbeachca.gov/government/city-council/natalie-moser.cfm' },
   'huntingtonbeach:dan kalmick':        { party: 'D', url: 'https://www.huntingtonbeachca.gov/government/city-council/dan-kalmick.cfm' },
   'huntingtonbeach:rhonda bolton':      { party: 'D', url: 'https://www.huntingtonbeachca.gov/government/city-council/rhonda-bolton.cfm' },
@@ -146,15 +146,18 @@ const MEMBERS: Record<string, CouncilMemberMeta> = {
   'sandiego:sean elo-rivera':  { party: 'D', url: 'https://www.sandiego.gov/citycouncil/cd9' },
 
   // ── San Francisco, CA (Board of Supervisors) ─────────────────────────────
-  'sfgov:connie chan':      { party: 'D', url: 'https://sfbos.org/supervisor-chan-district-1' },
-  'sfgov:stephen sherrill': { party: 'D', url: 'https://sfbos.org/supervisor-sherrill-district-2' },
-  'sfgov:danny sauter':     { party: 'D', url: 'https://sfbos.org/supervisor-sauter-district-3' },
-  'sfgov:joel engardio':    { party: 'D', url: 'https://sfbos.org/supervisor-engardio-district-4' },
-  'sfgov:matt dorsey':      { party: 'D', url: 'https://sfbos.org/supervisor-dorsey-district-6' },
-  'sfgov:myrna melgar':     { party: 'D', url: 'https://sfbos.org/supervisor-melgar-district-7' },
-  'sfgov:rafael mandelman': { party: 'D', url: 'https://sfbos.org/supervisor-mandelman-district-8' },
-  'sfgov:hillary ronen':    { party: 'D', url: 'https://sfbos.org/supervisor-ronen-district-9' },
-  'sfgov:shamann walton':   { party: 'D', url: 'https://sfbos.org/supervisor-walton-district-10' },
+  // Note: sfbos.org migrated to sf.gov/department-district-N in 2026.
+  'sfgov:connie chan':      { party: 'D', url: 'https://www.sf.gov/department-district-1' },
+  'sfgov:stephen sherrill': { party: 'D', url: 'https://www.sf.gov/department-district-2' },
+  'sfgov:danny sauter':     { party: 'D', url: 'https://www.sf.gov/department-district-3' },
+  'sfgov:alan wong':        { party: 'D', url: 'https://www.sf.gov/department-district-4' }, // appointed Dec 1 2025, succeeding recalled Joel Engardio
+  'sfgov:bilal mahmood':    { party: 'D', url: 'https://www.sf.gov/department-district-5' },
+  'sfgov:matt dorsey':      { party: 'D', url: 'https://www.sf.gov/department-district-6' },
+  'sfgov:myrna melgar':     { party: 'D', url: 'https://www.sf.gov/department-district-7' },
+  'sfgov:rafael mandelman': { party: 'D', url: 'https://www.sf.gov/department-district-8' },
+  'sfgov:jackie fielder':   { party: 'D', url: 'https://www.sf.gov/department-district-9' }, // succeeded Hillary Ronen, term-limited end of 2024
+  'sfgov:shamann walton':   { party: 'D', url: 'https://www.sf.gov/department-district-10' },
+  'sfgov:chyanne chen':     { party: 'D', url: 'https://www.sf.gov/department-district-11' },
 
   // ── Oakland, CA ──────────────────────────────────────────────────────────
   'oakland:dan kalb':            { party: 'D' },
@@ -197,10 +200,10 @@ const MEMBERS: Record<string, CouncilMemberMeta> = {
 
   // ── Seattle, WA ──────────────────────────────────────────────────────────
   'seattle:sara nelson':    { party: 'D' },
-  'seattle:tammy morales':  { party: 'D' },
+  'seattle:eddie lin':      { party: 'D' }, // D2 — won Nov 2025 special general, replacing Tammy Morales (resigned Jan 2025)
   'seattle:joy hollingsworth': { party: 'D' },
   'seattle:ron davis':      { party: 'D' },
-  'seattle:cathy moore':    { party: 'D' },
+  'seattle:debora juarez':  { party: 'D' }, // D5 — appointed July 2025 interim, replacing Cathy Moore (resigned); seat itself is on the Nov 2026 special election ballot, Juarez not running to keep it
   'seattle:dan strauss':    { party: 'D' },
   'seattle:andrew lewis':   { party: 'D' },
   'seattle:tanya woo':      { party: 'D' },
