@@ -18,7 +18,7 @@ const SENATE_STATES_2026 = [
 ];
 
 // ── Hardcoded known 2026 governor candidates ──────────────────────────────────
-// Updated as of Aug 25 2026 (monthly data check). FTM API is unreliable so this is our primary source.
+// Updated as of Sept 22 2026 (monthly data check). FTM API is unreliable so this is our primary source.
 // financeUrl = state campaign finance database
 const KNOWN_GOV_CANDIDATES: Record<string, Array<{
   name: string; party: string; title?: string;
@@ -114,10 +114,10 @@ const KNOWN_GOV_CANDIDATES: Record<string, Array<{
   ],
   FL: [
     { name: 'Ron DeSantis',   party: 'Republican', title: 'Incumbent Governor',                    note: 'Term-limited — open race' },
-    { name: 'Byron Donalds',  party: 'Republican', title: 'U.S. Representative (FL-19)',           note: 'Announced — Trump-endorsed' },
-    { name: 'Jay Collins',    party: 'Republican', title: 'Lt. Governor / Former Army Green Beret', note: 'Announced — Jan 2026' },
-    { name: 'Paul Renner',    party: 'Republican', title: 'Former FL House Speaker',               note: 'Announced' },
-    { name: 'David Jolly',    party: 'Democrat',   title: 'Former U.S. Representative',            note: 'Announced' },
+    { name: 'Byron Donalds',  party: 'Republican', title: 'U.S. Representative (FL-19)',           note: '🏆 Won Aug 18 GOP primary (~48%), Trump-endorsed — would be FL\'s first Black governor. Faces Jolly in November.' },
+    { name: 'David Jolly',    party: 'Democrat',   title: 'Former U.S. Representative',            note: '🏆 Democratic nominee — faces Donalds in November' },
+    { name: 'Jay Collins',    party: 'Republican', title: 'Lt. Governor / Former Army Green Beret', note: 'Lost Aug 18 GOP primary to Donalds' },
+    { name: 'Paul Renner',    party: 'Republican', title: 'Former FL House Speaker',               note: 'Lost Aug 18 GOP primary to Donalds' },
   ],
   NY: [
     { name: 'Kathy Hochul',     party: 'Democrat',   title: 'Incumbent Governor',                  note: 'Running for re-election — Dem party endorsed' },
@@ -156,10 +156,10 @@ const KNOWN_GOV_CANDIDATES: Record<string, Array<{
     { name: 'Mike Duggan',      party: 'Independent',  title: 'Former Mayor of Detroit',                 note: 'Dropped out — May 21, 2026' },
   ],
   AZ: [
-    { name: 'Katie Hobbs', party: 'Democrat', title: 'Incumbent Governor', note: 'Running for re-election — minimal primary opposition' },
-    { name: 'Andy Biggs', party: 'Republican', title: 'U.S. Representative (AZ-5)', note: 'Trump-endorsed — leads early GOP primary polling' },
-    { name: 'Karrin Taylor Robson', party: 'Republican', title: 'Business Executive / Former AZ Board of Regents', note: '2022 GOP primary runner-up — running again, Trump-endorsed' },
-    { name: 'David Schweikert', party: 'Republican', title: 'U.S. Representative (AZ-1)', note: 'Announced late 2025 — declined re-election to run for governor' },
+    { name: 'Katie Hobbs', party: 'Democrat', title: 'Incumbent Governor', note: 'Running for re-election — minimal primary opposition. Faces Biggs in November.' },
+    { name: 'Andy Biggs', party: 'Republican', title: 'U.S. Representative (AZ-5)', note: '🏆 Won July 22 GOP primary, Trump-endorsed — faces Hobbs in November' },
+    { name: 'David Schweikert', party: 'Republican', title: 'U.S. Representative (AZ-1)', note: 'Lost July 22 GOP primary to Biggs' },
+    { name: 'Karrin Taylor Robson', party: 'Republican', title: 'Business Executive / Former AZ Board of Regents', note: 'Dropped out — Feb 2026, citing concerns about a combative primary (Trump had endorsed her earlier, then also endorsed Biggs)' },
     { name: 'Kari Lake', party: 'Republican', note: 'Not running — announced (Aug 2026) she will not seek office again' },
   ],
   CO: [
@@ -193,7 +193,8 @@ const KNOWN_GOV_CANDIDATES: Record<string, Array<{
     { name: 'Tina Kotek', party: 'Democrat', title: 'Incumbent Governor', note: 'Running for re-election' },
   ],
   NH: [
-    { name: 'Kelly Ayotte', party: 'Republican', title: 'Incumbent Governor', note: 'Running for re-election' },
+    { name: 'Kelly Ayotte', party: 'Republican', title: 'Incumbent Governor', note: '🏆 Won Sept 8 GOP primary (91.7%) — faces Warmington in November' },
+    { name: 'Cinde Warmington', party: 'Democrat', title: 'Executive Councilor', note: '🏆 Democratic nominee, unopposed — faces Ayotte in November' },
   ],
   VT: [
     { name: 'Phil Scott', party: 'Republican', title: 'Incumbent Governor', note: 'Unopposed in Aug 11 GOP primary — seeking a 6th term, faces Janoo in November' },
@@ -333,10 +334,10 @@ const getStateRaces = unstable_cache(
       govCandidates,
       govSource,
       financeDb,
-      dataNote: 'Primary season largely complete as of Aug 25 2026. CA: Becerra (D) vs Hilton (R). GA: Jackson (R) vs Bottoms (D). MI: Benson (D) vs James (R). WI: Crowley (D) vs Tiffany (R) — photo-finish Dem primary. CT: Lamont (D, no term limit — running for 3rd term) vs Fazio (R). VT: Janoo (D) vs Scott (R, unopposed). TN: Green (D) vs Blackburn (R). HI: Green (D) vs Cordery (R). WY: Barlow (R) upset Trump-endorsed Degenfelder. AK: top-4 nonpartisan primary sends Kreiss-Tomkins, Begich (D) and Wilson, Bronson (R) to a ranked-choice Nov. general — Dunleavy term-limited. Fundraising from Cal-Access, CalMatters & NPR (through Aug 2026).',
+      dataNote: 'Primary season complete for essentially all 2026 governor races as of Sept 22 2026, with the Nov 3 general six weeks out. CA: Becerra (D) vs Hilton (R). GA: Jackson (R) vs Bottoms (D). MI: Benson (D) vs James (R). WI: Crowley (D) vs Tiffany (R). CT: Lamont (D, 3rd term) vs Fazio (R). VT: Janoo (D) vs Scott (R). TN: Green (D) vs Blackburn (R). HI: Green (D) vs Cordery (R). WY: Barlow (R) upset Trump-endorsed Degenfelder. AK: top-4 nonpartisan primary sends Kreiss-Tomkins, Begich (D) and Wilson, Bronson (R) to ranked-choice Nov. general. AZ: Biggs (R, Trump-endorsed) vs Hobbs (D). FL: Donalds (R, Trump-endorsed) vs Jolly (D). NH: Ayotte (R) vs Warmington (D). Fundraising from Cal-Access, CalMatters & NPR (through Sept 2026).',
     };
   },
-  ['stateraces-2026-v15'],
+  ['stateraces-2026-v16'],
   { revalidate: 3600 * 24 } // 24 hours — static data doesn't need frequent refresh
 );
 

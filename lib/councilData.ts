@@ -167,14 +167,16 @@ const MEMBERS: Record<string, CouncilMemberMeta> = {
   'oakland:kevin jenkins':       { party: 'D' },
 
   // ── Sacramento, CA ───────────────────────────────────────────────────────
-  'sacramento:mario woods':     { party: 'D' },
-  'sacramento:sean loloee':     { party: 'D' },
-  'sacramento:kayla dupuis':    { party: 'D' },
-  'sacramento:katie valenzuela':{ party: 'D' },
-  'sacramento:caity maple':     { party: 'D' },
-  'sacramento:eric guerra':     { party: 'D' },
-  'sacramento:richenee youngblood': { party: 'D' },
-  'sacramento:karina talamantes':   { party: 'D' },
+  // Full 8-district roster refreshed 2026-09-22 against cityofsacramento.gov —
+  // prior list dated to ~2022-23 (Loloee resigned Jan 2024 after federal indictment).
+  'sacramento:lisa kaplan':       { party: 'D' }, // D1
+  'sacramento:roger dickinson':   { party: 'D' }, // D2 — took office Dec 2024, former CA Assemblymember
+  'sacramento:karina talamantes': { party: 'D' }, // D3
+  'sacramento:phil pluckebaum':   { party: 'D' }, // D4 — took office Dec 2024
+  'sacramento:caity maple':       { party: 'D' }, // D5
+  'sacramento:eric guerra':       { party: 'D' }, // D6
+  'sacramento:rick jennings':     { party: 'D' }, // D7
+  'sacramento:mai vang':          { party: 'D' }, // D8
 
   // ── New York City, NY ────────────────────────────────────────────────────
   // NYC council is mostly Democrat — adding notable members
