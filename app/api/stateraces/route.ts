@@ -5,20 +5,20 @@ import { unstable_cache } from 'next/cache';
 const GOV_STATES_2026 = [
   'AL','AK','AZ','AR','CA','CO','CT','FL','GA','HI',
   'ID','IL','IA','KS','ME','MD','MA','MI','MN','NE',
-  'NV','NH','NJ','NM','NY','OH','OK','OR','PA','RI',
-  'SC','SD','TN','TX','VT','WA','WI','WY',
+  'NV','NH','NM','NY','OH','OK','OR','PA','RI',
+  'SC','SD','TN','TX','VT','WI','WY',
 ];
 
-// ── Senate seats up in 2026 (Class 2) ────────────────────────────────────────
+// ── Senate seats up in 2026 (Class 2 + FL and OH special elections) ──────────
 const SENATE_STATES_2026 = [
-  'AL','AK','AR','CO','DE','GA','ID','IL','IA','KS',
-  'KY','LA','ME','MA','MI','MN','MS','MT','NE','NH',
-  'NJ','NM','NC','OK','OR','RI','SC','SD','TN','TX',
-  'VA','WA','WY',
+  'AL','AK','AR','CO','DE','FL','GA','ID','IL','IA',
+  'KS','KY','LA','ME','MA','MI','MN','MS','MT','NE',
+  'NH','NJ','NM','NC','OH','OK','OR','RI','SC','SD',
+  'TN','TX','VA','WV','WY',
 ];
 
 // ── Hardcoded known 2026 governor candidates ──────────────────────────────────
-// Updated as of Sept 22 2026 (monthly data check). FTM API is unreliable so this is our primary source.
+// Updated as of Oct 21 2026 (monthly data check). FTM API is unreliable so this is our primary source.
 // financeUrl = state campaign finance database
 const KNOWN_GOV_CANDIDATES: Record<string, Array<{
   name: string; party: string; title?: string;
@@ -120,19 +120,21 @@ const KNOWN_GOV_CANDIDATES: Record<string, Array<{
     { name: 'Paul Renner',    party: 'Republican', title: 'Former FL House Speaker',               note: 'Lost Aug 18 GOP primary to Donalds' },
   ],
   NY: [
-    { name: 'Kathy Hochul',     party: 'Democrat',   title: 'Incumbent Governor',                  note: 'Running for re-election — Dem party endorsed' },
-    { name: 'Bruce Blakeman',   party: 'Republican', title: 'Nassau County Executive',             note: 'Announced — Trump-endorsed' },
+    { name: 'Kathy Hochul',     party: 'Democrat',   title: 'Incumbent Governor',                  note: 'Democratic nominee — running for re-election' },
+    { name: 'Bruce Blakeman',   party: 'Republican', title: 'Nassau County Executive',             note: 'Republican nominee (Trump-endorsed)' },
   ],
   IL: [
-    { name: 'JB Pritzker', party: 'Democrat', title: 'Incumbent Governor', note: 'Running for re-election' },
+    { name: 'JB Pritzker', party: 'Democrat', title: 'Incumbent Governor', note: 'Democratic nominee — seeking a 3rd term' },
+    { name: 'Darren Bailey', party: 'Republican', title: 'Former State Senator', note: 'Republican nominee (also the 2022 nominee)' },
   ],
   PA: [
-    { name: 'Josh Shapiro', party: 'Democrat', title: 'Incumbent Governor', note: 'Running for re-election' },
+    { name: 'Josh Shapiro', party: 'Democrat', title: 'Incumbent Governor', note: 'Democratic nominee — running for re-election' },
+    { name: 'Stacy Garrity', party: 'Republican', title: 'State Treasurer', note: 'Republican nominee' },
   ],
   OH: [
     { name: 'Mike DeWine',        party: 'Republican', title: 'Incumbent Governor',                         note: 'Term-limited — open race' },
-    { name: 'Vivek Ramaswamy',    party: 'Republican', title: 'Entrepreneur / Former Presidential Candidate', note: 'Won Republican primary — May 5, 2026' },
-    { name: 'Amy Acton',          party: 'Democrat',   title: 'Former Ohio Dept. of Health Director',        note: 'Announced — sole Dem candidate' },
+    { name: 'Vivek Ramaswamy',    party: 'Republican', title: 'Entrepreneur / Former Presidential Candidate', note: '🏆 Republican nominee — won May 5 primary' },
+    { name: 'Amy Acton',          party: 'Democrat',   title: 'Former Ohio Dept. of Health Director',        note: '🏆 Democratic nominee' },
   ],
   GA: [
     // ── GENERAL ELECTION CONTESTANTS ──
@@ -141,9 +143,6 @@ const KNOWN_GOV_CANDIDATES: Record<string, Array<{
     // ── DID NOT ADVANCE ──
     { name: 'Burt Jones',           party: 'Republican', title: 'Lt. Governor of Georgia',              note: 'Lost Republican primary runoff — June 16 (had Trump + Kemp endorsements)' },
     { name: 'Brian Kemp',           party: 'Republican', title: 'Incumbent Governor',                    note: 'Term-limited — open race' },
-  ],
-  NC: [
-    { name: 'Josh Stein', party: 'Democrat', title: 'Incumbent Governor', note: 'Running for re-election' },
   ],
   MI: [
     { name: 'Gretchen Whitmer', party: 'Democrat',     title: 'Incumbent Governor',                      note: 'Term-limited — open race' },
@@ -164,14 +163,14 @@ const KNOWN_GOV_CANDIDATES: Record<string, Array<{
   ],
   CO: [
     { name: 'Jared Polis', party: 'Democrat', title: 'Incumbent Governor', note: 'Term-limited — open race' },
-    { name: 'Phil Weiser', party: 'Democrat', title: 'Attorney General', note: 'Announced' },
-    { name: 'Heidi Ganahl', party: 'Republican', title: 'Former CU Regent', note: 'Possible candidate' },
-  ],
-  WA: [
-    { name: 'Bob Ferguson', party: 'Democrat', title: 'Incumbent Governor', note: 'Running for re-election' },
+    { name: 'Phil Weiser', party: 'Democrat', title: 'Attorney General', note: '🏆 Won June 30 Dem primary over U.S. Sen. Michael Bennet (55–45) — heavy favorite in November' },
+    { name: 'Victor Marx', party: 'Republican', title: 'Ministry leader', note: '🏆 Republican nominee — campaign mired in controversy over dubious claims' },
+    { name: 'Greg Lopez', party: 'Independent', note: 'Independent candidate' },
   ],
   MN: [
-    { name: 'Tim Walz', party: 'Democrat', title: 'Incumbent Governor', note: 'Running for re-election' },
+    { name: 'Tim Walz', party: 'Democrat', title: 'Incumbent Governor', note: 'Withdrew from re-election in Jan 2026 amid a fraud scandal in state-funded social services' },
+    { name: 'Amy Klobuchar', party: 'Democrat', title: 'U.S. Senator', note: '🏆 Democratic nominee (89.7% in Aug 11 primary) — would be Minnesota\'s first female governor' },
+    { name: 'Lisa Demuth', party: 'Republican', title: 'Speaker of the Minnesota House', note: '🏆 Republican nominee — beat Trump-endorsed Mike Lindell (43.4%) in Aug 11 primary' },
   ],
   WI: [
     // Tony Evers is term-limited / retiring — open race. Primary was August 11, 2026.
@@ -186,11 +185,12 @@ const KNOWN_GOV_CANDIDATES: Record<string, Array<{
     { name: 'Andrew Manske',   party: 'Republican', title: 'Republican candidate',                 note: 'Lost Aug 11 GOP primary — 3.8%' },
   ],
   NV: [
-    { name: 'Joe Lombardo', party: 'Republican', title: 'Incumbent Governor', note: 'Running for re-election' },
-    { name: 'Steve Sisolak', party: 'Democrat', title: 'Former Governor', note: 'Possible candidate' },
+    { name: 'Joe Lombardo', party: 'Republican', title: 'Incumbent Governor', note: '🏆 Republican nominee (91% in June 9 primary) — seeking a 2nd term' },
+    { name: 'Aaron Ford', party: 'Democrat', title: 'Attorney General', note: '🏆 Democratic nominee (63.8% over Alexis Hill) — one of the most competitive races in the country' },
   ],
   OR: [
-    { name: 'Tina Kotek', party: 'Democrat', title: 'Incumbent Governor', note: 'Running for re-election' },
+    { name: 'Tina Kotek', party: 'Democrat', title: 'Incumbent Governor', note: 'Democratic nominee — running for re-election' },
+    { name: 'Christine Drazan', party: 'Republican', title: 'House Minority Leader', note: 'Republican nominee' },
   ],
   NH: [
     { name: 'Kelly Ayotte', party: 'Republican', title: 'Incumbent Governor', note: '🏆 Won Sept 8 GOP primary (91.7%) — faces Warmington in November' },
@@ -201,13 +201,18 @@ const KNOWN_GOV_CANDIDATES: Record<string, Array<{
     { name: 'Amanda Janoo', party: 'Democrat', title: 'Economist', note: '🏆 Won Aug 11 Dem primary — faces Scott in November' },
   ],
   RI: [
-    { name: 'Dan McKee', party: 'Democrat', title: 'Incumbent Governor', note: 'Running for re-election' },
+    { name: 'Helena Foulkes', party: 'Democrat', title: 'Former CVS Health executive', note: '🏆 Defeated Gov. McKee in the Sept 9 Dem primary (63%, carried every city and town) — heavy favorite in November' },
+    { name: 'Dan McKee', party: 'Democrat', title: 'Incumbent Governor', note: 'Lost Sept 9 Dem primary — first governor in 8 years to lose a primary (63% disapproved of his handling of the Washington Bridge)' },
+    { name: 'Aaron Guckian', party: 'Republican', note: '🏆 Republican nominee' },
+    { name: 'Ken Block', party: 'Independent', note: 'Independent candidate' },
   ],
   MD: [
-    { name: 'Wes Moore', party: 'Democrat', title: 'Incumbent Governor', note: 'Running for re-election' },
+    { name: 'Wes Moore', party: 'Democrat', title: 'Incumbent Governor', note: 'Democratic nominee — running for re-election' },
+    { name: 'Dan Cox', party: 'Republican', title: 'Former State Delegate', note: 'Republican nominee (also the 2022 nominee)' },
   ],
   MA: [
-    { name: 'Maura Healey', party: 'Democrat', title: 'Incumbent Governor', note: 'Running for re-election' },
+    { name: 'Maura Healey', party: 'Democrat', title: 'Incumbent Governor', note: 'Democratic nominee (unopposed) — running for re-election' },
+    { name: 'Mike Minogue', party: 'Republican', title: 'Former medical-device CEO', note: '🏆 Won Sept 1 GOP primary (75%+ over Brian Shortsleeve)' },
   ],
   CT: [
     // Correction: CT governor has no term limit — Lamont ran for a 3rd term.
@@ -216,25 +221,33 @@ const KNOWN_GOV_CANDIDATES: Record<string, Array<{
   ],
   NM: [
     { name: 'Michelle Lujan Grisham', party: 'Democrat', title: 'Incumbent Governor', note: 'Term-limited — open race' },
-    { name: 'Mark Ronchetti', party: 'Republican', title: 'Former Meteorologist / Candidate', note: 'Possible candidate' },
+    { name: 'Deb Haaland', party: 'Democrat', title: 'Former U.S. Secretary of the Interior', note: '🏆 Democratic nominee' },
+    { name: 'Gregg Hull', party: 'Republican', title: 'Mayor of Rio Rancho', note: '🏆 Republican nominee' },
   ],
   KS: [
     { name: 'Laura Kelly', party: 'Democrat', title: 'Incumbent Governor', note: 'Term-limited — open race' },
-    { name: 'Derek Schmidt', party: 'Republican', title: 'Former AG', note: 'Possible candidate' },
+    { name: 'Cindy Holscher', party: 'Democrat', title: 'State Senator', note: '🏆 Democratic nominee' },
+    { name: 'Ty Masterson', party: 'Republican', title: 'Kansas Senate President', note: '🏆 Republican nominee' },
   ],
   IA: [
-    { name: 'Kim Reynolds', party: 'Republican', title: 'Incumbent Governor', note: 'Term-limited — open race' },
-    { name: 'Deidre DeJear', party: 'Democrat', title: 'Former Secretary of State candidate', note: 'Possible candidate' },
+    { name: 'Kim Reynolds', party: 'Republican', title: 'Incumbent Governor', note: 'Not seeking re-election — open race' },
+    { name: 'Rob Sand', party: 'Democrat', title: 'State Auditor', note: '🏆 Democratic nominee' },
+    { name: 'Zach Lahn', party: 'Republican', note: '🏆 Republican nominee' },
   ],
   ME: [
     { name: 'Janet Mills', party: 'Democrat', title: 'Incumbent Governor', note: 'Term-limited — open race' },
-    { name: 'Paul LePage', party: 'Republican', title: 'Former Governor', note: 'Possible candidate' },
+    { name: 'Hannah Pingree', party: 'Democrat', title: 'Former Maine House Majority Leader', note: '🏆 Won June 9 Dem primary via ranked-choice (56% to Nirav Shah\'s 44% in the final round)' },
+    { name: 'Bobby Charles', party: 'Republican', note: '🏆 Won June 9 GOP primary (60% over Benjamin Midgley)' },
+    { name: 'Rick Bennett', party: 'Independent', note: 'Independent candidate on the November ballot' },
   ],
   AL: [
     { name: 'Kay Ivey', party: 'Republican', title: 'Incumbent Governor', note: 'Term-limited — open race' },
+    { name: 'Tommy Tuberville', party: 'Republican', title: 'U.S. Senator', note: '🏆 Republican nominee' },
+    { name: 'Doug Jones', party: 'Democrat', title: 'Former U.S. Senator', note: '🏆 Democratic nominee' },
   ],
   AR: [
-    { name: 'Sarah Huckabee Sanders', party: 'Republican', title: 'Incumbent Governor', note: 'Running for re-election' },
+    { name: 'Sarah Huckabee Sanders', party: 'Republican', title: 'Incumbent Governor', note: 'Republican nominee — running for re-election' },
+    { name: 'Fred Love', party: 'Democrat', title: 'State Senator', note: 'Democratic nominee' },
   ],
   TN: [
     { name: 'Bill Lee', party: 'Republican', title: 'Incumbent Governor', note: 'Term-limited — open race' },
@@ -243,36 +256,45 @@ const KNOWN_GOV_CANDIDATES: Record<string, Array<{
   ],
   OK: [
     { name: 'Kevin Stitt', party: 'Republican', title: 'Incumbent Governor', note: 'Term-limited — open race' },
-    { name: 'David Walters', party: 'Democrat', title: 'Former Governor', note: 'Possible candidate' },
+    { name: 'Mike Mazzei', party: 'Republican', title: 'Former State Senator', note: '🏆 Republican nominee' },
+    { name: 'Cyndi Munson', party: 'Democrat', title: 'State Representative', note: '🏆 Democratic nominee' },
   ],
   SC: [
-    { name: 'Henry McMaster', party: 'Republican', title: 'Incumbent Governor', note: 'Running for re-election' },
+    { name: 'Henry McMaster', party: 'Republican', title: 'Incumbent Governor', note: 'Term-limited — open race' },
+    { name: 'Alan Wilson', party: 'Republican', title: 'Attorney General', note: '🏆 Won June 23 GOP runoff (68.6%) over Trump-endorsed Lt. Gov. Pamela Evette — Trump ended up backing both' },
+    { name: 'Jermaine Johnson', party: 'Democrat', title: 'State Representative', note: '🏆 Won June 9 Dem primary (59.7%) over Billy Webster' },
   ],
   SD: [
-    { name: 'Tony Gosch', party: 'Republican', title: 'Governor (succeeded Noem)', note: 'Open race — Noem resigned to become U.S. Secretary of Homeland Security' },
+    // Correction: the prior entry "Tony Gosch" was wrong — Noem's successor is Lt. Gov. Larry Rhoden.
+    { name: 'Larry Rhoden', party: 'Republican', title: 'Incumbent Governor (succeeded Noem, who resigned to become U.S. Secretary of Homeland Security)', note: '🏆 Won July 28 GOP runoff over Toby Doeden — leads Ahlers 56–36 in an Oct poll' },
+    { name: 'Dan Ahlers', party: 'Democrat', title: 'Former State Senator', note: '🏆 Democratic nominee' },
   ],
   WY: [
     { name: 'Mark Gordon', party: 'Republican', title: 'Incumbent Governor', note: 'Term-limited — open race' },
     { name: 'Eric Barlow', party: 'Republican', title: 'State Senator', note: '🏆 Won Aug 18 GOP primary — upset Trump-endorsed Degenfelder' },
     { name: 'Megan Degenfelder', party: 'Republican', title: 'State Superintendent of Public Instruction', note: 'Lost Aug 18 GOP primary despite Trump endorsement' },
+    { name: 'Ken Casner', party: 'Democrat', note: '🏆 Democratic nominee' },
   ],
   ID: [
-    { name: 'Brad Little', party: 'Republican', title: 'Incumbent Governor', note: 'Running for re-election' },
+    { name: 'Brad Little', party: 'Republican', title: 'Incumbent Governor', note: 'Republican nominee — running for re-election' },
+    { name: 'Terri Pickens Manweiler', party: 'Democrat', note: 'Democratic nominee' },
   ],
   HI: [
     { name: 'Josh Green', party: 'Democrat', title: 'Incumbent Governor', note: '🏆 Won Aug 8 Dem primary with 89%+ — faces Cordery in November' },
     { name: 'Gary Cordery', party: 'Republican', note: '🏆 Won Aug 8 GOP primary — faces Green in November' },
   ],
   AK: [
-    // Correction: Dunleavy is term-limited, not running. Top-4 nonpartisan primary (Aug 18) — all four advance to Nov. ranked-choice general.
-    { name: 'Jonathan Kreiss-Tomkins', party: 'Democrat', title: 'Former State Representative', note: '🏆 Advances to Nov. ranked-choice general — led Aug 18 top-4 primary (21.7%)' },
-    { name: 'Tom Begich', party: 'Democrat', title: 'Former State Senator', note: '🏆 Advances to Nov. ranked-choice general — 2nd in Aug 18 primary (20.1%)' },
-    { name: 'Bernadette Wilson', party: 'Republican', note: '🏆 Advances to Nov. ranked-choice general — 3rd in Aug 18 primary (10.5%)' },
-    { name: 'Dave Bronson', party: 'Republican', title: 'Former Mayor of Anchorage', note: '🏆 Advances to Nov. ranked-choice general — 4th in Aug 18 primary (8.4%)' },
+    // Dunleavy is term-limited. Top-4 nonpartisan primary (Aug 18) feeds a ranked-choice Nov. general.
+    { name: 'Jonathan Kreiss-Tomkins', party: 'Democrat', title: 'Former State Representative', note: '🏆 Led the Aug 18 top-4 primary (21.7%) — on the Nov. ranked-choice ballot' },
+    { name: 'Bernadette Wilson', party: 'Republican', note: 'Advanced from the Aug 18 primary (3rd, 10.5%) — on the Nov. ranked-choice ballot' },
+    { name: 'Dave Bronson', party: 'Republican', title: 'Former Mayor of Anchorage', note: 'Advanced from the Aug 18 primary (4th, 8.4%) — on the Nov. ranked-choice ballot' },
+    { name: 'Treg Taylor', party: 'Republican', note: 'Finished 5th in the primary (7.5%) but took Begich\'s spot on the Nov. ballot after Begich withdrew' },
+    { name: 'Tom Begich', party: 'Democrat', title: 'Former State Senator', note: 'Finished 2nd in the Aug 18 primary (20.1%), then withdrew from the race' },
     { name: 'Mike Dunleavy', party: 'Republican', title: 'Incumbent Governor', note: 'Term-limited — not on the ballot' },
   ],
   NE: [
-    { name: 'Jim Pillen', party: 'Republican', title: 'Incumbent Governor', note: 'Running for re-election' },
+    { name: 'Jim Pillen', party: 'Republican', title: 'Incumbent Governor', note: 'Republican nominee — running for re-election' },
+    { name: 'Lynne Walz', party: 'Democrat', note: 'Democratic nominee' },
   ],
 };
 
@@ -334,10 +356,10 @@ const getStateRaces = unstable_cache(
       govCandidates,
       govSource,
       financeDb,
-      dataNote: 'Primary season complete for essentially all 2026 governor races as of Sept 22 2026, with the Nov 3 general six weeks out. CA: Becerra (D) vs Hilton (R). GA: Jackson (R) vs Bottoms (D). MI: Benson (D) vs James (R). WI: Crowley (D) vs Tiffany (R). CT: Lamont (D, 3rd term) vs Fazio (R). VT: Janoo (D) vs Scott (R). TN: Green (D) vs Blackburn (R). HI: Green (D) vs Cordery (R). WY: Barlow (R) upset Trump-endorsed Degenfelder. AK: top-4 nonpartisan primary sends Kreiss-Tomkins, Begich (D) and Wilson, Bronson (R) to ranked-choice Nov. general. AZ: Biggs (R, Trump-endorsed) vs Hobbs (D). FL: Donalds (R, Trump-endorsed) vs Jolly (D). NH: Ayotte (R) vs Warmington (D). Fundraising from Cal-Access, CalMatters & NPR (through Sept 2026).',
+      dataNote: 'All 2026 governor nominees are set as of Oct 21 2026; the general election is Nov 3. Biggest turnover since 2010: RI Gov. McKee lost his primary (Foulkes), MN Gov. Walz withdrew in January (Klobuchar is the nominee), and 18 states have open races with no incumbent seeking re-election. Fundraising from Cal-Access, CalMatters & NPR (through Sept 2026).',
     };
   },
-  ['stateraces-2026-v16'],
+  ['stateraces-2026-v17'],
   { revalidate: 3600 * 24 } // 24 hours — static data doesn't need frequent refresh
 );
 

@@ -201,26 +201,35 @@ const MEMBERS: Record<string, CouncilMemberMeta> = {
   'chicago:anthony beale':      { party: 'D' },
 
   // ── Seattle, WA ──────────────────────────────────────────────────────────
-  'seattle:sara nelson':    { party: 'D' },
-  'seattle:eddie lin':      { party: 'D' }, // D2 — won Nov 2025 special general, replacing Tammy Morales (resigned Jan 2025)
-  'seattle:joy hollingsworth': { party: 'D' },
-  'seattle:ron davis':      { party: 'D' },
-  'seattle:debora juarez':  { party: 'D' }, // D5 — appointed July 2025 interim, replacing Cathy Moore (resigned); seat itself is on the Nov 2026 special election ballot, Juarez not running to keep it
-  'seattle:dan strauss':    { party: 'D' },
-  'seattle:andrew lewis':   { party: 'D' },
-  'seattle:tanya woo':      { party: 'D' },
-  'seattle:alexis mercedes guillen': { party: 'D' },
+  // Roster refreshed 2026-10-21 against seattle.gov/council (prior list had 4 departed members).
+  // Wikipedia lists all nine as party preference "Democratic".
+  'seattle:rob saka':          { party: 'D' }, // D1
+  'seattle:eddie lin':         { party: 'D' }, // D2 — won Nov 2025 special general, replacing Tammy Morales (resigned Jan 2025)
+  'seattle:joy hollingsworth': { party: 'D' }, // D3 — Council President
+  'seattle:maritza rivera':    { party: 'D' }, // D4
+  'seattle:debora juarez':     { party: 'D' }, // D5 — interim appointee (July 2025) replacing Cathy Moore; seat is on the Nov 3 2026 special-election ballot and Juarez is not running
+  'seattle:dan strauss':       { party: 'D' }, // D6
+  'seattle:bob kettle':        { party: 'D' }, // D7
+  'seattle:robert kettle':     { party: 'D' }, // D7 (alternate spelling)
+  'seattle:alexis mercedes rinck': { party: 'D' }, // Position 8 (citywide)
+  'seattle:dionne foster':     { party: 'D' }, // Position 9 (citywide)
 
   // ── Denver, CO ───────────────────────────────────────────────────────────
-  'denver:jamie torres':    { party: 'D' },
-  'denver:kevin flynn':     { party: 'D' },
-  'denver:flavia colgan':   { party: 'D' },
-  'denver:diana romero campbell': { party: 'D' },
-  'denver:amanda sawyer':   { party: 'D' },
-  'denver:chris hinds':     { party: 'D' },
-  'denver:jolon clark':     { party: 'D' },
-  'denver:shontel lewis':   { party: 'D' },
-  'denver:stacie gilmore':  { party: 'D' },
+  // Roster refreshed 2026-10-21 against denvergov.org. Council seats are officially nonpartisan; only
+  // members whose party could be verified or were previously carried as D keep a badge.
+  'denver:amanda sandoval':          {},                // D1
+  'denver:kevin flynn':              { party: 'D' },    // D2
+  'denver:jamie torres':             { party: 'D' },    // D3
+  'denver:diana romero campbell':    { party: 'D' },    // D4
+  'denver:amanda sawyer':            { party: 'D' },    // D5
+  'denver:paul kashmann':            {},                // D6
+  'denver:flor alvidrez':            {},                // D7
+  'denver:shontel lewis':            { party: 'D' },    // D8
+  'denver:darrell watson':           {},                // D9
+  'denver:chris hinds':              { party: 'D' },    // D10
+  'denver:stacie gilmore':           { party: 'D' },    // D11
+  'denver:serena gonzales-gutierrez': { party: 'D' },   // At-Large Seat A (Democratic per Wikipedia)
+  // At-Large Seat B is VACANT: Sarah Parady resigned Aug 5 2026 (health); special election Nov 3 2026.
 
   // ── Austin, TX ───────────────────────────────────────────────────────────
   'austin:natasha harper-madison': { party: 'D' },

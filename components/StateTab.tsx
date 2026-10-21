@@ -328,7 +328,9 @@ export default function StateTab({ zip, state, stateName }: { zip: string; state
         ) : (
           <FlowCard
             title={`${stateName} Governor · 2026`}
-            sub={govData.govCandidates?.some((c: any) => c.note?.includes('Incumbent')) ? 'Incumbent running' : 'Open race'}
+            sub={govData.govCandidates?.some((c: any) =>
+              c.title?.includes('Incumbent') && !/term-limited|retiring|not seeking|withdrew|lost|not on the ballot/i.test(c.note ?? '')
+            ) ? 'Incumbent running' : 'Open race'}
             icon="🏛️"
             accentColor="#2d6a4f"
             defaultOpen={true}
